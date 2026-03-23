@@ -1,0 +1,10 @@
+name = "Thesis"
+version = "0.1.0"
+defaultTargets = ["thesis"]
+
+[[lean_lib]]
+name = "Thesis"
+
+[[lean_exe]]
+name = "thesis"
+root = "Main"
