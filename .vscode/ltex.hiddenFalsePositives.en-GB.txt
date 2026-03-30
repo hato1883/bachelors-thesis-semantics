@@ -1,0 +1,2 @@
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\QMarginNote[1][#1]\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_GB","sentence":"^\\QCode[1][style=std]#1 Code_Numbered[1][style=std,numbers=left]#1\\E$"}

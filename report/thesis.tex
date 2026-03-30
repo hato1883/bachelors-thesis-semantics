@@ -17,13 +17,14 @@
   ragged2e,   % Justified text in the margin notes
   url,        % For typesetting URLs
   listings,   % Code formatting
-  hyperref,   % Links in PDF from TOC, refs, etc.
   lipsum,
   booktabs,
   changepage,
   float,
   dingbat
 }
+\usepackage[hidelinks]{hyperref} % Links in PDF from TOC, refs, etc.
+
 \renewcommand{\bfdefault}{bx}
 \DeclareTextFontCommand\textsb{\libertineSB}
 
@@ -56,6 +57,8 @@
 
 \NewEnviron{MarginNote}[1][0mm]{\marginnote{\footnotesize\justifying\BODY}[#1]}
 \newcommand{\Footnote}[2][0mm]{\footnotemark\marginnote{\footnotesize$^{\arabic{footnote})}$~#2}[#1]}
+
+\usepackage[]{todonotes}
 
 % Adjust figure to shift left/right to adjust for page margins
 \renewenvironment{figure*}[1][]{%
@@ -104,7 +107,7 @@
 
 %% == Code =======================================================
 \lstnewenvironment{Code}[1][style=std]{\lstset{#1}}{}
-\lstnewenvironment{Code_Numbered}[1][style=std,numbers=left]{\lstset{#1}}{}
+\lstnewenvironment{Code_Numbered}[1][style=std, numbers=left]{\lstset{#1}}{}
 
 \renewcommand{\c}[1]{\lstinline[style=std]@#1@}
 
@@ -152,8 +155,8 @@
 
 \begin{document}
 \frontmatter
-\title{Thesis Template}
-\author{Tobias Wrigstad}
+\title{Mechanizing Proofs from a Course on Programming Language Semantics in Lean}
+\author{Hampus Toft}
 \date{\today}
 
 \maketitle
@@ -161,219 +164,444 @@
 \vspace*{3cm}
 \section*{Abstract}
 
-\RED{Replace this with the actual abstract. Obviously.}
-Suspendisse luctus leo et porta mattis. In semper, nisi et
-suscipit iaculis, leo urna laoreet lacus, ut laoreet lorem tellus
-eget dui. Vestibulum eu auctor nisi. Morbi pharetra euismod velit
-ac mattis. Maecenas tempor vitae augue ut aliquam. Nunc auctor,
-nibh at imperdiet finibus, ex leo semper lacus, ac vehicula quam
-nisl condimentum leo.
+\RED{Abstract will be one of the last things added,
+this is left as a placeholder to get a feel of the length}
+\lipsum[1]
 
 
 \tableofcontents
+\listoftodos
 \listoffigures
 \listoftables
 
 \mainmatter
 
 \chapter{Introduction}
+\label{cha:introduction}
 
+\todo{Introduce on a high level the global usage of programs} \noindent
+Programming as a whole is becoming a larger and larger part in our society,
+affecting our way of life in unprecedented ways.
+
+\todo{Continue by zooming in the need of valdated correctness of program} \noindent
+This introduces a larger and larger field of research in ensuring the corecctness of the programs created.
+To be able to verify a specify program it can be necessary to verify the programming language it is written in as well, or at least partial aspects of it.
+
+\todo{Then be even more specific using Programming langauge semantics} \noindent
+This is where Programming Language Semantics is used,
+
+\todo{Finaly introduce the two methods studied, written and mechanized proofs} \noindent
+but modern proofs are constructed in 2 different ways, one method formalizes the proof in a natural language such as english using established terms.
+Whilst some proofs lean on the mathematical proofing methods to ensure a less ambiguous proof to allow the proof to be verified by automatic tooling such as proof Assistants.
+This thesis aims to evaluate the differences between these two methods, and try to uncover any ambiguity created in the proof techniques used, such as implicit assumptions.
+
+%
+%
+%
+\label{intro:research_question}
+\section{Research Question and Goals}
+\todo{What is this thesis about? (Mechanizing semantic proofs)} \noindent
+In this thesis we will explore what, if any implicit assumptions must be made explicit when mechanizing a written programming language semantics formal proof of into Lean 4.
+We will also evaluate if there exists any subtleties in the formal proofs that is being left to the reader to prove or understand for the proof to be valid.  
+%\lipsum[1]
+
+\todo{Why does it matter? (Informal proofs hide complexity)} \noindent
+This can be helpful to highlight aspects of proofs that can often be left to the readers to understand or assume, whilst in a mechanized proof is stated explicitly.
+Therein give writers a pointer into what they should highlight when constructing proofs to decrease any possible ambiguity introduced by using a written form of the proof.
+
+%
+%
+%
+\section{Scope}
+\label{intro:scope}
+\todo{Scope: While language, Big-Step and Small-Step semantics, equivalence proof}
+This thesis will evaluate proofs from the course "Semantics of Programming Languages (1DL311)" which uses the litterature "Semantics with Applications: An Appetizer".
+In addition to only focusing material presented in the course we will further limit the evaluation to a few proofs from the chapters "2. Operational Semantics" and "3. More on Operational Semantics".
+These chapters introduce the toy programming language "While", which we will be using in the proofs which we will mechanize into Lean 4.
+
+%
+%
+%
+\section{Contribution}
+\label{intro:contribution}
+\todo{Contribution statement of what this thesis adds to the research topic}
+This thesis contribution to the field of programming language is the process of mechanizing written programming language semantic proofs,
+as well as which assumptions if any is needed to be stated explicitly in the proof assistant that otherwise was implicitly defined in the written counterpart.
+
+%
+%
+%
+\label{intro:roadmap}
+\section{Thesis Structure Roadmap} 
+\todo{A map of the thesis layout written in plain english to give reader a tour guide through the thesis}
 \lipsum[1]
 
-\begin{MarginNote}[3cm]
-  \lipsum[2]
-
-  \RED{Use linebreaks\-to\-insert\-hyphens\-where\-needed\-in the margin.}
-\end{MarginNote}
-
-Footnotes\Footnote[-1cm]{Like this one. Note the manual vertical offset in the source code.} will go into the margin. They should be used sparingly.
-
-\begin{itemize}[label=\leftpointright]
-\item The \texttt{enumitem} package will help you customise lists
-\item Like weird labels like this
-  \begin{itemize}
-  \item Try \texttt{texdoc enumitem} on your command line if you
-    have a local \LaTeX{} installation (and have your mind blown)
-  \end{itemize}
-\end{itemize}
-
-You can use \texttt{cleveref} to cross-reference in your text.
-For chapters, it will produce something like this: \Cref{cha:background}.
-For sections, it will produce something like this: \Cref{sec:purpose-goals}.
-
-\lipsum[3]
-
-\section{Purpose and Goals}
-\label{sec:purpose-goals}
-
-\lipsum[4-6]
-
-\begin{itemize}
-\item FWIW, this is my favourite list label for unordered lists. I
-  find bullets too ``clumsy.'' If you do not like it, you can
-  override the default settings (see the source).
-\item But your thesis is your thesis. And, ofc, don't use words
-  like FWIW, ofc, and don't in a thesis text.
-
-  \begin{itemize}
-  \item You can nest lists if you want.
-
-    \begin{itemize}
-    \item But do not go overboard.
-    \end{itemize}
-
-  \end{itemize}
-  
-\end{itemize}
-
-This is how you typeset descriptions:
-
-\begin{description}
-\item[Beach Boys] \lipsum[1]
-\item[The Ronettes] \lipsum[2]
-\end{description}
-
-Enumerated lists:
-
-\begin{enumerate}
-\item One
-\item Two
-\end{enumerate}
-
-Note that you can resume lists.
-
-\begin{enumerate}[resume]
-\item One
-\item Two \label{lst:two}
-\end{enumerate}
-
-And reference back to individual list items, \eg{}~\cref{lst:two}.
-
-\section{Thesis Outline}
-\label{sec:thesis-outline}
-
-\lipsum[7]
-
-\begin{figure}[t]
-  \begin{center}
-    \vspace*{1em}
-    \verb+\includegraphics[width=0.9\linewidth]{image.pdf}+
-    \vspace*{1em}
-  \end{center}
-  \caption{This is a figure, it will be placed top-most of a page (if possible).}
-  \label{fig:example-1}
-\end{figure}
-
-\begin{figure*}[t]
-  \begin{center}
-    \vspace*{1em}
-    \verb+\includegraphics[width=0.9\linewidth]{image.pdf}+
-    \vspace*{1em}
-  \end{center}
-\caption[Check the source to see how to customise a figure's LoF entry.]{This is a wider figure, it too will be placed top-most of a page (if possible).}
-  \label{fig:example-2}
-\end{figure*}
-
-
-\begin{table}[b]
-  \caption{This is a table, it will be placed at the bottom of a
-    page (if possible). Note that captions for tables are placed
-    \emph{above} the table.}
-  \begin{center}
-    \begin{tabular}{lll}
-      \toprule
-      $A$ & $B$ & $C$ \\
-      \midrule
-      $A$ & \multicolumn{2}{c}{$B-C$} \\
-      $A$ & \Yes{} & \No{} \\
-      \bottomrule
-    \end{tabular}
-  \end{center}
-  
-  \label{tab:example-1}
-\end{table}
-
-\chapter{Background}
+%
+%
+%
+%
+%
+%
+\chapter{Mechanised Theorem Proving in Lean}
 \label{cha:background}
 
-This chapter typically contains a discussion of the related work.
-BibTeX is a great way to manage bibliography information. If you
-use Emacs, tools like RefTeX will help you insert references into
-your code. Given that we are not constrained for space, we can use
-citations that look like this: \citep{Acm_Curriculum_2013,
-  CWE_193}. To give the text a bit better flow, you can sometimes
-work them into the text. Using numbered references is allowed but
-it will cause them to be much like Dijkstra's
-\citeyearpar{Dijkstra_1968} dreaded GOTO's.
+\begin{itemize}
+    \item \RED{Lastly, establish what a proof assistant is and how they are used/work}
+    \item \RED{Next, establish knowladge in PLS}
+\end{itemize}
 
-\chapter{Methodology}
-\lipsum[1] Code \c{int inline = ++x;} looks like so:
+In this chapter, we review what propositional and predicate logic mean in the context of semantics,
+as well as how programming language semantics utilize the logic framework.
+Lastly we explore the proof assistant Lean in a effort to clearify thier purpose when constructing proofs.
 
-\begin{Code}
-public class HelloWorld<T> extends Something<T> {
-  public static void main(String[] args) {
-    System.out.println("Hello, world!");
-  }
-}
-\end{Code}
+% %
+% %
+% %
+% % Alternative Section: "Logical proofs"
+% \section{Propositional and Predicate Logic: The Foundation for Semantics}  
+% \todo{Increase readers knowladge level from 1st year to 2nd year student  (do not introduce logic course again)}
+% Propositional and predicate logic is a formalization which aims to remove any ambiguity as of a result of the choice of wording from the stament being made.
+% This property is useful when making formal proofs, allowing readers to focus on the proof itself instead of the ambiguity of the wording presenting the proof.
+% \todo{Maybe move this example into \autoref{background:subsec:why_need_formal_logic}}  One such ambiguity can be seen in the stament "He ate his ice cream", where the term "his" could refer to a person eating his own ice cream, or it could refer to another persons ice cream.
+% This ambiguity is removed if we instead use the stament "a.ate(i)" where a is defined as Person A, and i is defined as the ice cream owned by Person A.
+% In this statment it is clear that the person in question is eating thier own ice cream.
 
-You can also get it with line numbers:
+% %
+% \subsection{Why We Need Formal Logic}
+% \label{background:subsec:why_need_formal_logic}
+% \todo{Add text}
+% \lipsum[1]
 
-\begin{Code_Numbered}
-public class HelloWorld<T> extends Something<T> {
-  public static void main(String[] args) {
-    System.out.println("Hello, world!"); @\label{code:hello}@
-  }
-}
-\end{Code_Numbered}
+% %
+% \subsection{Propositional Logic Basics}
+% \label{background:subsec:prop_logic_basics}
+% \todo{Add text}
+% \lipsum[1]
+
+% %
+% \subsection{Predicate Logic (First-Order Logic)}
+% \label{background:subsec:pred_logic_basics}
+% \todo{Add text}
+% \lipsum[1]
+
+% %
+% \subsection{Formal Proofs and Inference Rules}
+% \label{background:subsec:fomral_and_inference_basics}
+% \todo{Add text}
+% \lipsum[1]
+
+% %
+% \subsection{Induction: The Workhorse Proof Technique}
+% \label{background:subsec:induction_basics}
+% \todo{Add text}
+% \lipsum[1]
+
+%
+%
+%
+% Alternative Section: "Proof Assistants and thier purpose"
+\section{Proof Assistants: Tools for Mechanizing Semantics}
+\label{background:sec:proof_assistant}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{What is a Proof Assistant?}
+\label{background:subsec:what_is_proof_assistant}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{Why Proof Assistants for Semantic Proofs?}
+\label{background:subsec:why_use_proof_assistant}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{How Proof Assistants Work (High-Level)}
+\label{background:subsec:how_do_proof_assistant_work}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{Lean Specifically}
+\label{background:subsec:lean}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{Formalization Process for Semantic Proofs (Step-by-Step)}
+\label{background:subsec:formalization_process}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection*{A Lean Proof Sketch: Simple Example}
+\label{background:subsec:proof_sketch_example}
+\todo{Add text}
+\lipsum[1]
 
 
-You can refer to lines like this: \verb+\cref{code:hello}+ (gives you \cref{code:hello}, see source for more details).
+%
+%
+%
+% Alternative Section: "Programming Language Semantics"
+\section{Programming Language Semantics: Four Approaches}
+\label{background:sec:pls}
+\todo{Introduce Programming Language Semantics and the 2 (4 if we got time) diffrent approaches}
+There are four major approaches to construct semantics for a programming language, of which we will examine proofs of two of them.
+In this section we will do a quick overview of thier diffrences.
+First approach is called "Natural Semantics" often refered to as "Big-Step Semnatics" and often shortend to "ns" which we will explore in \autoref{background:subsec:ns}.
+Secound approach is called "Structural Operational Semantics" which is refered to as "Small-Step Semantics" and shortend to "sos" explored in \autoref{background:subsec:sos}.
 
-Verbatim text is set in a monospaced typewriter font:
+The third approach which will not be exaxmined in this thesis is "Axiomatic Semantics".
 
-\begin{verbatim}
-----------,
-          |           ASCII art!
-          '--> (*)
-\end{verbatim}
+Lastly we have "Denotational Semantics" which also wont be studied in this thesis.
 
-\lipsum[2-4]
+We will also do a quick overview of the toy language "While" introduced by the litterature "Semantics with Applications An Appetizer" in \autoref{background:subsec:while_lang}.
 
-\begin{table}[!h]
-  \caption{bar}
-  \label{tab:bar}
-\end{table}
+% %
+% \subsection{Overview: Syntax vs. Semantics}
+% \label{background:subsec:syntax_vs_semantics}
+% \todo{Add text}
+% \lipsum[1]
 
-\begin{listing*}[t]
-\begin{Code_Numbered}
-public class HelloWorld<T> extends Something<T> {
-  public static void main(String[] args) {
-    System.out.println("Hello, world!"); @\label{code:hello:2}@
-  }
-}
-\end{Code_Numbered}
-\caption{If you like, you can have code listings inside a \c{listing} float.}
-\label{lst:foo}
-\end{listing*}
+%
+\subsection{Natural Semantics (Big-Step Semantics)}
+\label{background:subsec:ns}
+\todo{Add text}
+\lipsum[1]
 
-Referencing Listing~\ref{lst:foo}.
-Probably better to use cleveref: \cref{lst:foo}.
+%
+\subsection{Structural Operational Semantics (Small-Step Semantics)}
+\label{background:subsec:sos}
+\todo{Add text}
+\lipsum[1]
 
-\chapter{Design}
+%
+\subsection{Axiomatic Semantics (Hoare Logic)}
+\label{background:subsec:axiomatic}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Denotational Semantics}
+\label{background:subsec:denotational}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Summary: The Four Semantics and Their Relationships}
+\label{background:subsec:semantic_recap}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{The While Language: Our Case Study}
+\label{background:subsec:while_lang}
+\todo{Add text}
+\lipsum[1]
+
+%
+%
+%
+%
+%
+%
+\chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
+\label{formal_ns_sos_equiv}
+\todo{Add text}
+\lipsum[1]
+
+%
+%
+%
+\section{Formalizing Natural Semantics (Big-Step)}
+\label{formal_ns_sos_equiv:sec:ns:formalization}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Formalization in Lean}
+\label{formal_ns_sos_equiv:subsec:ns:formalization_lean}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Challenges and Solutions}
+\label{formal_ns_sos_equiv:subsec:ns:chall_sol}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Insights Gained}
+\label{formal_ns_sos_equiv:subsec:ns:insights}
+\todo{Add text}
+\lipsum[1]
+
+%
+%
+%
+\section{Formalizing Structural Operational Semantics (Small-Step)}
+\label{formal_ns_sos_equiv:sec:sos:formalization}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Formalization in Lean}
+\label{formal_ns_sos_equiv:subsec:sos:formalization_lean}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Challenges and Solutions}
+\label{formal_ns_sos_equiv:subsec:sos:chall_sol}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Insights Gained}
+\label{formal_ns_sos_equiv:subsec:sos:insights}
+\todo{Add text}
+\lipsum[1]
+
+%
+%
+%
+\section{Proving Natural Semantics $\equiv$ Structural Operational Semantics}
+\label{formal_ns_sos_equiv:sec:ns_equiv_sos}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Formalization in Lean}
+\label{formal_ns_sos_equiv:subsec:ns_equiv_sos:formalization_lean}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Challenges and Solutions}
+\label{formal_ns_sos_equiv:subsec:ns_equiv_sos:chall_sol}
+\todo{Add text}
+\lipsum[1]
+
+%
+\subsection{Insights Gained}
+\label{formal_ns_sos_equiv:subsec:ns_equiv_sos:insights}
+\todo{Add text}
+\lipsum[1]
+
+%
+%
+%
+%
+%
+%
+% Alternative Chapter: "Discussion"
+\chapter{Discussion: Mechanizing Semantic Proofs — Findings and Insights}
 \lipsum
 
-\chapter{Implementation}
+%
+%
+%
+\section{TODO}
+\lipsum[1]
+
+%
+%
+%
+\section{Mechanization: Pros and Cons}
+\lipsum[1]
+
+%
+%
+%
+\section{Proof Techniques That Worked Well}
+\lipsum[1]
+
+%
+%
+%
+\section{Cross-Semantic Insights}
+\lipsum[1]
+
+%
+%
+%
+\section{Lessons for Future Mechanizations}
+\lipsum[1]
+
+%
+%
+%
+%
+%
+%
+\chapter{Related Work}
 \lipsum
 
-\chapter{Evaluation}
-\lipsum
+%
+%
+%
+\section{TODO}
+\lipsum[1]
 
+%
+%
+%
+%
+%
+%
 \chapter{Conclusions}
 \lipsum
 
+%
+%
+%
+\section{TODO}
+\lipsum[1]
+
+%
+%
+%
+%
+%
+%
 \bibliographystyle{plainnat}
 \bibliography{sources}
+
+%
+%
+%
+%
+%
+%
+\appendix
+\chapter{Lean Source Code}
+
+%
+%
+%
+%
+%
+%
+\chapter{Proof Comparison Tables (Detailed)}
+
+%
+%
+%
+%
+%
+%
+\chapter{Running the Code}
+
+%
+%
+%
+%
+%
+%
+\chapter{Extended Examples}
 
 \end{document}
 
