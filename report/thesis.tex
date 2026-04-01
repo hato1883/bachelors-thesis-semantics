@@ -166,7 +166,7 @@
 
 \RED{Abstract will be one of the last things added,
 this is left as a placeholder to get a feel of the length}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 
 \tableofcontents
@@ -178,22 +178,34 @@ this is left as a placeholder to get a feel of the length}
 
 \chapter{Introduction}
 \label{cha:introduction}
+As software becomes more critical, \todo{Is this a good funnel into topic?}
+and the amount of programming languages increases, the need to ensure
+an instruction in a program does what the programmer think it does becomes essential.
+This is especially important when compilers and interpreters translate code into
+lower level representations such as machine code or bytecode.
 
-\todo{Introduce on a high level the global usage of programs} \noindent
-Programming as a whole is becoming a larger and larger part in our society,
-affecting our way of life in unprecedented ways.
+To bridge this gap of syntax and semantics, the field of programming language \todo{is the term "gap" applicable here}
+semantics was developed, formalizing the behavior of instructions
+in a rigorous mathematical representation.
+By defining these meanings, we can reason about a program's behavior and
+validate that it works as intended regardless of input.
 
-\todo{Continue by zooming in the need of valdated correctness of program} \noindent
-This introduces a larger and larger field of research in ensuring the corecctness of the programs created.
-To be able to verify a specify program it can be necessary to verify the programming language it is written in as well, or at least partial aspects of it.
+In academic settings, such as the course
+"Semantics of Programming Languages (1DL311)" provided by Uppsala University, \todo{Course or the litterature itself}
+these definitions and proofs are often presented "on paper" using
+techniques such as induction over the structure.
+These paper-based proofs frequently omit inductive steps that share
+similarities with previous ones. While these proofs are useful for
+teaching, it is also susceptible to human error, implicit assumptions and
+gaps in logical reasoning. By mechanizing the proof we introduce a layer of
+automatic validation, thereby ensuring logical soundness and verify
+formal correctness.
 
-\todo{Then be even more specific using Programming langauge semantics} \noindent
-This is where Programming Language Semantics is used,
-
-\todo{Finaly introduce the two methods studied, written and mechanized proofs} \noindent
-but modern proofs are constructed in 2 different ways, one method formalizes the proof in a natural language such as english using established terms.
-Whilst some proofs lean on the mathematical proofing methods to ensure a less ambiguous proof to allow the proof to be verified by automatic tooling such as proof Assistants.
-This thesis aims to evaluate the differences between these two methods, and try to uncover any ambiguity created in the proof techniques used, such as implicit assumptions.
+This thesis investigates the process of translating these pen-and-paper proofs
+into mechanized proofs using the proof assistant Lean. The goal is to
+evaluate whether the techniques used in the 1DL311 curriculum correspond
+directly to Lean's mechanisms or if they require any reformulation to achieve
+machine-level precision.
 
 %
 %
@@ -201,40 +213,70 @@ This thesis aims to evaluate the differences between these two methods, and try 
 \label{intro:research_question}
 \section{Research Question and Goals}
 \todo{What is this thesis about? (Mechanizing semantic proofs)} \noindent
-In this thesis we will explore what, if any implicit assumptions must be made explicit when mechanizing a written programming language semantics formal proof of into Lean 4.
-We will also evaluate if there exists any subtleties in the formal proofs that is being left to the reader to prove or understand for the proof to be valid.  
-%\lipsum[1]
+The primary objective of this work is to determine the "semantic gap"
+between human-readable proofs and machine-checked logic.
+Specifically, this thesis seeks to answer the following:
+\begin{itemize}
+    \item \textbf{RQ1:} Do the proof techniques presented in the 1DL311 curriculum
+    map directly to Lean's internal mechanisms, or do they require significant
+    structural reformulation?
+    \item \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
+    present in the literature must be made explicit to satisfy the Lean kernel?
+\end{itemize}
+%\RED{\lipsum[1]}
 
+%
+%
+%
+\label{intro:motivation}
+\section{Motivation}
 \todo{Why does it matter? (Informal proofs hide complexity)} \noindent
-This can be helpful to highlight aspects of proofs that can often be left to the readers to understand or assume, whilst in a mechanized proof is stated explicitly.
-Therein give writers a pointer into what they should highlight when constructing proofs to decrease any possible ambiguity introduced by using a written form of the proof.
+Informal proofs are designed for human consumption and often prioritize
+intuition over exhaustive detail. However, these omissions can hide
+underlying complexities or logical leaps. By identifying these points of
+divergence, this research provides a roadmap for how educators can
+structure pen-and-paper proofs to decrease ambiguity and better prepare students
+for formal verification tasks.
+
+% This can be helpful to highlight aspects of proofs that can often be left to the
+% readers to understand or assume, whilst in a mechanized proof is stated explicitly.
+% Therein give writers a pointer into what they should highlight when constructing
+% proofs to decrease any possible ambiguity introduced by the omision of cases or other
+% pedagogical shortcuts when writing a proof.
 
 %
 %
 %
 \section{Scope}
 \label{intro:scope}
-\todo{Scope: While language, Big-Step and Small-Step semantics, equivalence proof}
-This thesis will evaluate proofs from the course "Semantics of Programming Languages (1DL311)" which uses the litterature "Semantics with Applications: An Appetizer".
-In addition to only focusing material presented in the course we will further limit the evaluation to a few proofs from the chapters "2. Operational Semantics" and "3. More on Operational Semantics".
-These chapters introduce the toy programming language "While", which we will be using in the proofs which we will mechanize into Lean 4.
+\todo{Scope: While language, Big-Step and Small-Step semantics, equivalence proof} \noindent
+This thesis will evaluate proofs from the course "Semantics of Programming Languages
+(1DL311)" which uses the litterature "Semantics with Applications: An Appetizer".
+In addition to only focusing material presented in the course, this analysis
+will be limited to the evaluation to a few proofs from the chapters
+"2. Operational Semantics" and
+"3. More on Operational Semantics".
+These chapters introduce the toy programming language "While", which will be
+used in the proofs mechanized into Lean 4.
 
 %
 %
 %
 \section{Contribution}
 \label{intro:contribution}
-\todo{Contribution statement of what this thesis adds to the research topic}
-This thesis contribution to the field of programming language is the process of mechanizing written programming language semantic proofs,
-as well as which assumptions if any is needed to be stated explicitly in the proof assistant that otherwise was implicitly defined in the written counterpart.
+\todo{Contribution statement of what this thesis adds to the research topic} \noindent
+This thesis contribution to the field of programming language is the process of
+mechanizing written programming language semantic proofs into Lean 4,
+as well as which assumptions if any is needed to be stated explicitly in the proof
+assistant that otherwise was implicitly defined in the written counterpart.
 
 %
 %
 %
 \label{intro:roadmap}
 \section{Thesis Structure Roadmap} 
-\todo{A map of the thesis layout written in plain english to give reader a tour guide through the thesis}
-\lipsum[1]
+\todo{A map of the thesis layout written in plain english to give reader a tour guide through the thesis} \noindent
+\RED{\lipsum[1]}
 
 %
 %
@@ -270,31 +312,31 @@ Lastly we explore the proof assistant Lean in a effort to clearify thier purpose
 % \subsection{Why We Need Formal Logic}
 % \label{background:subsec:why_need_formal_logic}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 % %
 % \subsection{Propositional Logic Basics}
 % \label{background:subsec:prop_logic_basics}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 % %
 % \subsection{Predicate Logic (First-Order Logic)}
 % \label{background:subsec:pred_logic_basics}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 % %
 % \subsection{Formal Proofs and Inference Rules}
 % \label{background:subsec:fomral_and_inference_basics}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 % %
 % \subsection{Induction: The Workhorse Proof Technique}
 % \label{background:subsec:induction_basics}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 %
 %
@@ -303,43 +345,43 @@ Lastly we explore the proof assistant Lean in a effort to clearify thier purpose
 \section{Proof Assistants: Tools for Mechanizing Semantics}
 \label{background:sec:proof_assistant}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{What is a Proof Assistant?}
 \label{background:subsec:what_is_proof_assistant}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{Why Proof Assistants for Semantic Proofs?}
 \label{background:subsec:why_use_proof_assistant}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{How Proof Assistants Work (High-Level)}
 \label{background:subsec:how_do_proof_assistant_work}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{Lean Specifically}
 \label{background:subsec:lean}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{Formalization Process for Semantic Proofs (Step-by-Step)}
 \label{background:subsec:formalization_process}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection*{A Lean Proof Sketch: Simple Example}
 \label{background:subsec:proof_sketch_example}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 
 %
@@ -351,7 +393,7 @@ Lastly we explore the proof assistant Lean in a effort to clearify thier purpose
 \todo{Introduce Programming Language Semantics and the 2 (4 if we got time) diffrent approaches}
 There are four major approaches to construct semantics for a programming language, of which we will examine proofs of two of them.
 In this section we will do a quick overview of thier diffrences.
-First approach is called "Natural Semantics" often refered to as "Big-Step Semnatics" and often shortend to "ns" which we will explore in \autoref{background:subsec:ns}.
+First approach is called "Natural Semantics" often refered to as "Big-Step Semantics" and often shortend to "ns" which we will explore in \autoref{background:subsec:ns}.
 Secound approach is called "Structural Operational Semantics" which is refered to as "Small-Step Semantics" and shortend to "sos" explored in \autoref{background:subsec:sos}.
 
 The third approach which will not be exaxmined in this thesis is "Axiomatic Semantics".
@@ -364,43 +406,43 @@ We will also do a quick overview of the toy language "While" introduced by the l
 % \subsection{Overview: Syntax vs. Semantics}
 % \label{background:subsec:syntax_vs_semantics}
 % \todo{Add text}
-% \lipsum[1]
+% \RED{\lipsum[1]}
 
 %
 \subsection{Natural Semantics (Big-Step Semantics)}
 \label{background:subsec:ns}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Structural Operational Semantics (Small-Step Semantics)}
 \label{background:subsec:sos}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Axiomatic Semantics (Hoare Logic)}
 \label{background:subsec:axiomatic}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Denotational Semantics}
 \label{background:subsec:denotational}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Summary: The Four Semantics and Their Relationships}
 \label{background:subsec:semantic_recap}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{The While Language: Our Case Study}
 \label{background:subsec:while_lang}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -411,7 +453,7 @@ We will also do a quick overview of the toy language "While" introduced by the l
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -419,25 +461,25 @@ We will also do a quick overview of the toy language "While" introduced by the l
 \section{Formalizing Natural Semantics (Big-Step)}
 \label{formal_ns_sos_equiv:sec:ns:formalization}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Formalization in Lean}
 \label{formal_ns_sos_equiv:subsec:ns:formalization_lean}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Challenges and Solutions}
 \label{formal_ns_sos_equiv:subsec:ns:chall_sol}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Insights Gained}
 \label{formal_ns_sos_equiv:subsec:ns:insights}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -445,25 +487,25 @@ We will also do a quick overview of the toy language "While" introduced by the l
 \section{Formalizing Structural Operational Semantics (Small-Step)}
 \label{formal_ns_sos_equiv:sec:sos:formalization}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Formalization in Lean}
 \label{formal_ns_sos_equiv:subsec:sos:formalization_lean}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Challenges and Solutions}
 \label{formal_ns_sos_equiv:subsec:sos:chall_sol}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Insights Gained}
 \label{formal_ns_sos_equiv:subsec:sos:insights}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -471,25 +513,25 @@ We will also do a quick overview of the toy language "While" introduced by the l
 \section{Proving Natural Semantics $\equiv$ Structural Operational Semantics}
 \label{formal_ns_sos_equiv:sec:ns_equiv_sos}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Formalization in Lean}
 \label{formal_ns_sos_equiv:subsec:ns_equiv_sos:formalization_lean}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Challenges and Solutions}
 \label{formal_ns_sos_equiv:subsec:ns_equiv_sos:chall_sol}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 \subsection{Insights Gained}
 \label{formal_ns_sos_equiv:subsec:ns_equiv_sos:insights}
 \todo{Add text}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -499,37 +541,37 @@ We will also do a quick overview of the toy language "While" introduced by the l
 %
 % Alternative Chapter: "Discussion"
 \chapter{Discussion: Mechanizing Semantic Proofs — Findings and Insights}
-\lipsum
+\RED{\lipsum}
 
 %
 %
 %
 \section{TODO}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
 %
 \section{Mechanization: Pros and Cons}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
 %
 \section{Proof Techniques That Worked Well}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
 %
 \section{Cross-Semantic Insights}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
 %
 \section{Lessons for Future Mechanizations}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -538,13 +580,13 @@ We will also do a quick overview of the toy language "While" introduced by the l
 %
 %
 \chapter{Related Work}
-\lipsum
+\RED{\lipsum}
 
 %
 %
 %
 \section{TODO}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
@@ -553,13 +595,13 @@ We will also do a quick overview of the toy language "While" introduced by the l
 %
 %
 \chapter{Conclusions}
-\lipsum
+\RED{\lipsum}
 
 %
 %
 %
 \section{TODO}
-\lipsum[1]
+\RED{\lipsum[1]}
 
 %
 %
