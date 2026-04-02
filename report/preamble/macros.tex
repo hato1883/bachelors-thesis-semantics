@@ -1,0 +1,121 @@
+%
+% All Thesis custom macros
+% and redefinitions
+%
+
+\renewcommand{\bfdefault}{bx}
+\DeclareTextFontCommand\textsb{\libertineSB}
+
+\Crefname{section}{\S}{\S\S}
+
+% \setlist{noitemsep} % To make all lists compact
+\setlist[itemize]{itemsep=0pt}
+\setlist[itemize,1]{label=--}
+\setlist[itemize,2]{label=\ensuremath{\triangleright}}
+\setlist[itemize,3]{label=\RED{AVOID}}
+% Description lists to use semibold labels
+\setlist[description]{font=\libertineSB}
+
+
+\captionsetup{justification=raggedright,singlelinecheck=false}
+
+\newcommand\myhrulefill[1]{\leavevmode\leaders\hrule height#1\hfill\kern0pt}
+\DeclareCaptionFormat{FigFormat}{{\color{black}\myhrulefill{0.5pt}}\\#1#2#3}
+\captionsetup[figure]{format=FigFormat}
+\captionsetup[table]{format=FigFormat}
+
+\DeclareCaptionFormat{LstFormat}{\textsf{Listing}~\arabic{chapter}.\arabic{listing}:#2#3}
+\floatstyle{ruled}
+\newfloat{listing}{thp}{lol}[chapter]
+\floatname{listing}{Listing}
+\captionsetup[listing]{format=LstFormat}
+
+\NewEnviron{MarginNote}[1][0mm]{\marginnote{\footnotesize\justifying\BODY}[#1]}
+\newcommand{\Footnote}[2][0mm]{\footnotemark\marginnote{\footnotesize$^{\arabic{footnote})}$~#2}[#1]}
+
+
+
+% Adjust figure to shift left/right to adjust for page margins
+\renewenvironment{figure*}[1][]{%
+  \begin{figure}[#1]%
+    % This feature is deprecated for now
+    % \checkoddpage%
+    % \ifoddpage%
+    %   \begin{adjustwidth}{0cm}{-45mm}%%
+    % \else%
+    %   \begin{adjustwidth}{-45mm}{0cm}%%
+    % \fi%
+    }{%
+    % \end{adjustwidth}%
+  \end{figure}
+}
+
+% Adjust table to shift left/right to adjust for page margins
+\renewenvironment{table*}[1][]{%
+  \begin{table}[#1]%
+    % This feature is deprecated for now
+    % \checkoddpage%
+    % \ifoddpage%
+    %   \begin{adjustwidth}{0cm}{-45mm}%%
+    % \else%
+    %   \begin{adjustwidth}{-45mm}{0cm}%%
+    % \fi%
+    }{%
+    % \end{adjustwidth}%
+  \end{table}
+}
+
+% Adjust listing to shift left/right to adjust for page margins
+\renewenvironment{listing*}[1][]{%
+  \begin{listing}[#1]%
+    % This feature is deprecated for now
+    % \checkoddpage%
+    % \ifoddpage%
+    %   \begin{adjustwidth}{0cm}{-45mm}%%
+    % \else%
+    %   \begin{adjustwidth}{-45mm}{0cm}%%
+    % \fi%
+    }{%
+    % \end{adjustwidth}%
+  \end{listing}
+}
+
+%% == Code =======================================================
+\lstnewenvironment{Code}[1][style=std]{\lstset{#1}}{}
+\lstnewenvironment{Code_Numbered}[1][style=std, numbers=left]{\lstset{#1}}{}
+
+\renewcommand{\c}[1]{\lstinline[style=std]@#1@}
+
+\lstdefinestyle{std}{
+  language=java,
+  basicstyle=\small\tt\color{black},
+  keywordstyle=\small\tt\bfseries,
+  numberstyle=\footnotesize\sf\color{black},
+  commentstyle=\small\color{black}\it,
+  aboveskip=1ex,
+  belowskip=1ex,
+  tabsize=2,
+  columns=fullflexible,
+  xleftmargin=1ex,
+  resetmargins=true,
+  showstringspaces=false,
+  morecomment=[l]{//},
+  morecomment=[l]{--},
+  morecomment=[s]{/*}{*/},
+  escapeinside=@@,
+  morekeywords={Frobies},
+  moredelim=[is][\textit]{___}{___},
+  moredelim=[is][\textbf]{__*}{*__},
+  numberbychapter=true
+}
+
+\newcommand{\RED}[1]{\textcolor{red}{#1}}
+\newcommand{\ie}{\emph{i.e.,}}
+\newcommand{\eg}{\emph{e.g.,}}
+\newcommand{\etal}{\emph{et~al.}}
+
+
+\newcommand{\Yes}{\ding{51}}
+\newcommand{\No}{\ding{55}}
+
+\renewcommand{\bfdefault}{b}

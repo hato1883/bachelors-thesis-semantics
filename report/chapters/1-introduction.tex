@@ -1,0 +1,101 @@
+
+\chapter{Introduction}
+\label{cha:introduction}
+As software becomes more critical, \todo{Is this a good funnel into topic?}
+and the amount of programming languages increases, the need to ensure
+an instruction in a program does what the programmer think it does becomes essential.
+This is especially important when compilers and interpreters translate code into
+lower level representations such as machine code or bytecode.
+
+To bridge this gap of syntax and semantics, the field of programming language \todo{is the term "gap" applicable here}
+semantics was developed, formalizing the behavior of instructions
+in a rigorous mathematical representation.
+By defining these meanings, we can reason about a program's behavior and
+validate that it works as intended regardless of input.
+
+In academic settings, such as the course
+"Semantics of Programming Languages (1DL311)" provided by Uppsala University, \todo{Course or the litterature itself}
+these definitions and proofs are often presented "on paper" using
+techniques such as induction over the structure.
+These paper-based proofs frequently omit inductive steps that share
+similarities with previous ones. While these proofs are useful for
+teaching, it is also susceptible to human error, implicit assumptions and
+gaps in logical reasoning. By mechanizing the proof we introduce a layer of
+automatic validation, thereby ensuring logical soundness and verify
+formal correctness.
+
+This thesis investigates the process of translating these pen-and-paper proofs
+into mechanized proofs using the proof assistant Lean. The goal is to
+evaluate whether the techniques used in the 1DL311 curriculum correspond
+directly to Lean's mechanisms or if they require any reformulation to achieve
+machine-level precision.
+
+%
+%
+%
+\label{intro:research_question}
+\section{Research Question and Goals}
+\todo{What is this thesis about? (Mechanizing semantic proofs)} \noindent
+The primary objective of this work is to determine the "semantic gap"
+between human-readable proofs and machine-checked logic.
+Specifically, this thesis seeks to answer the following:
+\begin{itemize}
+    \item \textbf{RQ1:} Do the proof techniques presented in the 1DL311 curriculum
+    map directly to Lean's internal mechanisms, or do they require significant
+    structural reformulation?
+    \item \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
+    present in the literature must be made explicit to satisfy the Lean kernel?
+\end{itemize}
+
+%
+%
+%
+\label{intro:motivation}
+\section{Motivation}
+\todo{Why does it matter? (Informal proofs hide complexity)} \noindent
+Informal proofs are designed for human consumption and often prioritize
+intuition over exhaustive detail. However, these omissions can hide
+underlying complexities or logical leaps. By identifying these points of
+divergence, this research provides a roadmap for how educators can
+structure pen-and-paper proofs to decrease ambiguity and better prepare students
+for formal verification tasks.
+
+% This can be helpful to highlight aspects of proofs that can often be left to the
+% readers to understand or assume, whilst in a mechanized proof is stated explicitly.
+% Therein give writers a pointer into what they should highlight when constructing
+% proofs to decrease any possible ambiguity introduced by the omision of cases or other
+% pedagogical shortcuts when writing a proof.
+
+%
+%
+%
+\section{Scope}
+\label{intro:scope}
+\todo{Scope: While language, Big-Step and Small-Step semantics, equivalence proof} \noindent
+This thesis will evaluate proofs from the course "Semantics of Programming Languages
+(1DL311)" which uses the litterature "Semantics with Applications: An Appetizer".
+In addition to only focusing material presented in the course, this analysis
+will be limited to the evaluation to a few proofs from the chapters
+"2. Operational Semantics" and
+"3. More on Operational Semantics".
+These chapters introduce the toy programming language "While", which will be
+used in the proofs mechanized into Lean 4.
+
+%
+%
+%
+\section{Contribution}
+\label{intro:contribution}
+\todo{Contribution statement of what this thesis adds to the research topic} \noindent
+This thesis contribution to the field of programming language is the process of
+mechanizing written programming language semantic proofs into Lean 4,
+as well as which assumptions if any is needed to be stated explicitly in the proof
+assistant that otherwise was implicitly defined in the written counterpart.
+
+%
+%
+%
+\label{intro:roadmap}
+\section{Thesis Structure Roadmap} 
+\todo{A map of the thesis layout written in plain english to give reader a tour guide through the thesis} \noindent
+\RED{\lipsum[1]}
