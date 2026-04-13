@@ -1,0 +1,33 @@
+
+% code block command usage: \begin{Lean_Code} x := 1 \end{Lean_Code}
+\lstnewenvironment{While_Code}[1][style=whileLang]{\lstset{#1}}{}
+\lstnewenvironment{While_Code_Numbered}[1][style=whileLang, numbers=left]{\lstset{#1}}{}
+
+% Inline command usage: \while{x := 1}
+\newcommand{\while}[1]{\lstinline[style=whileLang]@#1@}
+
+
+\lstdefinestyle{whileLang}{
+  basicstyle=\small\ttfamily\color{black},
+  keywordstyle=\small\ttfamily\bfseries,
+  commentstyle=\small\itshape\color{gray},
+  numberstyle=\footnotesize\sffamily,
+  aboveskip=1ex,
+  belowskip=1ex,
+  tabsize=2,
+  columns=fullflexible,
+  xleftmargin=1ex,
+  showstringspaces=false,
+  % \While language keywords
+  morekeywords={
+    skip, while, do, if, then, else, true, false, and, or, not
+  },
+  % While often uses := for assignment
+  literate={:=}{{$\coloneq$}}2 {<=}{{$\leq$}}1 {>=}{{$\geq$}}1,
+  % Comments (standard style for semantics papers)
+  morecomment=[l]{//},
+  morecomment=[s]{(*}{*)},
+  escapeinside=@@,
+  moredelim=[is][\textit]{___}{___},
+  moredelim=[is][\textbf]{__*}{*__}
+}

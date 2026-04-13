@@ -5,163 +5,239 @@
 %
 %
 %
-\chapter{Mechanised Theorem Proving in Lean}
+\chapter{Background}
 \label{cha:background}
-
-\begin{itemize}
-    \item \RED{Lastly, establish what a proof assistant is and how they are used/work}
-    \item \RED{Next, establish knowladge in PLS}
-\end{itemize}
-
 \noindent
-In this chapter, we review what propositional and predicate logic mean in the context of semantics,
-as well as how programming language semantics utilize the logic framework.
-Lastly we explore the proof assistant Lean in a effort to clearify thier purpose when constructing proofs.
-
-% %
-% %
-% %
-% % Alternative Section: "Logical proofs"
-% \section{Propositional and Predicate Logic: The Foundation for Semantics}  
-% \todo{Increase readers knowladge level from 1st year to 2nd year student  (do not introduce logic course again)}
-% Propositional and predicate logic is a formalization which aims to remove any ambiguity as of a result of the choice of wording from the stament being made.
-% This property is useful when making formal proofs, allowing readers to focus on the proof itself instead of the ambiguity of the wording presenting the proof.
-% \todo{Maybe move this example into \autoref{background:subsec:why_need_formal_logic}}  One such ambiguity can be seen in the stament "He ate his ice cream", where the term "his" could refer to a person eating his own ice cream, or it could refer to another persons ice cream.
-% This ambiguity is removed if we instead use the stament "a.ate(i)" where a is defined as Person A, and i is defined as the ice cream owned by Person A.
-% In this statment it is clear that the person in question is eating thier own ice cream.
-
-% %
-% \subsection{Why We Need Formal Logic}
-% \label{background:subsec:why_need_formal_logic}
-% \todo{Add text}
-% \RED{\lipsum[1]}
-
-% %
-% \subsection{Propositional Logic Basics}
-% \label{background:subsec:prop_logic_basics}
-% \todo{Add text}
-% \RED{\lipsum[1]}
-
-% %
-% \subsection{Predicate Logic (First-Order Logic)}
-% \label{background:subsec:pred_logic_basics}
-% \todo{Add text}
-% \RED{\lipsum[1]}
-
-% %
-% \subsection{Formal Proofs and Inference Rules}
-% \label{background:subsec:fomral_and_inference_basics}
-% \todo{Add text}
-% \RED{\lipsum[1]}
-
-% %
-% \subsection{Induction: The Workhorse Proof Technique}
-% \label{background:subsec:induction_basics}
-% \todo{Add text}
-% \RED{\lipsum[1]}
+This chapter establishes the theoretical foundation necessary for the thesis.
+We begin by specifying the \While language, which serves as the primary object
+of study throughout this work. This provides the concrete syntax required to
+explore the formal semantics of programming languages—the mathematical bridge
+between a program's notation and its behavior. We then delve into Operational
+Semantics, detailing both the Natural (big-step) and Structural (small-step)
+approaches, followed by the primary proof techniques used in their analysis.
+Finally, we introduce the Lean 4 proof assistant, detailing the mechanisms used
+to translate these textbook definitions into machine-checked proofs.
 
 %
 %
 %
-% Alternative Section: "Proof Assistants and thier purpose"
-\section{Proof Assistants: Tools for Mechanizing Semantics}
-\label{background:sec:proof_assistant}
-\todo{Add text}
+\section{The \While Language}
+\label{background:sec:TODO}
+\todo{Copied from Hugo Lönnqvist Österberg "Implementing Dataflow
+Analysis for an Imperative Programming Language in Trieste"}
+The \While language is a simple imperative language used in various literature
+when teaching program analysis and semantics \missingcitation. Although different variants
+exist, the chosen definition is based on the version shown in the book ”Semantics
+with Applications: An Appetizer” .
+The definition of a While program is as follows:
+\begin{itemize}
+    \item A program consists of a statement.
+    \item A statement could in turn be an assignment, a skip (has no effect on the
+program), an if statement, a while loop or a pair of two statements.
+    \item The two possible expressions are of type arithmetic and boolean. Arithmetic
+expressions can be integers, variables or arithmetic operations. Likewise,
+boolean expressions can be true, false, a relational or boolean operation
+resulting in a truth value.
+\end{itemize}
+\hampus{Need full semantic categories, thier definitions etc here}
+\[
+\begin{array}{ll}
+    $n$  & \mbox{will range over numerals, } \textbf{Num},\\[0.6em]
+    $x$  & \mbox{will range over variables, } \textbf{Var},\\[0.6em]
+    $a$  & \mbox{will range over arithmetic expressions, } \textbf{Aexp},\\[0.6em]
+    $b$  & \mbox{will range over boolean expressions, } \textbf{Bexp},\\[0.6em]
+    $S$  & \mbox{will range over statements, } \textbf{Stm-},\\[0.6em]
+    $s$  & \mbox{will range over states, } \textbf{State},
+\end{array}
+\]
+
+\[
+\begin{array}{lcl}
+    n &::=& 0 \mid 1 \mid n0 \mid n1 \\[0.6em]
+    x &::=& [a-zA-Z]([a-zA-Z] \mid [0-9])^{*} \\[0.6em]
+    a &::=& n \mid x \mid a_1 + a_2 \mid a_1 \star a_2 \mid a_1 - a_2 \\[0.6em]
+    b &::=& \mathbf{true} \mid \mathbf{false} \mid a_1 = a_2 \mid a_1 \leq a_2 \mid \neg b \mid b_1 \land b_2 \\[0.6em]
+    S &::=& x := a \mid \mathbf{skip} \mid S_1; S_2 \mid \mathbf{if}\ b\ \mathbf{then}\ S_1\ \mathbf{else}\ S_2 \mid \mathbf{while}\ b\ \mathbf{then}\ S
+\end{array}
+\]
+
+We will also use so called semantic functions to translate values from our syntax described above to known semantics borrowed from the math world.
+\[
+\mathbf{State} : \mathbf{Var} \to \mathbb{Z}
+\]
+defined as a total function by mapping all "unset" variables to 0,
+we continue with 
+\[
+\mathcal{N} : \mathbf{Num} \to \mathbb{Z}
+\]
+defined as
+\[
+\begin{array}{rcl}
+    \mathcal{N}[\![0]\!] &=& 0 \\[0.6em]
+    \mathcal{N}[\![1]\!] &=& 1 \\[0.6em]
+    \mathcal{N}[\![n 0]\!] &=& 2 \cdot \mathcal{N}[\![n]\!] \\[0.6em]
+    \mathcal{N}[\![n 1]\!] &=& 2 \cdot \mathcal{N}[\![n]\!] + 1
+\end{array}
+\]
+and 
+\[
+\mathcal{A} : \mathbf{Aexp} \to (\mathbf{State} \to \mathbb{Z})
+\]
+defined as
+\[
+\begin{array}{rcl}
+    \mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\[0.6em]
+    \mathcal{A}[\![x]\!]s &=& s \, x \\[0.6em]
+    \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s \\[0.6em]
+    \mathcal{A}[\![a_1 \star a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s \cdot \mathcal{A}[\![a_2]\!]s \\[0.6em]
+    \mathcal{A}[\![a_1 - a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s - \mathcal{A}[\![a_2]\!]s
+\end{array}
+\]
+and lastly
+\[
+\mathcal{B} : \mathbf{Bexp} \to (\mathbf{State} \to \mathbf{T})
+\]
+defined as
+\[
+\begin{array}{rcl}
+    \mathcal{B}[\![\mathbf{true}]\!]s &=& \mathbf{tt} \\[0.6em]
+    \mathcal{B}[\![\mathbf{false}]\!]s &=& \mathbf{ff} \\[0.6em]
+    \mathcal{B}[\![a_1 = a_2]\!]s &=& \left\{
+        \begin{array}{@{}l@{\quad}l@{}}
+            \mathbf{tt} & \mbox{if } \mathcal{A}[\![a_1]\!]s = \mathcal{A}[\![a_2]\!]s \\
+            \mathbf{ff} & \mbox{if } \mathcal{A}[\![a_1]\!]s \not = \mathcal{A}[\![a_2]\!]s
+        \end{array}
+    \right. \\[1.2em]
+    \mathcal{B}[\![a_1 \leq a_2]\!]s &=& \left\{
+        \begin{array}{@{}l@{\quad}l@{}}
+            \mathbf{tt} & \mbox{if } \mathcal{A}[\![a_1]\!]s \leq \mathcal{A}[\![a_2]\!]s \\
+            \mathbf{ff} & \mbox{if } \mathcal{A}[\![a_1]\!]s > \mathcal{A}[\![a_2]\!]s
+        \end{array}
+    \right. \\[1.2em]
+    \mathcal{B}[\![\neg b]\!]s &=& \left\{
+        \begin{array}{@{}l@{\quad}l@{}}
+            \mathbf{tt} & \mbox{if } \mathcal{B}[\![b]\!]s = \mathbf{ff} \\
+            \mathbf{ff} & \mbox{if } \mathcal{B}[\![b]\!]s = \mathbf{tt}
+        \end{array}
+    \right. \\[1.2em]
+    \mathcal{B}[\![b_1 \land b_2]\!]s &=& \left\{
+        \begin{array}{@{}l@{\quad}l@{}}
+            \mathbf{tt} & \mbox{if } \mathcal{B}[\![b_1]\!]s = \mathbf{tt} \mbox{ and } \mathcal{B}[\![b_2]\!]s = \mathbf{tt} \\
+            \mathbf{ff} & \mbox{if } \mathcal{B}[\![b_1]\!]s = \mathbf{ff} \mbox{ or } \mathcal{B}[\![b_2]\!]s = \mathbf{ff}
+        \end{array}
+    \right.
+\end{array}
+\]
+\hampus{Make sure to explan notation like it is done in "Semantics of Programming Languages: Structures and Techniques"}
+
+\todo{What?}
+\todo{Why?}
+\todo{How?}
+
+
+%
+%
+%
+\section{Formal Semantics of Programming Languages}
+\label{background:sec:formal_semantics_pl}
+\todo{What?}
+The formal semantics of a programming language is a rigorous mathematical
+framework used to describe the behavior of programs \missingcitation. While a language's syntax
+defines the rules for constructing valid programs (the "grammar"), its semantics
+provides the "meaning"—specifying exactly how a computer should execute those
+instructions \missingcitation.
+
+\todo{Why?}
+In many industrial settings, the semantics of a language are described using
+natural language manuals \missingcitation. However, natural language is often prone to ambiguity,
+leading to inconsistent implementations across different compilers or interpreters \missingcitation.
+Formal semantics eliminates this ambiguity by using mathematical structures—such
+as sets, functions, and logic to define program execution \missingcitation.
+
+By separating how an instruction is written (the syntax) such as
+\begin{While_Code}
+    if (x > 0) then {x = x} else {x = -x}
+\end{While_Code} % \noindent
+from the meaning (the semantics) such as "if x is less than 0 then negate the value, otherwise do nothing" it is possible to
+create a deeper and more detailed understanding (\hampus{this statment has no basis}) \missingcitation of the programming language
+and therby the programs written.
+
+
+\todo{How?}
+Formal semantics are typically expressed through three main approaches:
+Denotational (modeling programs as mathematical functions),
+Axiomatic (using logic to define preconditions and postconditions),
+and Operational \missingcitation. This thesis focuses on the Operational approach, which describes
+how a program transition from one state to another during execution.
+
+
+%
+%
+%
+\section{Operational Semantics}
+\todo{breif What?} \noindent
+\hampus{AI SLOP bellow!}
+Operational semantics describes the meaning of a program by specifying how it
+executes on an abstract machine. Unlike other semantic approaches, it is
+"execution-oriented," focusing on the transitions between program states.
+A state transition is typically represented as a relation between a
+configuration—consisting of a statement and the current state—and a resulting
+state or a subsequent configuration.
+\todo{show state transition notation and describe it, lean on The Formal Semantics of Programming Languages: An Introduction}
+
+In this work, we examine two primary styles of operational semantics:
+\emph{Natural Semantics} (Big-Step) and
+\emph{Structural Operational Semantics} (Small-Step).
+\hampus{END OF AI SLOP}
+
+\subsection*{Natural Operational Semantics (Big-Step)}
+\label{background:os:ns}
+\todo{What?}
+\RED{\lipsum[1]}
+\todo{Why?}
+\RED{\lipsum[1]}
+\todo{How?}
+\hampus{Show NS rules for \While describing them}
 \RED{\lipsum[1]}
 
 %
-\subsection*{What is a Proof Assistant?}
-\label{background:subsec:what_is_proof_assistant}
-\todo{Add text}
+%
+%
+\subsection*{Structural Operational Semantics (Small-Step)}
+\label{background:os:sos}
+\todo{What?}
+\RED{\lipsum[1]}
+\todo{Why?}
+\RED{\lipsum[1]}
+\todo{How?}
+\hampus{Show SOS rules for \While describing them}
 \RED{\lipsum[1]}
 
-%
-\subsection*{Why Proof Assistants for Semantic Proofs?}
-\label{background:subsec:why_use_proof_assistant}
-\todo{Add text}
-\RED{\lipsum[1]}
+
 
 %
-\subsection*{How Proof Assistants Work (High-Level)}
-\label{background:subsec:how_do_proof_assistant_work}
-\todo{Add text}
-\RED{\lipsum[1]}
-
 %
-\subsection*{Lean Specifically}
-\label{background:subsec:lean}
-\todo{Add text}
-\RED{\lipsum[1]}
-
 %
-\subsection*{Formalization Process for Semantic Proofs (Step-by-Step)}
-\label{background:subsec:formalization_process}
-\todo{Add text}
+\section{Proof Techniques in Semantics}
+\label{background:sec:proof_techniques}
+\hampus{induction over structure etc}
+\todo{What?}
 \RED{\lipsum[1]}
-
-%
-\subsection*{A Lean Proof Sketch: Simple Example}
-\label{background:subsec:proof_sketch_example}
-\todo{Add text}
+\todo{Why?}
+\RED{\lipsum[1]}
+\todo{How?}
 \RED{\lipsum[1]}
 
 
 %
 %
 %
-% Alternative Section: "Programming Language Semantics"
-\section{Programming Language Semantics: Four Approaches}
-\label{background:sec:pls}
-\todo{Introduce Programming Language Semantics and the 2 (4 if we got time) diffrent approaches}
-There are four major approaches to construct semantics for a programming language, of which we will examine proofs of two of them.
-In this section we will do a quick overview of thier diffrences.
-First approach is called "Natural Semantics" often refered to as "Big-Step Semantics" and often shortend to "ns" which we will explore in \autoref{background:subsec:ns}.
-Secound approach is called "Structural Operational Semantics" which is refered to as "Small-Step Semantics" and shortend to "sos" explored in \autoref{background:subsec:sos}.
-
-The third approach which will not be exaxmined in this thesis is "Axiomatic Semantics".
-
-Lastly we have "Denotational Semantics" which also wont be studied in this thesis.
-
-We will also do a quick overview of the toy language "While" introduced by the litterature "Semantics with Applications An Appetizer" in \autoref{background:subsec:while_lang}.
-
-% %
-% \subsection{Overview: Syntax vs. Semantics}
-% \label{background:subsec:syntax_vs_semantics}
-% \todo{Add text}
-% \RED{\lipsum[1]}
-
-%
-\subsection{Natural Semantics (Big-Step Semantics)}
-\label{background:subsec:ns}
-\todo{Add text}
+\section{The Lean 4 Proof Assistant }
+\label{background:sec:lean_4}
+\hampus{Show by example, pen-and-papper proof proves eveness by induction, this is done like this in lean \dots}
+\todo{What?}
 \RED{\lipsum[1]}
-
-%
-\subsection{Structural Operational Semantics (Small-Step Semantics)}
-\label{background:subsec:sos}
-\todo{Add text}
+\todo{Why?}
 \RED{\lipsum[1]}
-
-%
-\subsection{Axiomatic Semantics (Hoare Logic)}
-\label{background:subsec:axiomatic}
-\todo{Add text}
-\RED{\lipsum[1]}
-
-%
-\subsection{Denotational Semantics}
-\label{background:subsec:denotational}
-\todo{Add text}
-\RED{\lipsum[1]}
-
-%
-\subsection{Summary: The Four Semantics and Their Relationships}
-\label{background:subsec:semantic_recap}
-\todo{Add text}
-\RED{\lipsum[1]}
-
-%
-\subsection{The While Language: Our Case Study}
-\label{background:subsec:while_lang}
-\todo{Add text}
+\todo{How?}
 \RED{\lipsum[1]}

@@ -1,0 +1,33 @@
+%
+% All Thesis custom macros
+% and redefinitions
+%
+
+%% == Code =======================================================
+\lstnewenvironment{Code}[1][style=std]{\lstset{#1}}{}
+\lstnewenvironment{Code_Numbered}[1][style=std, numbers=left]{\lstset{#1}}{}
+
+\renewcommand{\c}[1]{\lstinline[style=std]@#1@}
+
+\lstdefinestyle{std}{
+  language=java,
+  basicstyle=\small\tt\color{black},
+  keywordstyle=\small\tt\bfseries,
+  numberstyle=\footnotesize\sf\color{black},
+  commentstyle=\small\color{black}\it,
+  aboveskip=1ex,
+  belowskip=1ex,
+  tabsize=2,
+  columns=fullflexible,
+  xleftmargin=1ex,
+  resetmargins=true,
+  showstringspaces=false,
+  morecomment=[l]{//},
+  morecomment=[l]{--},
+  morecomment=[s]{/*}{*/},
+  escapeinside=@@,
+  morekeywords={Frobies},
+  moredelim=[is][\textit]{___}{___},
+  moredelim=[is][\textbf]{__*}{*__},
+  numberbychapter=true
+}

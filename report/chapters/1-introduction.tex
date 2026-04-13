@@ -3,30 +3,31 @@
 \label{cha:introduction}
 As software becomes more critical, \todo{Is this a good funnel into topic?}
 and the amount of programming languages increases, the need to ensure
-an instruction in a program does what the programmer think it does becomes essential.
+an instruction in a program does what the programmer think it does becomes essential \missingcitation.
 This is especially important when compilers and interpreters translate code into
-lower level representations such as machine code or bytecode.
+lower level representations such as machine code or bytecode \hampus{true, but} \missingcitation.
 
 To bridge this gap of syntax and semantics, the field of programming language \todo{is the term "gap" applicable here}
 semantics was developed, formalizing the behavior of instructions
-in a rigorous mathematical representation.
+in a rigorous mathematical representation \hampus{was it developed for this reason?} \missingcitation.
 By defining these meanings, we can reason about a program's behavior and
-validate that it works as intended regardless of input.
+validate that it works as intended regardless of input \missingcitation.
 
 In academic settings, such as the course
 "Semantics of Programming Languages (1DL311)" provided by Uppsala University, \todo{Course or the litterature itself}
 these definitions and proofs are often presented "on paper" using
-techniques such as induction over the structure.
+techniques such as induction over the structure \hampus{Add Citation to the course instance} \missingcitation.
 These paper-based proofs frequently omit inductive steps that share
-similarities with previous ones. While these proofs are useful for
+similarities with previous ones \hampus{maybe give a example / page number in the book}.
+While these proofs are useful for
 teaching, it is also susceptible to human error, implicit assumptions and
 gaps in logical reasoning. By mechanizing the proof we introduce a layer of
 automatic validation, thereby ensuring logical soundness and verify
-formal correctness.
+formal correctness \hampus{Maybe cite Lean / Coq / general proof assistant for this statment}.
 
 This thesis investigates the process of translating these pen-and-paper proofs
 into mechanized proofs using the proof assistant Lean. The goal is to
-evaluate whether the techniques used in the 1DL311 curriculum correspond
+evaluate whether the techniques used in the 1DL311 curriculum \hampus{maybe add course cite again} correspond
 directly to Lean's mechanisms or if they require any reformulation to achieve
 machine-level precision.
 
@@ -36,7 +37,7 @@ machine-level precision.
 \label{intro:research_question}
 \section{Research Question and Goals}
 \todo{What is this thesis about? (Mechanizing semantic proofs)} \noindent
-The primary objective of this work is to determine the "semantic gap"
+The primary objective of this work is to determine the "semantic gap" \hampus{Not in love with the qoutes}
 between human-readable proofs and machine-checked logic.
 Specifically, this thesis seeks to answer the following:
 \begin{itemize}
@@ -54,11 +55,12 @@ Specifically, this thesis seeks to answer the following:
 \section{Motivation}
 \todo{Why does it matter? (Informal proofs hide complexity)} \noindent
 Informal proofs are designed for human consumption and often prioritize
-intuition over exhaustive detail. However, these omissions can hide
-underlying complexities or logical leaps. By identifying these points of
-divergence, this research provides a roadmap for how educators can
+intuition over exhaustive detail \hampus{this statment feels weired especially "humna consumption"}.
+However, these omissions can hide underlying complexities or logical leaps \hampus{no proof of this}.
+By identifying these points of divergence,
+this research provides a roadmap for how educators can
 structure pen-and-paper proofs to decrease ambiguity and better prepare students
-for formal verification tasks.
+for formal verification tasks \hampus{why focus on pedagogical}.
 
 % This can be helpful to highlight aspects of proofs that can often be left to the
 % readers to understand or assume, whilst in a mechanized proof is stated explicitly.
@@ -71,13 +73,13 @@ for formal verification tasks.
 %
 \section{Scope}
 \label{intro:scope}
-\todo{Scope: While language, Big-Step and Small-Step semantics, equivalence proof} \noindent
+\todo{Scope: \While language, Big-Step and Small-Step semantics, equivalence proof} \noindent
 This thesis will evaluate proofs from the course "Semantics of Programming Languages
-(1DL311)" which uses the litterature "Semantics with Applications: An Appetizer".
+(1DL311)" which uses the litterature "Semantics with Applications: An Appetizer" \hampus{cite book}.
 In addition to only focusing material presented in the course, this analysis
 will be limited to the evaluation to a few proofs from the chapters
-"2. Operational Semantics" and
-"3. More on Operational Semantics".
+"2. Operational Semantics \hampus{cite chapter page number}" and
+"3. More on Operational Semantics \hampus{cite chapter page number}".
 These chapters introduce the toy programming language "While", which will be
 used in the proofs mechanized into Lean 4.
 

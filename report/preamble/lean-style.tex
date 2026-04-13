@@ -1,0 +1,47 @@
+% Required for Unicode support in listings
+\usepackage[utf8]{inputenc}
+\DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
+\DeclareUnicodeCharacter{2203}{\ensuremath{\exists}}
+\DeclareUnicodeCharacter{2192}{\ensuremath{\to}}
+\DeclareUnicodeCharacter{2218}{\ensuremath{\circ}}
+\DeclareUnicodeCharacter{2223}{\ensuremath{\mid}}
+
+% code block command usage: \begin{Lean_Code} def x := 1 \end{Lean_Code}
+\lstnewenvironment{Lean_Code}[1][style=lean4]{\lstset{#1}}{}
+\lstnewenvironment{Lean_Code_Numbered}[1][style=lean4, numbers=left]{\lstset{#1}}{}
+
+% Inline command usage: \lean{def x := 1}
+\newcommand{\lean}[1]{\lstinline[style=lean4]@#1@}
+
+
+\lstdefinestyle{lean4}{
+  language=bash, % Base for fallback, but we define custom keywords
+  basicstyle=\small\ttfamily\color{black},
+  keywordstyle=\small\ttfamily\bfseries\color{blue!70!black},
+  commentstyle=\small\itshape\color{green!40!black},
+  stringstyle=\color{purple},
+  numberstyle=\footnotesize\sffamily\color{gray},
+  aboveskip=1ex,
+  belowskip=1ex,
+  tabsize=2,
+  columns=fullflexible,
+  xleftmargin=1ex,
+  showstringspaces=false,
+  % Lean 4 Keywords
+  morekeywords={
+    def, theorem, lemma, example, open, import, 
+    variable, variables, instance, class, structure, 
+    inductive, syntax, macro, deriving, if, then, else, 
+    let, have, show, by, match, with, infix, notation, namespace, end
+  },
+  % Comments
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  % Symbols and Delimiters
+  escapeinside=@@,
+  moredelim=[is][\textit]{___}{___},
+  moredelim=[is][\textbf]{__*}{*__},
+  % Handle Unicode visually if not using XeLaTeX/LuaLaTeX
+  extendedchars=true,
+  literate={→}{{$\to$}}1 {⇒}{{$\Rightarrow$}}1 {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {λ}{{$\lambda$}}1 {:=}{{$:=$}}2
+}
