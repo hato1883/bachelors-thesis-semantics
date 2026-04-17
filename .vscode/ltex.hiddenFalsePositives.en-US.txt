@@ -1,0 +1,1 @@
+{"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QFormal semantics are typically expressed through three main approaches: Denotational (modeling programs as mathematical functions), Axiomatic (using logic to define preconditions and postconditions), and Operational .\\E$"}

@@ -18,6 +18,7 @@ namespace While
     | succ1 (n : Num) : Num  -- n 1
 
   -- Helper: Converts a standard Nat to your bitvector Num
+  @[reducible]
   def natToNum : Nat → Num
     | 0 => Num.zero
     | 1 => Num.one
@@ -130,5 +131,73 @@ namespace While
     | sequence        (S₁ S₂ : Stmt) -- S = S₁; S₂
     | cond (b : Bexp) (S₁ S₂ : Stmt) -- S = if b then S₁ else S₂
     | loop (b : Bexp) (S₁ : Stmt)    -- S = while b then S₁
+
+  -- infixr:90 " := " => Stmt.ass
+  -- infixl:80 " ; " => Stmt.sequence
+
+  -- Make variables print as just the string
+  -- Unexpander for Var.mk (Antiquotation style)
+  section tmp
+  open Lean PrettyPrinter
+  @[app_unexpander Var.mk] def unexpandVar : Unexpander
+    | `($_ $name) =>
+      match name.raw.isStrLit? with
+      | some s =>
+        -- This turns the string "x" into the identifier x
+        let id := mkIdent s.toName
+        return id
+      | none => throw ()
+    | _ => throw ()
+
+  -- Unexpander for State assignment
+  @[app_unexpander assign] def unexpandAssign : Lean.PrettyPrinter.Unexpander
+    | `($_ $s $x $z) => `($s[$x ↦ $z])
+    | _ => throw ()
+
+  -- Unexpander for Stmt.ass
+  -- This adds the ":=" for assignment
+  @[app_unexpander Stmt.ass] def unexpandAss : Unexpander
+    | `($_ $x $a) => `($x ":=" $a)
+    | _ => throw ()
+
+  -- Unexpander for Stmt.sequence
+  -- This adds the ";" and the parentheses for nesting
+  @[app_unexpander Stmt.sequence] def unexpandSeq : Lean.PrettyPrinter.Unexpander
+    | `($_ $S1 $S2) => `(($S1 ";" $S2))
+    | _ => throw ()
+
+  -- Unexpander for Stmt.cond
+  -- This adds the "if then else"
+  @[app_unexpander Stmt.cond] def unexpandCond : Lean.PrettyPrinter.Unexpander
+    | `($_ $b $S1 $S2) => `("if" $b "then" $S1 "else" $S2)
+    | _ => throw ()
+
+  -- Unexpander for Stmt.loop
+  -- This adds the "while then"
+  @[app_unexpander Stmt.loop] def unexpandLoop : Lean.PrettyPrinter.Unexpander
+    | `($_ $b $S1) => `("while" $b "do" $S1)
+    | _ => throw ()
+  end tmp
+
+  -- 1. If you update the same variable twice, only the last one matters.
+  @[simp] theorem assign_shadow (s : State) (x : Var) (z1 z2 : ℤ) :
+    s[x ↦ z1][x ↦ z2] = s[x ↦ z2] := by
+    apply funext
+    intro v
+    simp [assign]
+    split_ifs <;> rfl
+
+  -- 2. If you update different variables, you can swap them to group them.
+  @[simp]theorem assign_comm (s : State) (x1 x2 : Var) (z1 z2 : ℤ) (h : x1 ≠ x2) :
+  s[x1 ↦ z1][x2 ↦ z2] = s[x2 ↦ z2][x1 ↦ z1] := by
+    apply funext
+    intro v
+    simp [assign]
+    split_ifs with h1 h2 <;> try rfl
+    -- Only the contradiction case remains
+    subst h1 h2 -- changes goal from x1 != x2 to v != v
+    contradiction
+
+  attribute [simp, reducible] Num_to_Z Aexp_eval Bexp_eval assign
 
 end While

@@ -31,7 +31,7 @@ theorem n_total_mapping_z (n : While.Num) : ∃! (z : ℤ), 𝒩⟦n⟧ = z := b
     refine ⟨2 * z_d, ?existence, ?uniqueness⟩
     case existence =>
       show 2 * 𝒩⟦d⟧ = 2 * z_d
-      simp
+      simp -- changes to ....
       exact h_prop
     case uniqueness =>
       intro y hy

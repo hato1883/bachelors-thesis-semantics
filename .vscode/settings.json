@@ -4,6 +4,7 @@
         "Aexp",
         "belowskip",
         "Bexp",
+        "compositionally",
         "corecctness",
         "escapeinside",
         "Frobies",
@@ -15,6 +16,7 @@
         "moredelim",
         "numberbychapter",
         "numberstyle",
+        "postconditions",
         "Repr",
         "resetmargins",
         "showstringspaces",
@@ -24,5 +26,8 @@
         "synctex",
         "tabsize",
         "xleftmargin"
-    ]
+    ],
+    "chat.tools.terminal.autoApprove": {
+        "lake": true
+    }
 }

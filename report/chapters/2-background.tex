@@ -14,63 +14,126 @@ of study throughout this work. This provides the concrete syntax required to
 explore the formal semantics of programming languages—the mathematical bridge
 between a program's notation and its behavior. We then delve into Operational
 Semantics, detailing both the Natural (big-step) and Structural (small-step)
-approaches, followed by the primary proof techniques used in their analysis.
+approaches \missingcitation, followed by the primary proof techniques used in their analysis.
 Finally, we introduce the Lean 4 proof assistant, detailing the mechanisms used
-to translate these textbook definitions into machine-checked proofs.
+to translate these textbook definitions into machine-checked proofs \missingcitation.
 
 %
 %
 %
-\section{The \While Language}
-\label{background:sec:TODO}
-\todo{Copied from Hugo Lönnqvist Österberg "Implementing Dataflow
-Analysis for an Imperative Programming Language in Trieste"}
-The \While language is a simple imperative language used in various literature
-when teaching program analysis and semantics \missingcitation. Although different variants
-exist, the chosen definition is based on the version shown in the book ”Semantics
-with Applications: An Appetizer” .
-The definition of a While program is as follows:
+\section{The \While language}
+\label{background:sec:while}
+\todo{What?} Programming language semantics needs a language to study, and commonly used
+programming languages are often a bad fit due to the constant
+evolution of languages, operating systems, and hardware \missingcitation. \todo{Why?}
+To address this, a common 
+praxis is to invent a "toy" programming language that lacks a physical implementation 
+but possesses rigorous rules \missingcitation. In this case, we use \While, a simplified imperative language 
+defined in the literature of our case study \missingcitation.
+
+Like most programming languages, \While is built using statements and expressions. \todo{How?}
+Informally, the language supports the following statements:
 \begin{itemize}
-    \item A program consists of a statement.
-    \item A statement could in turn be an assignment, a skip (has no effect on the
-program), an if statement, a while loop or a pair of two statements.
-    \item The two possible expressions are of type arithmetic and boolean. Arithmetic
-expressions can be integers, variables or arithmetic operations. Likewise,
-boolean expressions can be true, false, a relational or boolean operation
-resulting in a truth value.
+    \item assignment,
+    \item skip (no effect),
+    \item if-then-else,
+    \item while-loop,
+    \item sequential composition.
 \end{itemize}
-\hampus{Need full semantic categories, thier definitions etc here}
+This allows us to build simple programs where we use the sequential statement to connect
+two operations, such as "assign $x$ to 4, then skip." Before we can define how these 
+programs behave, we must first define the formal building blocks of the language's 
+structure: its \emph{Syntactic Categories}.
+
+%
+%
+\subsection*{Syntactic Categories}
+The \While language is constructed from several basic syntactic sets. These sets 
+define the "alphabet" and "words" available to the programmer:
+\begin{itemize}
+    \item numbers \Num, which consists of positive integers including 0,
+    \item variables \Var, which consist of a letter followed by letters or numbers,
+    \item arithmetic expressions \Aexp,
+    \item boolean expressions \Bexp,
+    \item statements \Stm.
+\end{itemize}
+
+To manipulate these sets in formal proofs, we introduce \emph{meta-variables}. 
+By convention, we let specific letters range over these sets so that $n$ always 
+implies a numeral, and $S$ always implies a statement:
 \[
 \begin{array}{ll}
-    $n$  & \mbox{will range over numerals, } \textbf{Num},\\[0.6em]
-    $x$  & \mbox{will range over variables, } \textbf{Var},\\[0.6em]
-    $a$  & \mbox{will range over arithmetic expressions, } \textbf{Aexp},\\[0.6em]
-    $b$  & \mbox{will range over boolean expressions, } \textbf{Bexp},\\[0.6em]
-    $S$  & \mbox{will range over statements, } \textbf{Stm-},\\[0.6em]
-    $s$  & \mbox{will range over states, } \textbf{State},
+    n  & \mbox{ranges over numerals, } \Num,\\[0.6em]
+    x  & \mbox{ranges over variables, } \Var,\\[0.6em]
+    a  & \mbox{ranges over arithmetic expressions, } \Aexp,\\[0.6em]
+    b  & \mbox{ranges over boolean expressions, } \Bexp,\\[0.6em]
+    S  & \mbox{ranges over statements, } \Stm.
 \end{array}
 \]
-
+Each variable can be primed or sub-scripted (e.g., \(n', n_0, n_{317}\)) to create 
+distinct instances that still belong to the same set. Using these meta-variables, 
+we define the formation rules using Backus-Naur Form (BNF) notation \missingcitation:
 \[
 \begin{array}{lcl}
-    n &::=& 0 \mid 1 \mid n0 \mid n1 \\[0.6em]
+    n &::=& 0 \mid 1 \mid n'0 \mid n'1 \\[0.6em]
     x &::=& [a-zA-Z]([a-zA-Z] \mid [0-9])^{*} \\[0.6em]
     a &::=& n \mid x \mid a_1 + a_2 \mid a_1 \star a_2 \mid a_1 - a_2 \\[0.6em]
-    b &::=& \mathbf{true} \mid \mathbf{false} \mid a_1 = a_2 \mid a_1 \leq a_2 \mid \neg b \mid b_1 \land b_2 \\[0.6em]
-    S &::=& x := a \mid \mathbf{skip} \mid S_1; S_2 \mid \mathbf{if}\ b\ \mathbf{then}\ S_1\ \mathbf{else}\ S_2 \mid \mathbf{while}\ b\ \mathbf{then}\ S
+    b &::=& \mathbf{true} \mid \mathbf{false} \mid a_1 = a_2 \mid a_1 \leq a_2 \mid \neg b' \mid b_1 \land b_2 \\[0.6em]
+    S &::=& x := a \mid \mathbf{skip} \mid S_1; S_2 \mid \mathbf{if}\ b\ \mathbf{then}\ S_1\ \mathbf{else}\ S_2 \mid \mathbf{while}\ b\ \mathbf{then}\ S'
 \end{array}
 \]
+The symbol "\(::=\)" denotes that a category "can be" a specific form, while "\(\mid\)" 
+denotes an alternative. This is an \emph{inductive definition} \missingcitation : for example, 
+an arithmetic expression $a$ can be a simple number $n$, or it can be a 
+compound expression like $a_1 + a_2$, where $a_1$ and $a_2$ are themselves 
+already formed arithmetic expressions.
 
-We will also use so called semantic functions to translate values from our syntax described above to known semantics borrowed from the math world.
+With the syntax established, we now need a mathematical "universe" to map these 
+symbols into. This is provided by the \emph{Semantic Domains}.
+
+%
+%
+\subsection*{Semantic Domains}
+While the syntax defines what we can write, the semantic domains define what those 
+writings actually \emph{mean} in terms of mathematical objects \missingcitation. We map \While 
+syntax into the following sets:
+\begin{itemize}
+    \item Truth values \(\Truth = \{ \mathbf{tt}, \mathbf{ff} \}\), where \textbf{tt} represents mathematical truth.
+    \item Integers \(\mathbb{Z}\), the set $\{ \dots, -1, 0, 1, \dots \}$.
+    \item Program states \State, representing the memory configuration.
+\end{itemize}
+We use the meta-variable $s$ to range over states. To bridge the gap between 
+the syntax of \Aexp or \Bexp and these mathematical domains, 
+we require \emph{Semantic Functions} \missingcitation.
+
+%
+%
+\subsection*{Semantic Functions}
+Semantic functions serve as the "translators" from syntax to semantics. We 
+standardize this translation using 'semantic brackets' \([\![\cdot]\!]\) to 
+enclose the syntax being evaluated \missingcitation. This separates the \While language from 
+the mathematical "meta-language" used to describe it. To distinguish between 
+different types of evaluation, we prefix the brackets with calligraphic letters:
 \[
-\mathbf{State} : \mathbf{Var} \to \mathbb{Z}
+\begin{array}{ll}
+    \mathcal{N} : \mathbf{Num} \to \mathbb{Z} & \mbox{(Translating numerals to integers)} \\[0.6em]
+    \mathcal{A} : \mathbf{Aexp} \to (\mathbf{State} \to \mathbb{Z}) & \mbox{(Evaluating arithmetic in a state)} \\[0.6em]
+    \mathcal{B} : \mathbf{Bexp} \to (\mathbf{State} \to \mathbf{T}) & \mbox{(Evaluating booleans in a state)}
+\end{array}
 \]
-defined as a total function by mapping all "unset" variables to 0,
-we continue with 
-\[
-\mathcal{N} : \mathbf{Num} \to \mathbb{Z}
-\]
-defined as
+In the definitions for $\mathcal{A}$ and $\mathcal{B}$, the function takes a piece 
+of syntax and returns a \emph{function} that expects a state $s$. We often 
+write $\mathcal{A}[\![a]\!]s$ to mean "the integer result of expression $a$ 
+evaluated in state $s$."
+
+%
+%
+\subsection*{Semantic Equations}
+The equations below provide the rules for our semantic functions. These are 
+defined \emph{compositionally}, meaning the value of a complex expression depends 
+solely on the values of its sub-expressions \missingcitation. 
+
+For numerals, we define the translation of binary-style strings to integers:
 \[
 \begin{array}{rcl}
     \mathcal{N}[\![0]\!] &=& 0 \\[0.6em]
@@ -79,11 +142,9 @@ defined as
     \mathcal{N}[\![n 1]\!] &=& 2 \cdot \mathcal{N}[\![n]\!] + 1
 \end{array}
 \]
-and 
-\[
-\mathcal{A} : \mathbf{Aexp} \to (\mathbf{State} \to \mathbb{Z})
-\]
-defined as
+Arithmetic expressions $\mathcal{A}$ are evaluated by looking up variables in 
+the state $s$ or performing mathematical operations ($+, \cdot, -$) on the 
+results of sub-expressions:
 \[
 \begin{array}{rcl}
     \mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\[0.6em]
@@ -93,11 +154,8 @@ defined as
     \mathcal{A}[\![a_1 - a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s - \mathcal{A}[\![a_2]\!]s
 \end{array}
 \]
-and lastly
-\[
-\mathcal{B} : \mathbf{Bexp} \to (\mathbf{State} \to \mathbf{T})
-\]
-defined as
+Boolean expressions $\mathcal{B}$ follow a similar pattern, returning \textbf{tt} 
+or \textbf{ff} based on the mathematical truth of the comparisons:
 \[
 \begin{array}{rcl}
     \mathcal{B}[\![\mathbf{true}]\!]s &=& \mathbf{tt} \\[0.6em]
@@ -128,12 +186,36 @@ defined as
     \right.
 \end{array}
 \]
-\hampus{Make sure to explan notation like it is done in "Semantics of Programming Languages: Structures and Techniques"}
 
-\todo{What?}
-\todo{Why?}
-\todo{How?}
+Throughout these definitions, we have relied on the notion of a "state" to store 
+variable values. We conclude by formally defining this context.
 
+%
+%
+\subsection*{Auxiliary Components}
+The \emph{State} is the primary auxiliary component of our semantics. Formally, 
+a state is a function that maps each variable to its current integer value:
+\[
+s : \mathbf{Var} \to \mathbb{Z}
+\]
+In this language, we assume the state is a \emph{total function}; if a variable 
+has not been explicitly assigned, it is mapped to 0 by default. 
+
+To describe how statements change the state (such as in an assignment $x := a$), 
+we use the notation $s[x \mapsto v]$ to represent a new state that is identical 
+to $s$ except that the variable $x$ now maps to the value $v$:
+\[
+s[x \mapsto v]y = \left\{
+    \begin{array}{ll}
+        v & \mbox{if } y = x \\
+        s \, y & \mbox{if } y \neq x
+    \end{array}
+\right.
+\]
+This "substitution" notation is fundamental to describing the execution of 
+imperative commands in \While \missingcitation.
+
+The syntactic categories and semantic functions defined above provide the necessary vocabulary for our toy language. Yet, the question remains: how do we formally describe the step-by-step transition of a program from one configuration to another? To answer this, we move from the definition of the language itself to the study of Formal Semantics of Programming Languages, comparing the operational, denotational, and axiomatic approaches to defining program behavior \missingcitation.
 
 %
 %
@@ -159,8 +241,8 @@ By separating how an instruction is written (the syntax) such as
     if (x > 0) then {x = x} else {x = -x}
 \end{While_Code} % \noindent
 from the meaning (the semantics) such as "if x is less than 0 then negate the value, otherwise do nothing" it is possible to
-create a deeper and more detailed understanding (\hampus{this statment has no basis}) \missingcitation of the programming language
-and therby the programs written.
+create a deeper and more detailed understanding (\hampus{this statement has no basis}) \missingcitation of the programming language
+and thereby the programs written.
 
 
 \todo{How?}
@@ -168,7 +250,7 @@ Formal semantics are typically expressed through three main approaches:
 Denotational (modeling programs as mathematical functions),
 Axiomatic (using logic to define preconditions and postconditions),
 and Operational \missingcitation. This thesis focuses on the Operational approach, which describes
-how a program transition from one state to another during execution.
+how a program transition from one state to another during execution \missingcitation.
 
 
 %
