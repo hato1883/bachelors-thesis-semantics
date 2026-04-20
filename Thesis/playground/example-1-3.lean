@@ -57,15 +57,15 @@ end part_1_3
 section part_1_6
 
   def s : State := default_state["x"↦3]
-  #check 𝒜⟦"x" + 1⟧
-  #eval 𝒜⟦"x" + 1⟧ s
+  #check 𝓐⟦"x" + 1⟧
+  #eval 𝓐⟦"x" + 1⟧ s
 
 end part_1_6
 
 
 section part_1_8
 
-  theorem aexp_total_mapping_z (a : Aexp) (s : State) : ∃! (z : ℤ), 𝒜⟦a⟧ s = z :=
+  theorem aexp_total_mapping_z (a : Aexp) (s : State) : ∃! (z : ℤ), 𝓐⟦a⟧ s = z :=
     by sorry
 
 end part_1_8

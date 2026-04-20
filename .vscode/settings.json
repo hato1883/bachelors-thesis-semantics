@@ -10,6 +10,7 @@
         "Frobies",
         "fullflexible",
         "keywordstyle",
+        "linarith",
         "litterature",
         "Mathlib",
         "morecomment",
@@ -25,6 +26,8 @@
         "symm",
         "synctex",
         "tabsize",
+        "unexpand",
+        "unexpander",
         "xleftmargin"
     ],
     "chat.tools.terminal.autoApprove": {

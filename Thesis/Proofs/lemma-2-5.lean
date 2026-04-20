@@ -26,7 +26,7 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
   -- Forward direction: while → if
   case mp =>
     intro hDerivWhile
-    by_cases hCondTrue : ℬ⟦b⟧ s = true
+    by_cases hCondTrue : 𝓑⟦b⟧ s = true
     case pos =>
       apply big_step.if_true
       · exact hCondTrue
@@ -50,7 +50,7 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
   -- Backward direction: if → while
   case mpr =>
     intro hDerivIf
-    by_cases hCondTrue : ℬ⟦b⟧ s = true
+    by_cases hCondTrue : 𝓑⟦b⟧ s = true
     case pos =>
       cases hDerivIf with
       | if_true hCondTrue' hDerivSeq =>

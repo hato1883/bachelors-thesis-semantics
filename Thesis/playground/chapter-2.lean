@@ -26,7 +26,7 @@ example (s : State) :
     · -- y := 2
       apply big_step.ass
   · -- Right side: z := 3
-    -- simplify [x↦𝒜⟦1⟧ s][y↦𝒜⟦2⟧ s[x↦𝒜⟦1⟧ s] to [x↦1][y↦2]
+    -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
     simp [Aexp_eval, Num_to_Z]
     apply big_step.ass
 
@@ -53,10 +53,10 @@ example :
   · -- Left side: y := 1
     apply big_step.ass
   · -- Right side: while ¬ (x = 1) do (y := y*x; x := x-1)
-    -- simplify [x↦𝒜⟦1⟧ s][y↦𝒜⟦2⟧ s[x↦𝒜⟦1⟧ s] to [x↦1][y↦2]
+    -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
     simp [Bexp_eval, Aexp_eval, Num_to_Z]
     apply big_step.while_true
-    · -- ℬ⟦¬(x=1)⟧ s[y↦1] = true
+    · -- 𝓑⟦¬(x=1)⟧ s[y↦1] = true
       simp [Bexp_eval]
     · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[y↦1]⟩ →ₙₛ s'
       apply big_step.seq
@@ -66,7 +66,7 @@ example :
         apply big_step.ass
     · -- ⟨"while" ¬(x = 1) "do" y ":=" y * x ";" x ":=" x - 1, s'⟩ →ₙₛ s''
       apply big_step.while_true
-      · -- ℬ⟦¬(x=1)⟧ s[x↦2][y↦3] = true
+      · -- 𝓑⟦¬(x=1)⟧ s[x↦2][y↦3] = true
         simp [Bexp_eval]
       · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[x↦2][y↦3]⟩ →ₙₛ s'
         apply big_step.seq
@@ -78,7 +78,7 @@ example :
         -- Change default_state[x↦3][y↦1][y↦3][x↦2][y↦6][x↦1] to default_state[x↦1][y↦6]
         simp [assign_comm, assign_shadow]
         apply big_step.while_false
-        · -- ℬ⟦¬(x=1)⟧ s[x↦1][y↦6] = false
+        · -- 𝓑⟦¬(x=1)⟧ s[x↦1][y↦6] = false
           simp [Bexp_eval]
 
 end example_2_2
@@ -104,10 +104,10 @@ example :
   · -- Left side: y := 1
     apply big_step.ass
   · -- Right side: z := 3
-    -- simplify [x↦𝒜⟦1⟧ s][y↦𝒜⟦2⟧ s[x↦𝒜⟦1⟧ s] to [x↦1][y↦2]
+    -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
     simp [Bexp_eval, Aexp_eval, Num_to_Z]
     apply big_step.while_true
-    · -- ℬ⟦¬(x=1)⟧ s[y↦1] = true
+    · -- 𝓑⟦¬(x=1)⟧ s[y↦1] = true
       simp [Bexp_eval]
     · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[y↦1]⟩ →ₙₛ s'
       apply big_step.seq
@@ -117,7 +117,7 @@ example :
         apply big_step.ass
     · -- ⟨"while" ¬(x = 1) "do" y ":=" y * x ";" x ":=" x - 1, s'⟩ →ₙₛ s''
       apply big_step.while_true
-      · -- ℬ⟦¬(x=1)⟧ s[x↦2][y↦3] = true
+      · -- 𝓑⟦¬(x=1)⟧ s[x↦2][y↦3] = true
         simp [Bexp_eval]
       · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[x↦2][y↦3]⟩ →ₙₛ s'
         apply big_step.seq
@@ -129,7 +129,7 @@ example :
         -- Change default_state[x↦3][y↦1][y↦3][x↦2][y↦6][x↦1] to default_state[x↦1][y↦6]
         simp [assign_comm, assign_shadow]
         apply big_step.while_false
-        · -- ℬ⟦¬(x=1)⟧ s[x↦1][y↦6] = false
+        · -- 𝓑⟦¬(x=1)⟧ s[x↦1][y↦6] = false
           simp [Bexp_eval]
 
 end example_2_2

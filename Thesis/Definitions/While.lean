@@ -112,7 +112,7 @@ def Aexp_eval : Aexp → State → ℤ
   | Aexp.mul a₁ a₂, s => Aexp_eval a₁ s * Aexp_eval a₂ s
   | Aexp.sub a₁ a₂, s => Aexp_eval a₁ s - Aexp_eval a₂ s
 
-notation "𝒜⟦" a "⟧" => Aexp_eval a
+notation "𝓐⟦" a "⟧" => Aexp_eval a
 
 -- TODO: change to inductive instead of def so that proof 1.8 is needed
 def Bexp_eval : Bexp → State → Bool
@@ -123,7 +123,7 @@ def Bexp_eval : Bexp → State → Bool
   | Bexp.not b₁,    s => ¬ (Bexp_eval b₁ s)
   | Bexp.and b₁ b₂, s => (Bexp_eval b₁ s) ∧  (Bexp_eval b₂ s)
 
-notation "ℬ⟦" b "⟧" => Bexp_eval b
+notation "𝓑⟦" b "⟧" => Bexp_eval b
 
 def assign (s : State) (x : Var) (z : ℤ) : State :=
   fun (v: Var) => if v = x then z else s v
@@ -198,7 +198,7 @@ notation:50 a₁:51 " ⩽ " a₂:50 => While.Bexp.le a₁ a₂
 prefix:75 "¬ " => While.Bexp.not
 
 -- And: b₁ ∧ b₂
-infixr:70 " ∧ " => While.Bexp.and
+infixr:35 " ∧ " => While.Bexp.and
 
 -- true/false
 notation "𝕋" => While.Bexp.true

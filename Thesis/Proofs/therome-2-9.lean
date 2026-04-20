@@ -27,13 +27,13 @@ theorem deterministic (S : Stmt) (s s' s'' : State) (h: ⟨S, s⟩ →ₙₛ s')
   (s' = s'') := by
   induction h generalizing s'' with
   -- verifying tree built using [assₙₛ] axiom
-  | ass hEvalAssign =>
+  | ass =>
     -- First explicit Lean-only inversion point (textbook keeps this implicit):
     -- introduce the alternative derivation, then invert it by constructor cases.
     intro hDerivAlt
     cases hDerivAlt with
-    | ass hEvalAssignAlt =>
-      rw [← hEvalAssign, ← hEvalAssignAlt]
+    | ass =>
+      rfl
 
   -- verifying tree built using [skipₙₛ] axiom
   | skip =>
