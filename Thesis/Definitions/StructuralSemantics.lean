@@ -108,20 +108,40 @@ def unexpandConfigStep : Lean.PrettyPrinter.Unexpander
 
 @[app_unexpander small_step]
 def unexpandSmallStep : Lean.PrettyPrinter.Unexpander
-  | `($_ $S $s (Config.step $S' $s')) => `(⟨$S,  $s⟩ →ₛₒₛ ⟨$S', $s'⟩)
-  | `($_ $S $s (Config.final $s'))    => `(⟨$S,  $s⟩ →ₛₒₛ $s')
+  | `($_ $S $s $c) =>
+      match c with
+      | `(⟨$S', $s'⟩) => `(⟨$S,  $s⟩ →ₛₒₛ ⟨$S', $s'⟩)
+      | `($s')        => `(⟨$S,  $s⟩ →ₛₒₛ $s')
   | _ => throw ()
 
 @[app_unexpander small_step_k]
 def unexpandSmallStepK : Lean.PrettyPrinter.Unexpander
-  | `($_ (Config.step $S $s) $k (Config.step $S' $s')) => `(⟨$S,  $s⟩ →ₛₒₛ[$k] ⟨$S', $s'⟩)
-  | `($_ (Config.step $S $s) $k (Config.final $s'))    => `(⟨$S,  $s⟩ →ₛₒₛ[$k] $s')
+  | `($_ $c $k $c') =>
+      match c, c' with
+      | `(⟨$S, $s⟩), `(⟨$S', $s'⟩) => `(⟨$S,  $s⟩ →ₛₒₛ[$k] ⟨$S', $s'⟩)
+      | `(⟨$S, $s⟩), `($s')        => `(⟨$S,  $s⟩ →ₛₒₛ[$k] $s')
+      | _,           _             => throw ()
   | _ => throw ()
 
 @[app_unexpander small_step_star]
 def unexpandSmallStepStar : Lean.PrettyPrinter.Unexpander
-  | `($_ (Config.step $S $s) (Config.step $S' $s')) => `(⟨$S,  $s⟩ →ₛₒₛ* ⟨$S', $s'⟩)
-  | `($_ (Config.step $S $s) (Config.final $s'))    => `(⟨$S,  $s⟩ →ₛₒₛ* $s')
+  | `($_ $c $c') =>
+      match c, c' with
+      | `(⟨$S, $s⟩), `(⟨$S', $s'⟩) => `(⟨$S,  $s⟩ →ₛₒₛ* ⟨$S', $s'⟩)
+      | `(⟨$S, $s⟩), `($s')        => `(⟨$S,  $s⟩ →ₛₒₛ* $s')
+      | _,           _             => throw ()
   | _ => throw ()
+
+-- @[app_unexpander small_step_star.step]
+-- def unexpandSmallStepStarStep : Lean.PrettyPrinter.Unexpander
+--   | `($_ (Config.step $S $s) (Config.step $S' $s')) => `(⟨$S,  $s⟩ →ₛₒₛ* ⟨$S', $s'⟩)
+--   | `($_ (Config.step $S $s) (Config.final $s'))    => `(⟨$S,  $s⟩ →ₛₒₛ* $s')
+--   | _ => throw ()
+
+-- @[app_unexpander small_step_star.refl]
+-- def unexpandSmallStepStarRefl : Lean.PrettyPrinter.Unexpander
+--   | `($_ (Config.step $S $s) (Config.step $S' $s')) => `(⟨$S,  $s⟩ →ₛₒₛ* ⟨$S', $s'⟩)
+--   | `($_ (Config.step $S $s) (Config.final $s'))    => `(⟨$S,  $s⟩ →ₛₒₛ* $s')
+--   | _ => throw ()
 
 end StructuralSemantics
