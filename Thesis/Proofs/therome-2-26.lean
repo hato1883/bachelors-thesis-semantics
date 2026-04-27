@@ -76,15 +76,15 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     -- ih2 : ⟨whileₛ✝ b✝ doₛ✝ S✝,s'✝⟩ →ₛₒₛ* s''✝
     -- ⊢ ⟨S✝; whileₛ✝ b✝ doₛ✝ S✝,s✝⟩ →ₛₒₛ* s''✝
 
-  | while_false hcond =>
+  | while_false h_cond =>
     apply small_step_star.step
-    apply small_step.while_unroll
-    apply small_step_star.step
-    apply small_step.if_false
-    exact hcond
-    apply small_step_star.step
-    apply small_step.skip
-    apply small_step_star.refl
+    · apply small_step.while_unroll
+    · apply small_step_star.step
+      · apply small_step.if_false
+        · exact h_cond
+      · apply small_step_star.step
+        apply small_step.skip
+        · apply small_step_star.refl
 
 
 theorem sos_to_ns (S : Stmt) (s s' : State) :

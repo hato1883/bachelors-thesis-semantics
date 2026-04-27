@@ -11,7 +11,7 @@ BUILD:= build
 	cp ./$(BUILD)/$(MAIN).pdf ./$(MAIN).pdf
 
 main:
-	latexmk -f -pdf -synctex=1 -interaction=nonstopmode -halt-on-error -outdir=$(BUILD) $(MAIN)
+	latexmk -f -pdflua -synctex=1 -interaction=nonstopmode -halt-on-error -outdir=$(BUILD) $(MAIN)
 
 bib:
 	bibtex $(BIB)

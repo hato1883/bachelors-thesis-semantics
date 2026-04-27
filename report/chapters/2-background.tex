@@ -21,6 +21,86 @@ to translate these textbook definitions into machine-checked proofs \missingcita
 %
 %
 %
+\section{Formal Semantics of Programming Languages}
+\label{background:sec:formal_semantics_pl}
+\todo{What?}
+The formal semantics of a programming language is a rigorous mathematical
+framework used to describe the behavior of programs \missingcitation. While a language's syntax
+defines the rules for constructing valid programs (the "grammar"), its semantics
+provides the "meaning"—specifying exactly how a computer should execute those
+instructions \missingcitation.
+
+\todo{Why?}
+In many industrial settings, the semantics of a language are described using
+natural language manuals \missingcitation. However, natural language is often prone to ambiguity,
+leading to inconsistent implementations across different compilers or interpreters \missingcitation.
+Formal semantics eliminates this ambiguity by using mathematical structures—such
+as sets, functions, and logic to define program execution \missingcitation.
+
+By separating how an instruction is written (the syntax) such as
+\begin{While_Code}
+    if (x > 0) then {x = x} else {x = -x}
+\end{While_Code} % \noindent
+from the meaning (the semantics) such as "if x is less than 0 then negate the value, otherwise do nothing" it is possible to
+create a deeper and more detailed understanding (\hampus{this statement has no basis}) \missingcitation of the programming language
+and thereby the programs written.
+
+
+\todo{How?}
+Formal semantics are typically expressed through three main approaches:
+Denotational (modeling programs as mathematical functions),
+Axiomatic (using logic to define preconditions and postconditions),
+and Operational \missingcitation. This thesis focuses on the Operational approach, which describes
+how a program transition from one state to another during execution \missingcitation.
+
+In addition to these different semantics a representation of the language in question is needed.
+This representation is built using five different components.
+First of which is the so-called "\emph{Syntactic Categories}"
+
+%
+\subsection*{Syntactic Categories}
+The syntactic categories of a language represent the alphabet.
+This could include things such as number, variable arithmetic and boolean expressions.
+It is also common to define so called "\emph{meta-variables}" which is used as a placeholder value for each category,
+an example would be \(S\) which could represent a \emph{Statement} in a language, where \(S_1\) is another statement than \(S_2\) or \(S'\).
+
+In addition to defining the categories and \emph{meta-variables}, it is important to define the grammar of the alphabet, effectively creating words out of the alphabet.
+This is commonly done using BNF, short for \emph{Backus-Naur Form}, an example can be seen in the \autoref{background:sec:while:syntactic}.
+By providing the grammar it is possible to start building programs using the earlier defined alphabet, but this is just syntax,
+we have yet to define meaning to our alphabet and words created from it.
+To give the words meaning we use the next two components which is called "\emph{Semantic Domains}" and "\emph{Semantic Functions}"
+
+%
+\subsection*{Semantic Domains}
+This component provides the semantic domains in which we will use to give our programs meaning.
+A domain can be all natural numbers, or true and false, or even a custom domain such as program states or memory locations.
+Next we need to know how the words in our alphabet is translated into our semantic domains, this is done by the "\emph{Semantic Functions}" mentioned earlier.
+
+%
+\subsection*{Semantic Functions}
+This component provides the translation from our words to our domains.
+It is common to define a custom notation to mark when a semantic function is being applied,
+as it is common to use Natural numbers such as \(1\), \(2\), \(3\), etc., both as words in our language but also as the result of a semantic function.
+
+Whilst this component describes a functional definition, the actual function definitions are defined in the next component which is called "\emph{Semantic Equations}".
+
+%
+\subsection*{Semantic Equations}
+This component is responsible for defining on a case by case basis how exactly the semantic function translates the words given by our grammar into our semantic domains.
+Often this is done compositionally, which means that we might define a multiplication as multiplying the result of two recursive calls on its components.
+Lastly we define the last component known as "\emph{Auxiliary Components}".
+
+\subsection*{Auxiliary Components}
+This is the last and final component used to create a representation of a programming language.
+Auxiliary components is a broad way of saying "everything else" this could include the definition of what a program state is,
+or memory locations or even environments for dynamic/static function linking.
+This section might contain functions and definitions that could occur in a previous component in a different paper,
+this occurs as a result from picking which approach to use, and what the main focus is.
+
+
+%
+%
+%
 \section{The \While language}
 \label{background:sec:while}
 \todo{What?} Programming language semantics needs a language to study, and commonly used
@@ -48,6 +128,7 @@ structure: its \emph{Syntactic Categories}.
 %
 %
 \subsection*{Syntactic Categories}
+\label{background:sec:while:syntactic}
 The \While language is constructed from several basic syntactic sets. These sets 
 define the "alphabet" and "words" available to the programmer:
 \begin{itemize}
@@ -217,47 +298,12 @@ imperative commands in \While \missingcitation.
 
 The syntactic categories and semantic functions defined above provide the necessary vocabulary for our toy language. Yet, the question remains: how do we formally describe the step-by-step transition of a program from one configuration to another? To answer this, we move from the definition of the language itself to the study of Formal Semantics of Programming Languages, comparing the operational, denotational, and axiomatic approaches to defining program behavior \missingcitation.
 
-%
-%
-%
-\section{Formal Semantics of Programming Languages}
-\label{background:sec:formal_semantics_pl}
-\todo{What?}
-The formal semantics of a programming language is a rigorous mathematical
-framework used to describe the behavior of programs \missingcitation. While a language's syntax
-defines the rules for constructing valid programs (the "grammar"), its semantics
-provides the "meaning"—specifying exactly how a computer should execute those
-instructions \missingcitation.
-
-\todo{Why?}
-In many industrial settings, the semantics of a language are described using
-natural language manuals \missingcitation. However, natural language is often prone to ambiguity,
-leading to inconsistent implementations across different compilers or interpreters \missingcitation.
-Formal semantics eliminates this ambiguity by using mathematical structures—such
-as sets, functions, and logic to define program execution \missingcitation.
-
-By separating how an instruction is written (the syntax) such as
-\begin{While_Code}
-    if (x > 0) then {x = x} else {x = -x}
-\end{While_Code} % \noindent
-from the meaning (the semantics) such as "if x is less than 0 then negate the value, otherwise do nothing" it is possible to
-create a deeper and more detailed understanding (\hampus{this statement has no basis}) \missingcitation of the programming language
-and thereby the programs written.
-
-
-\todo{How?}
-Formal semantics are typically expressed through three main approaches:
-Denotational (modeling programs as mathematical functions),
-Axiomatic (using logic to define preconditions and postconditions),
-and Operational \missingcitation. This thesis focuses on the Operational approach, which describes
-how a program transition from one state to another during execution \missingcitation.
-
 
 %
 %
 %
 \section{Operational Semantics}
-\todo{breif What?} \noindent
+\todo{Brief What?} \noindent
 \hampus{AI SLOP bellow!}
 Operational semantics describes the meaning of a program by specifying how it
 executes on an abstract machine. Unlike other semantic approaches, it is
@@ -265,7 +311,7 @@ executes on an abstract machine. Unlike other semantic approaches, it is
 A state transition is typically represented as a relation between a
 configuration—consisting of a statement and the current state—and a resulting
 state or a subsequent configuration.
-\todo{show state transition notation and describe it, lean on The Formal Semantics of Programming Languages: An Introduction}
+\todo{Show state transition notation and describe it, lean on The Formal Semantics of Programming Languages: An Introduction}
 
 In this work, we examine two primary styles of operational semantics:
 \emph{Natural Semantics} (Big-Step) and
@@ -302,7 +348,7 @@ In this work, we examine two primary styles of operational semantics:
 %
 \section{Proof Techniques in Semantics}
 \label{background:sec:proof_techniques}
-\hampus{induction over structure etc}
+\hampus{Induction over structure etc.}
 \todo{What?}
 \RED{\lipsum[1]}
 \todo{Why?}
@@ -314,9 +360,9 @@ In this work, we examine two primary styles of operational semantics:
 %
 %
 %
-\section{The Lean 4 Proof Assistant }
+\section{The Lean 4 Proof Assistant}
 \label{background:sec:lean_4}
-\hampus{Show by example, pen-and-papper proof proves eveness by induction, this is done like this in lean \dots}
+\hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
 \todo{What?}
 \RED{\lipsum[1]}
 \todo{Why?}

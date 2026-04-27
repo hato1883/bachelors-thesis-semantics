@@ -2,44 +2,66 @@
 % All Thesis package dependencies
 %
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
+%% --- Core Engine & Language ---
 \usepackage[british]{babel}
+
+% REMOVED: inputenc and fontenc. 
+% fontspec handles encoding natively in LuaLaTeX/XeLaTeX.
+
+% --- Fonts & Unicode Support ---
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}  % Professional Serif (Times-like)
+\setsansfont{TeX Gyre Heros}   % Professional Sans (Helvetica-like)
+
+% Set the Serif font (Libertine)
+% \setmainfont{Linux Libertine O}[
+%     Numbers = Lining,
+%     Ligatures = TeX
+% ]
+
+% Set Monospace (Inconsolata or DejaVu Sans Mono for Lean symbols)
+% \setmonofont{inconsolata}[Scale=0.95] 
+
+% --- Layout & Typography ---
+\usepackage[paper=a4paper,text={13cm,24cm},marginparsep=5mm,marginparwidth=45mm,inner=20mm,twoside]{geometry}
+\usepackage{paracol}
+\setlength{\columnsep}{1em} % Adjust this value as needed
+\columnratio{0.5} % Split page exactly in half
+
+\usepackage{microtype}
+% Disable specific microtype features that clash with LuaLaTeX/fontspec
+\microtypesetup{expansion=false, kerning=false}
+
+% --- Graphics & Colors ---
 \usepackage{graphicx}
 \usepackage[dvipsnames]{xcolor}
-\usepackage[sb]{libertine}
-\usepackage[scale=0.9]{inconsolata}
+\usepackage{float}
+\usepackage{caption} % Customization below
 
-\usepackage[sf]{titlesec}
-\usepackage[square,sort,colon,authoryear]{natbib}
-%\usepackage[export]{adjustbox}
-
-\usepackage{
-  marginnote, % Improved margin notes
-  environ,
-  ragged2e,   % Justified text in the margin notes
-  url,        % For typesetting URLs
-  listings,   % Code formatting
-  lipsum,
-  booktabs,
-  changepage,
-  float,
-  dingbat
-}
-\usepackage[hidelinks]{hyperref} % Links in PDF from TOC, refs, etc.
-
-\usepackage[capitalise]{cleveref}
-\usepackage{enumitem}   % Improved lists 
-
-\usepackage[twoside,labelfont=sf]{caption}
-
-\usepackage[]{todonotes}
-
+% --- Coding & Formalism ---
+\usepackage{amsmath}
+\usepackage{listings}
 \usepackage{amssymb}
-
-\usepackage[activate={true,nocompatibility},final,tracking=true,kerning=true,spacing=true,factor=1100,stretch=10,shrink=10]{microtype}
-\usepackage[paper=a4paper,text={13cm,24cm},marginparsep=5mm,marginparwidth=45mm,inner=20mm,twoside]{geometry}
-
 \usepackage{pifont}
+% \usepackage{dingbat}
 
+% --- Referencing & Utilities ---
+\usepackage[hidelinks]{hyperref} % Load before cleveref
+\usepackage[square,sort,colon,authoryear]{natbib}
+\usepackage[capitalise]{cleveref}
+\usepackage{url}
 \usepackage{xspace}
+\usepackage{todonotes}
+\usepackage{lipsum}
+\usepackage{booktabs}
+
+% --- Margin & Formatting Tools ---
+\usepackage{marginnote}
+\usepackage{environ}
+\usepackage{ragged2e}
+\usepackage{changepage}
+\usepackage{enumitem}
+\usepackage[sf]{titlesec}
+
+% --- Post-Package Setup ---
+\captionsetup{twoside,labelfont=sf}

@@ -26,21 +26,23 @@ inductive small_step : Stmt → State → Config → Prop where
       small_step Stmt.skip s (Config.final s)
 
   -- [comp1ₛₒₛ]
-  | comp1 {S₁ S₁' S₂ s s'} :
-      small_step S₁ s (Config.step S₁' s') →
+  | comp1 {S₁ S₁' S₂ s s'}
+    (progress : small_step S₁ s (Config.step S₁' s')) :
       small_step (Stmt.sequence S₁ S₂) s (Config.step (Stmt.sequence S₁' S₂) s')
 
   -- [comp2ₛₒₛ]
-  | comp2 {S₁ S₂ s s'} :
-      small_step S₁ s (Config.final s') →
+  | comp2 {S₁ S₂ s s'}
+    (terminates : small_step S₁ s (Config.final s')) :
       small_step (Stmt.sequence S₁ S₂) s (Config.step S₂ s')
 
   -- [ifᵗᵗₛₒₛ]
-  | if_true {b S₁ S₂ s} (h : 𝓑⟦b⟧ s = true) :
+  | if_true {b S₁ S₂ s}
+    (h_cond_true : 𝓑⟦b⟧ s = true) :
       small_step (Stmt.cond b S₁ S₂) s (Config.step S₁ s)
 
   -- [ifᶠᶠₛₒₛ]
-  | if_false {b S₁ S₂ s} (h : 𝓑⟦b⟧ s = false) :
+  | if_false {b S₁ S₂ s}
+    (h_cond_false : 𝓑⟦b⟧ s = false) :
       small_step (Stmt.cond b S₁ S₂) s (Config.step S₂ s)
 
   -- [whileₛₒₛ]
@@ -70,18 +72,18 @@ notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " s':40 => small_step S s (Config
 inductive small_step_k : Config → Nat → Config → Prop where
   | refl {γ} :
       small_step_k γ 0 γ
-  | step {S s γ' γ'' k} :
-      small_step S s γ' →
-      small_step_k γ' k γ'' →
+  | step {S s γ' γ'' k}
+    (step : small_step S s γ')
+    (rest : small_step_k γ' k γ'') :
       small_step_k (Config.step S s) (k + 1) γ''
 
 /-- Reflexive-transitive closure -/
 inductive small_step_star : Config → Config → Prop where
   | refl {γ} :
       small_step_star γ γ
-  | step {S s γ' γ''} :
-      small_step S s γ' →
-      small_step_star γ' γ'' →
+  | step {S s γ' γ''}
+    (step : small_step S s γ')
+    (rest : small_step_star γ' γ'') :
       small_step_star (Config.step S s) γ''
 
 -- k-step

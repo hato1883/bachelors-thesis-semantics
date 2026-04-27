@@ -7,8 +7,120 @@
 %
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
+First steps before reasoning wheter or not Natural Semantics and Structural Operational Semantics are equivilent is to create them.
+and to create them we also need a langugae to apply them to, in our case this will be \While.
+
 \todo{Add text}
 \RED{\lipsum[1]}
+
+%
+%
+%
+\section{Formalizing \While}
+\label{formal_ns_sos_equiv:sec:while:formalization}
+
+
+\begin{paracol}{2}
+    
+    % --- SECTION: SYNTACTIC CATEGORIES ---
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+        \begin{Lean_Code}
+inductive Num where
+  | zero : Num
+  | one  : Num
+  | succ0 (n : Num) : Num
+  | succ1 (n : Num) : Num
+
+inductive Aexp where
+  | num (n : Num)
+  | var (x : Var)
+  | add (a1 a2 : Aexp)
+  | mul (a1 a2 : Aexp)
+  | sub (a1 a2 : Aexp)
+
+inductive Bexp where
+  | true | false
+  | eq  (a1 a2 : Aexp)
+  | le  (a1 a2 : Aexp)
+  | not (b1 : Bexp)
+  | and (b1 b2 : Bexp)
+        \end{Lean_Code}
+    \end{leftcolumn}
+
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)}
+        \vspace{1em}
+        
+        The syntactic categories for \textit{While} are defined using BNF notation. We map numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets:
+        \[
+        \begin{array}{lcl}
+            a &::=& n \mid x \mid a_1 + a_2 \mid a_1 \star a_2 \mid a_1 - a_2 \\
+            b &::=& \mathbf{true} \mid \mathbf{false} \mid a_1 = a_2 \mid a_1 \leq a_2 \dots
+        \end{array}
+        \]
+    \end{rightcolumn}
+
+    \switchcolumn % Start next row alignment
+    % \hr % Optional visual separator
+
+    % --- SECTION: SEMANTIC DOMAINS ---
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def State := Var -> Int
+
+def default_state : State := 
+  fun _ => 0
+
+def assign (s : State) (x : Var) (z : Int) : State :=
+  fun (v: Var) => 
+    if v = x then z else s v
+
+notation s "[" x " |-> " z "]" => assign s x z
+        \end{Lean_Code}
+    \end{leftcolumn}
+
+    \begin{rightcolumn}
+        \vspace{1em}
+        The \textbf{State} represents memory as a total function from variables to integers:
+        \[ s : \mathbf{Var} \to \mathbb{Z} \]
+        Update is defined via substitution notation:
+        \[
+        s[x \mapsto v]y = \begin{cases} 
+        v & \text{if } y = x \\ 
+        s\,y & \text{if } y \neq x 
+        \end{cases}
+        \]
+    \end{rightcolumn}
+
+    \switchcolumn
+    % \hr
+
+    % --- SECTION: SEMANTIC FUNCTIONS ---
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Aexp_eval : Aexp -> State -> Int
+  | Aexp.num n, _ => Num_to_Z n
+  | Aexp.var x, s => s x
+  | Aexp.add a1 a2, s => 
+      Aexp_eval a1 s + Aexp_eval a2 s
+
+notation "A[[" a "]]" => Aexp_eval a
+        \end{Lean_Code}
+    \end{leftcolumn}
+
+    \begin{rightcolumn}
+        \vspace{1em}
+        Semantic functions $\mathcal{A}$ translate syntax into mathematical operations. This evaluation is \textbf{compositional}:
+        \[
+        \begin{array}{rcl}
+            \mathcal{A}[\![x]\!]s &=& s \, x \\
+            \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s
+        \end{array}
+        \]
+    \end{rightcolumn}
+
+\end{paracol}
 
 %
 %

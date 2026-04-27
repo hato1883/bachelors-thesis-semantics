@@ -1,21 +1,11 @@
-% Required for Unicode support in listings
-\usepackage[utf8]{inputenc}
-\DeclareUnicodeCharacter{2200}{\ensuremath{\forall}}
-\DeclareUnicodeCharacter{2203}{\ensuremath{\exists}}
-\DeclareUnicodeCharacter{2192}{\ensuremath{\to}}
-\DeclareUnicodeCharacter{2218}{\ensuremath{\circ}}
-\DeclareUnicodeCharacter{2223}{\ensuremath{\mid}}
+% --- lean-style.tex ---
 
-% code block command usage: \begin{Lean_Code} def x := 1 \end{Lean_Code}
-\lstnewenvironment{Lean_Code}[1][style=lean4]{\lstset{#1}}{}
-\lstnewenvironment{Lean_Code_Numbered}[1][style=lean4, numbers=left]{\lstset{#1}}{}
+% REMOVED: inputenc and \DeclareUnicodeCharacter. 
+% LuaLaTeX handles these natively through fontspec.
 
-% Inline command usage: \lean{def x := 1}
-\newcommand{\lean}[1]{\lstinline[style=lean4]@#1@}
-
-
+% Define the lean4 style
 \lstdefinestyle{lean4}{
-  language=bash, % Base for fallback, but we define custom keywords
+  language=bash, % Fallback
   basicstyle=\small\ttfamily\color{black},
   keywordstyle=\small\ttfamily\bfseries\color{blue!70!black},
   commentstyle=\small\itshape\color{green!40!black},
@@ -34,14 +24,33 @@
     inductive, syntax, macro, deriving, if, then, else, 
     let, have, show, by, match, with, infix, notation, namespace, end
   },
+  % Line breaks
+  breaklines=true,                % Enables wrapping
+  postbreak=\mbox{\textcolor{gray}{$\hookrightarrow$}\space}, % Symbol at start of wrapped line
+  breakatwhitespace=true,         % Prevents breaking in the middle of words
+  breakindent=20pt,               % Indents the wrapped portion for visual clarity
   % Comments
   morecomment=[l]{--},
   morecomment=[s]{/-}{-/},
   % Symbols and Delimiters
   escapeinside=@@,
-  moredelim=[is][\textit]{___}{___},
-  moredelim=[is][\textbf]{__*}{*__},
-  % Handle Unicode visually if not using XeLaTeX/LuaLaTeX
+  % Unicode Handling for listings
+  % Even with LuaLaTeX, 'literate' ensures symbols look perfect in code
   extendedchars=true,
-  literate={→}{{$\to$}}1 {⇒}{{$\Rightarrow$}}1 {∀}{{$\forall$}}1 {∃}{{$\exists$}}1 {λ}{{$\lambda$}}1 {:=}{{$:=$}}2
+  literate=
+    {→}{{\ensuremath{\to}}}1 
+    {⇒}{{\ensuremath{\Rightarrow}}}1 
+    {∀}{{\ensuremath{\forall}}}1 
+    {∃}{{\ensuremath{\exists}}}1 
+    {λ}{{\ensuremath{\lambda}}}1 
+    {:=}{{$:=$}}2 
+    {∘}{{\ensuremath{\circ}}}1 
+    {∣}{{\ensuremath{\mid}}}1
 }
+
+% code block command usage: \begin{Lean_Code} def x := 1 \end{Lean_Code}
+\lstnewenvironment{Lean_Code}[1][style=lean4]{\lstset{#1}}{}
+\lstnewenvironment{Lean_Code_Numbered}[1][style=lean4, numbers=left]{\lstset{#1}}{}
+
+% Inline command usage: \lean{def x := 1}
+\newcommand{\lean}[1]{\lstinline[style=lean4]@#1@}
