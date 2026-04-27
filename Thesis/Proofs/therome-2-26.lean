@@ -65,7 +65,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
 
   | while_true hcond h1 h2 ih1 ih2 =>
     apply small_step_star.step
-    apply small_step.while
+    apply small_step.while_unroll
     apply small_step_star.step
     apply small_step.if_true
     exact hcond
@@ -78,7 +78,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
 
   | while_false hcond =>
     apply small_step_star.step
-    apply small_step.while
+    apply small_step.while_unroll
     apply small_step_star.step
     apply small_step.if_false
     exact hcond

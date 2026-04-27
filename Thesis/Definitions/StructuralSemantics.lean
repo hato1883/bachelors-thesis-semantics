@@ -44,7 +44,7 @@ inductive small_step : Stmt → State → Config → Prop where
       small_step (Stmt.cond b S₁ S₂) s (Config.step S₂ s)
 
   -- [whileₛₒₛ]
-  | while {b S s} :
+  | while_unroll {b S s} :
       small_step (Stmt.loop b S) s (Config.step (Stmt.cond b (Stmt.sequence S (Stmt.loop b S)) Stmt.skip) s)
 
 
@@ -63,7 +63,7 @@ notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " s':40 => small_step S s (Config
 
 /-
   k-step and star-step relations for small-step semantics
-  ⟨S, s⟩ →ₛₒₛⁿ[k] γ : exactly k small steps from (S, s) to γ
+  ⟨S, s⟩ →ₛₒₛ[k] γ : exactly k small steps from (S, s) to γ
   ⟨S, s⟩ →ₛₒₛ* γ : any finite number of small steps from (S, s) to γ
 -/
 /-- k-step relation: γ₁ reaches γ₂ in exactly k steps -/
