@@ -47,7 +47,8 @@ inductive Stmt where
 
 def State := Var → ℤ -- Gives notation s x = n, where (s : State) (x : Var) (n : Num)
 
-def default_state : State := fun _ => 0
+def default_state : State :=
+  fun _ => 0
 
 
 /-=============================-/
@@ -105,7 +106,7 @@ def Num_to_Z : Num → ℤ
 notation "𝒩⟦" n "⟧" => Num_to_Z  n
 
 -- TODO: change to inductive instead of def so that proof 1.8 is needed
-def Aexp_eval : Aexp → State → ℤ
+def Aexp_eval : Aexp → (State → ℤ)
   | Aexp.num n, _ => 𝒩⟦n⟧
   | Aexp.var x, s => s x
   | Aexp.add a₁ a₂, s => Aexp_eval a₁ s + Aexp_eval a₂ s
@@ -115,7 +116,7 @@ def Aexp_eval : Aexp → State → ℤ
 notation "𝓐⟦" a "⟧" => Aexp_eval a
 
 -- TODO: change to inductive instead of def so that proof 1.8 is needed
-def Bexp_eval : Bexp → State → Bool
+def Bexp_eval : Bexp → (State → Bool)
   | Bexp.true,      _ => true
   | Bexp.false,     _ => false
   | Bexp.eq  a₁ a₂, s => (Aexp_eval a₁ s) == (Aexp_eval a₂ s)
@@ -136,23 +137,35 @@ notation:max s "[" x "↦" z "]" => assign s x z
 /-=============================-/
 
 -- 1. If you update the same variable twice, only the last one matters.
-@[simp] theorem assign_shadow (s : State) (x : Var) (z1 z2 : ℤ) :
+@[simp]
+theorem assign_shadow (s : State) (x : Var) (z1 z2 : ℤ) :
   s[x ↦ z1][x ↦ z2] = s[x ↦ z2] := by
   apply funext
   intro v
-  simp [assign]
-  split_ifs <;> rfl
+  repeat rw [assign]
+  split_ifs
+  · rfl
+  · rfl
 
 -- 2. If you update different variables, you can swap them to group them.
-@[simp]theorem assign_comm (s : State) (x1 x2 : Var) (z1 z2 : ℤ) (h : x1 ≠ x2) :
-  s[x1 ↦ z1][x2 ↦ z2] = s[x2 ↦ z2][x1 ↦ z1] := by
+@[simp]
+theorem assign_comm (s : State) (x y : Var) (z1 z2 : ℤ) (h : x ≠ y) :
+  s[x ↦ z1][y ↦ z2] = s[y ↦ z2][x ↦ z1] := by
   apply funext
   intro v
-  simp [assign]
-  split_ifs with h1 h2 <;> try rfl
-  -- Only the contradiction case remains
-  subst h1 h2 -- changes goal from x1 != x2 to v != v
-  contradiction
+  repeat rw [assign]
+  split_ifs with h1 h2
+  -- h1 : v = y
+  -- h2 : v = x
+  · show z2 = z1
+    subst h1 h2
+    contradiction
+  · show z2 = z2
+    rfl
+  · show z1 = z1
+    rfl
+  · show s v = s v
+    rfl
 
 attribute [simp, reducible] Num_to_Z Aexp_eval Bexp_eval assign
 

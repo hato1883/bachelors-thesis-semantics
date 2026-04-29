@@ -9,7 +9,15 @@
   basicstyle=\small\ttfamily\color{black},
   keywordstyle=\small\ttfamily\bfseries\color{blue!70!black},
   commentstyle=\small\itshape\color{green!40!black},
+  showstringspaces=false,
   stringstyle=\color{purple},
+  % Clear all default strings and only allow double quotes
+  morestring=[b]", 
+  % Explicitly tell listings to ignore single quotes as delimiters
+  deletestring=[d]',
+  deletestring=[b]',
+  % Ensure the tick/prime is treated as a normal character
+  alsoletter={'},
   numberstyle=\footnotesize\sffamily\color{gray},
   aboveskip=1ex,
   belowskip=1ex,
@@ -22,7 +30,9 @@
     def, theorem, lemma, example, open, import, 
     variable, variables, instance, class, structure, 
     inductive, syntax, macro, deriving, if, then, else, 
-    let, have, show, by, match, with, infix, notation, namespace, end
+    let, have, show, by, match, with, infix, notation, namespace, end,
+    apply, intro, simp, grind, exact, split_ifs, repeat, rw,  rfl, subst,
+    contradiction, where
   },
   % Line breaks
   breaklines=true,                % Enables wrapping
@@ -38,14 +48,16 @@
   % Even with LuaLaTeX, 'literate' ensures symbols look perfect in code
   extendedchars=true,
   literate=
-    {→}{{\ensuremath{\to}}}1 
-    {⇒}{{\ensuremath{\Rightarrow}}}1 
-    {∀}{{\ensuremath{\forall}}}1 
-    {∃}{{\ensuremath{\exists}}}1 
-    {λ}{{\ensuremath{\lambda}}}1 
-    {:=}{{$:=$}}2 
-    {∘}{{\ensuremath{\circ}}}1 
-    {∣}{{\ensuremath{\mid}}}1
+    {→}{{$\ →\ $}}3 
+    {↦}{{$\ \mapsto\ $}}3 
+    {⇒}{{$⇒\ $}}2 
+    {∀}{{$\forall\ $}}2 
+    {∃}{{$\exists\ $}}2 
+    {λ}{{$\lambda\ $}}2 
+    {:=}{{$:=\ $}}2 
+    {::=}{{$::=\ $}}3 
+    {∘}{{$\circ\ $}}2 
+    {|}{{$\mid\ $}}2
 }
 
 % code block command usage: \begin{Lean_Code} def x := 1 \end{Lean_Code}
@@ -54,3 +66,4 @@
 
 % Inline command usage: \lean{def x := 1}
 \newcommand{\lean}[1]{\lstinline[style=lean4]@#1@}
+\newcommand{\leanbreak}{\\ \hspace{2em}\mbox{\textcolor{gray}{$\hookrightarrow$}\space}}

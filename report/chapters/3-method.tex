@@ -19,134 +19,539 @@ and to create them we also need a langugae to apply them to, in our case this wi
 \section{Formalizing \While}
 \label{formal_ns_sos_equiv:sec:while:formalization}
 
+Due to Lean 4 being a programming language,
+it is needed to define the terms before using them,
+this will lead to some textbook definitions to come out of order.
+
+We will begin by mechanizing the syntactic categories defined in the textbook in chapter 1.2.
+The left-hand-side contains the Lean 4 code which represents the textbook definition given to the left.
+
+The syntactic categories for \textit{While} are defined using BNF notation. We map numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets.
 
 \begin{paracol}{2}
     
     % --- SECTION: SYNTACTIC CATEGORIES ---
     \begin{leftcolumn}
         \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
         \begin{Lean_Code}
 inductive Num where
   | zero : Num
   | one  : Num
   | succ0 (n : Num) : Num
   | succ1 (n : Num) : Num
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+            n &::=& 0 \\ 
+              &\mid& 1 \\ 
+              &\mid& n\ 1 \\ 
+              &\mid& n\ 0
+        \end{array}
+        \)
+    \end{rightcolumn}
 
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
 inductive Aexp where
   | num (n : Num)
   | var (x : Var)
   | add (a1 a2 : Aexp)
   | mul (a1 a2 : Aexp)
   | sub (a1 a2 : Aexp)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+            a &::=& n \\ 
+              &\mid& x \\ 
+              &\mid& a_1 + a_2 \\ 
+              &\mid& a_1 \star a_2 \\ 
+              &\mid& a_1 - a_2 \\
+        \end{array}
+        \)
+    \end{rightcolumn}
 
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
 inductive Bexp where
-  | true | false
+  | true
+  | false
   | eq  (a1 a2 : Aexp)
   | le  (a1 a2 : Aexp)
   | not (b1 : Bexp)
   | and (b1 b2 : Bexp)
         \end{Lean_Code}
     \end{leftcolumn}
-
     \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)}
-        \vspace{1em}
-        
-        The syntactic categories for \textit{While} are defined using BNF notation. We map numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets:
-        \[
+        \(\displaystyle
         \begin{array}{lcl}
-            a &::=& n \mid x \mid a_1 + a_2 \mid a_1 \star a_2 \mid a_1 - a_2 \\
-            b &::=& \mathbf{true} \mid \mathbf{false} \mid a_1 = a_2 \mid a_1 \leq a_2 \dots
+            b &::=& \mathbf{true} \\ 
+              &\mid& \mathbf{false} \\ 
+              &\mid& a_1 = a_2 \\ 
+              &\mid& a_1 \leq a_2 \\ 
+              &\mid& \neg b_1 \\ 
+              &\mid& b_1 \land b_2
         \end{array}
-        \]
+        \)
     \end{rightcolumn}
 
-    \switchcolumn % Start next row alignment
-    % \hr % Optional visual separator
-
-    % --- SECTION: SEMANTIC DOMAINS ---
+    \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-def State := Var -> Int
+inductive Stmt where
+  | ass  (x : Var)  (a : Aexp)
+  | skip
+  | sequence        (S@$_{1}$@ S@$_{2}$@ : Stmt)
+  | cond (b : Bexp) (S@$_{1}$@ S@$_{2}$@ : Stmt)
+  | loop (b : Bexp) (S@$_{1}$@ : Stmt)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+    S &::=& x := a \\
+      &\mid& \mathbf{skip} \\
+      &\mid& S_1; S_2 \\
+      &\mid& \mathbf{if}\ b\ \mathbf{then}\ S_1\ \mathbf{else}\ S_2 \\
+      &\mid& \mathbf{while}\ b\ \mathbf{then}\ S
+        \end{array}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+The \textbf{State} represents memory as a total function from variables to integers.
+A definition for substitution is also needed.
+\begin{paracol}{2}
+    % --- SECTION: SEMANTIC DOMAINS ---
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
 
-def default_state : State := 
-  fun _ => 0
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def State := Var @\to@ @ \(\mathbb{Z}\)@
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle s : \mathbf{Var} \to \mathbb{Z} \)
+    \end{rightcolumn}
 
-def assign (s : State) (x : Var) (z : Int) : State :=
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def assign (s : State) (x : Var) (z : @\(\mathbb{Z}\)@) : State :=
   fun (v: Var) => 
     if v = x then z else s v
 
-notation s "[" x " |-> " z "]" => assign s x z
+notation s "[" x " @\color{purple}\mapsto@ " z "]" @\leanbreak@=> assign s x z
         \end{Lean_Code}
     \end{leftcolumn}
-
     \begin{rightcolumn}
-        \vspace{1em}
-        The \textbf{State} represents memory as a total function from variables to integers:
-        \[ s : \mathbf{Var} \to \mathbb{Z} \]
-        Update is defined via substitution notation:
-        \[
+        \(\displaystyle
         s[x \mapsto v]y = \begin{cases} 
         v & \text{if } y = x \\ 
         s\,y & \text{if } y \neq x 
         \end{cases}
-        \]
-    \end{rightcolumn}
-
-    \switchcolumn
-    % \hr
-
-    % --- SECTION: SEMANTIC FUNCTIONS ---
-    \begin{leftcolumn}
-        \begin{Lean_Code}
-def Aexp_eval : Aexp -> State -> Int
-  | Aexp.num n, _ => Num_to_Z n
-  | Aexp.var x, s => s x
-  | Aexp.add a1 a2, s => 
-      Aexp_eval a1 s + Aexp_eval a2 s
-
-notation "A[[" a "]]" => Aexp_eval a
-        \end{Lean_Code}
-    \end{leftcolumn}
-
-    \begin{rightcolumn}
-        \vspace{1em}
-        Semantic functions $\mathcal{A}$ translate syntax into mathematical operations. This evaluation is \textbf{compositional}:
-        \[
-        \begin{array}{rcl}
-            \mathcal{A}[\![x]\!]s &=& s \, x \\
-            \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s
-        \end{array}
-        \]
+        \)
     \end{rightcolumn}
 
 \end{paracol}
+\vspace{1em}
+Now that we have defined the syntactic categories we can provide the semantic functions and equations.
+We skip defining the syntactic domains as they are implicitly defined in the functions to come.
+
+Each function is first  defined as a relation from one domain to another, and then the implementation of the function is given using the different semantic clauses.
+We will begin by provideing the definition for Numerals (\Num):
+\begin{paracol}{2}
+    % --- SECTION: SEMANTIC FUNCTIONS ---
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Num_to_Z : Num @\to@ @\(\mathbb{Z}\)@
+  | Num.zero    => 0
+  | Num.one     => 1
+  | Num.succ0 n => 2 * (Num_to_Z n)
+  | Num.succ1 n => 2 * (Num_to_Z n) + 1
+
+notation "@\color{purple}\(\mathcal{N}[\![\)@" n "@\color{purple}\(]\!]\)@" => Num_to_Z n
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{N} : Num \to \mathbb{Z}
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{N}[\![0]\!]s &=& 0 \\[0.6em]
+            \mathcal{N}[\![1]\!]s &=& 1 \\[0.6em]
+            \mathcal{N}[\![n\ 0]\!]s &=& 2 \cdot \mathcal{N}[\![n]\!] \\[0.6em]
+            \mathcal{N}[\![n\ 1]\!]s &=& 2 \cdot \mathcal{N}[\![n]\!] + 1
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+Next we will provide the definition for arithmetic expressions (\Aexp):
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Aexp_eval : Aexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
+  | Aexp.num n, _ => @ \(\mathcal{N}[\![n]\!]\)@
+  | Aexp.var x, s => s x
+  | Aexp.add @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s + Aexp_eval @\(a_2\)@ s
+  | Aexp.mul @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s * Aexp_eval @\(a_2\)@ s
+  | Aexp.sub @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s - Aexp_eval @\(a_2\)@ s
+
+notation "@\color{purple}\(\mathcal{A}[\![\)@" a "@\color{purple}\(]\!]\)@" @\leanbreak@=> Aexp_eval a
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{A} : Aexp \to (State \to \mathbb{Z})
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\[0.6em]
+            \mathcal{A}[\![x]\!]s &=& s \, x \\[0.6em]
+            \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s \\[0.6em]
+            \mathcal{A}[\![a_1 \star a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s \cdot \mathcal{A}[\![a_2]\!]s \\[0.6em]
+            \mathcal{A}[\![a_1 - a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s - \mathcal{A}[\![a_2]\!]s
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+Lastly we will provide the definition for boolean expressions (\Bexp):
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Bexp_eval : Bexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
+  | Bexp.@true@, _ => true
+  | Bexp.@false@, _ => false
+  | Bexp.eq @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s == Aexp_eval @\(a_2\)@ s
+  | Bexp.le @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s @\leq@ Aexp_eval @\(a_2\)@ s
+  | Bexp.not @\(b\)@, s => @\leanbreak@@\neg@ Bexp_eval @\(b\)@ s
+  | Bexp.and @\(b_1\)@ @\(b_2\)@, s => Bexp_eval @\(b_1\)@ s @\land@ Bexp_eval @\(b_2\)@ s
+
+notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\leanbreak@=> Bexp_eval b
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{B} : Bexp \to (State \to \mathbb{Z})
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{B}[\![true]\!]s &=& \textbf{tt} \\[0.6em]
+            \mathcal{B}[\![false]\!]s &=& \textbf{ff} \\[0.6em]
+            \mathcal{B}[\![a_1 = a_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{A}[\![a_1]\!]s = \mathcal{A}[\![a_2]\!]s \\ 
+        \textbf{ff} & \text{if } \mathcal{A}[\![a_1]\!]s \neq \mathcal{A}[\![a_2]\!]s
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![a_1 \leq a_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{A}[\![a_1]\!]s \leq \mathcal{A}[\![a_2]\!]s  \\ 
+        \textbf{ff} & \text{if } \mathcal{A}[\![a_1]\!]s > \mathcal{A}[\![a_2]\!]s 
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![\neg b]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \neg \mathcal{B}[\![b]\!]s \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b]\!]s
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![b_1 \land b_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{tt} \text{ and } \mathcal{B}[\![b_2]\!]s = \textbf{tt} \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{ff} \text{ or } \mathcal{B}[\![b_2]\!]s = \textbf{ff} \\ 
+        \end{cases}
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+In addition to the above definitions we will also need some extra proofs to allow us to reason about states.
+First we need a proof to prove that
+\[
+    s[x \mapsto z_1][x \mapsto z_2] = s[x \mapsto z_2]
+\]
+This proof would allow us to remove redundant assignments which will be useful when reasoning about repeated assignments in things like loops.
+There was no pen-and-paper proof provided for this property in the textbook.
+But one could imagine the proof to look something  like this:
+\todo{Fill in a pen-and-paper proof here please}
+
+\noindent
+In Lean this proof is constructed  using the following:
+\begin{Lean_Code}
+theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
+  s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by
+  apply funext
+  intro v
+  repeat rw [assign]
+  split_ifs
+  · rfl
+  · rfl
+\end{Lean_Code}
+
+The next property is commutative property of disticnt substitutions.
+A proof of this property needs to effectively prove the statment:
+\[
+    s[x \mapsto z_1][y \mapsto z_2] = s[y \mapsto z_2][x \mapsto z_1], y \neq x
+\]
+This proof would allow us to remove even more redundant assignments which will be useful when reasoning about repeated assignments in things like loops.
+There was no pen-and-paper proof provided for this property in the textbook.
+But one could imagine the proof to look something  like this:
+\todo{Fill in a pen-and-paper proof here please}
+
+
+\noindent
+In Lean this proof is constructed  using the following:
+\begin{Lean_Code}
+theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
+  s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by
+  apply funext
+  intro v
+  repeat rw [assign]
+  split_ifs with h1 h2
+  -- h1 : v = y
+  -- h2 : v = x
+  · show z2 = z1
+    subst h1 h2
+    contradiction
+  · show z2 = z2
+    rfl
+  · show z1 = z1
+    rfl
+  · show s v = s v
+    rfl
+\end{Lean_Code}
+By adding  these proofs it becomes trivial to prove a statment such as:
+\[
+    s[x \mapsto 3][x \mapsto 2][x \mapsto 1][x \mapsto 0] = s[x \mapsto 0]
+\]
+and things like
+\[
+    s[x \mapsto 3][y \mapsto 1][x \mapsto 2][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] = s[x \mapsto 0][y \mapsto 6]
+\]
+which otherwise might not be obvius for the reader, and definitly not for the Lean 4 complier.
 
 %
 %
 %
 \section{Formalizing Natural Semantics (Big-Step)}
 \label{formal_ns_sos_equiv:sec:ns:formalization}
-\todo{Add text}
-\RED{\lipsum[1]}
+Now that we have a mechanized definition of the \While language we can proceed by defining the actual semantics of running a \While language program. 
+We will start by defining the natural operational semantics often referd to as "big step semantics".
+When it comes to operational semantics we use deduction tree syntax to provide rules and axionoms.
 
-%
-\subsection{Formalization in Lean}
-\label{formal_ns_sos_equiv:subsec:ns:formalization_lean}
-\todo{Add text}
-\RED{\lipsum[1]}
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
 
-%
-\subsection{Challenges and Solutions}
-\label{formal_ns_sos_equiv:subsec:ns:chall_sol}
-\todo{Add text}
-\RED{\lipsum[1]}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
+  -- [ass@\color{green!40!black}$_{ns}$@] rule (axionom)
+  | ass {s x a} :
+      big_step (Stmt.ass x a) s (s[x @\mapsto@ @\(\mathcal{A}[\![a]\!]\)@ s])
+\end{Lean_Code}
+% notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\leanbreak@=> Bexp_eval b
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[ass$_{\text{ns}}$]]1{ \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]}
+\end{prooftree}
+            \]
+    \end{rightcolumn}
 
-%
-\subsection{Insights Gained}
-\label{formal_ns_sos_equiv:subsec:ns:insights}
-\todo{Add text}
-\RED{\lipsum[1]}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [skip@\color{green!40!black}$_{ns}$@] rule (axionom)
+  | skip {s} :
+      big_step Stmt.skip s S
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[skip$_{\text{ns}}$]]1{ \langle \textbf{skip}, s \rangle \to s}
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [comp@\color{green!40!black}$_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{2}$@, s'@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'' we produce @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@; S@\color{green!40!black}$_{2}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'')
+  | seq {S@$_{1}$@ S@$_{2}$@ s s' s''}
+    (h_left  : big_step S@$_{1}$@ s  s')
+    (h_right : big_step S@$_{2}$@ s' s'') :
+      big_step (Stmt.sequence S@$_{1}$@ S@$_{2}$@) s s''
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \hypo{\langle S_2, s' \rangle \to s''}
+  \infer[left label=[comp$_{\text{ns}}$]]2{ \langle S_1;\ S_2, s \rangle \to s''}
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [if@\color{green!40!black}$^{tt}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\(\color{green!40!black}\mathcal{B}[\![b]\!]\)@ s = true we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s')
+  | if_true {b S@$_{1}$@ S@$_{2}$@ s s'} :
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true) @\to@
+    (h_then : big_step S@$_{1}$@ s s') @\to@
+      big_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ tt}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+    \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to s'
+  }
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [if@\color{green!40!black}$^{ff}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{2}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\(\color{green!40!black}\mathcal{B}[\![b]\!]\)@ s = false we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s')
+  | if_false {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false)
+    (h_else : big_step S@$_{2}$@ s s') :
+      big_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{\langle S_2, s \rangle \to s'}
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to s'
+  }
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [while@\color{green!40!black}$^{tt}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S', s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s', @\color{green!40!black}$\langle$@while b do S', s'@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'' and @\color{green!40!black}\(\mathcal{B}[\![b]\!]\)@ s = true we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'')
+  | while_true {b S s s' s''}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true)
+    (h_step : big_step S s s')
+    (h_rest : big_step (Stmt.loop b S) s' s'') :
+      big_step (Stmt.loop b S) s s''
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{\langle S, s \rangle \to s'}
+  \hypo{\langle \textbf{while}\ b\ \textbf{do}\ S, s' \rangle \to s''}
+  \infer[
+      left label={[while$_{\text{ns}}^{\text{\ tt}}$]}
+      ]2[
+      if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+      ]{
+    \langle \textbf{while}\ b\ \textbf{do}\ S, s \rangle \to s''
+  }
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  -- [while@\color{green!40!black}$^{ff}_{ns}$@] rule (given @\color{green!40!black}\(\mathcal{B}[\![b]\!]\)@ s = false we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s)
+  | while_false {b S' s}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false) :
+      big_step (Stmt.loop b S') s s
+
+-- Define the standard Nielson & Nielson notation
+notation:40 "@$\langle$@" S "," s "@$\rangle$@" " @\to$_{ns}$@ " s' => big_step S s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+            \[
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[
+    left label={[while$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \textbf{while}\ b\ \textbf{do}\ S, s \rangle \to s
+  }
+\end{prooftree}
+            \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
 
 %
 %
