@@ -113,7 +113,7 @@ inductive Bexp where
 inductive Stmt where
   | ass  (x : Var)  (a : Aexp)
   | skip
-  | sequence        (S@$_{1}$@ S@$_{2}$@ : Stmt)
+  | composition     (S@$_{1}$@ S@$_{2}$@ : Stmt)
   | cond (b : Bexp) (S@$_{1}$@ S@$_{2}$@ : Stmt)
   | loop (b : Bexp) (S@$_{1}$@ : Stmt)
         \end{Lean_Code}
@@ -394,62 +394,68 @@ When it comes to operational semantics we use deduction tree syntax to provide r
     \begin{leftcolumn}
         \begin{Lean_Code}
 inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
-  -- [ass@\color{green!40!black}$_{ns}$@] rule (axionom)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
   | ass {s x a} :
       big_step (Stmt.ass x a) s (s[x @\mapsto@ @\(\mathcal{A}[\![a]\!]\)@ s])
 \end{Lean_Code}
-% notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\leanbreak@=> Bexp_eval b
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{} % Empty hypothesis for an axiom
   \infer[left label=[ass$_{\text{ns}}$]]1{ \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]}
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{1em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [skip@\color{green!40!black}$_{ns}$@] rule (axionom)
   | skip {s} :
-      big_step Stmt.skip s S
+      big_step Stmt.skip s s
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{} % Empty hypothesis for an axiom
   \infer[left label=[skip$_{\text{ns}}$]]1{ \langle \textbf{skip}, s \rangle \to s}
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{1em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [comp@\color{green!40!black}$_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{2}$@, s'@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'' we produce @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@; S@\color{green!40!black}$_{2}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'')
-  | seq {S@$_{1}$@ S@$_{2}$@ s s' s''}
+  | comp {S@$_{1}$@ S@$_{2}$@ s s' s''}
     (h_left  : big_step S@$_{1}$@ s  s')
     (h_right : big_step S@$_{2}$@ s' s'') :
-      big_step (Stmt.sequence S@$_{1}$@ S@$_{2}$@) s s''
+      big_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s s''
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{\langle S_1, s \rangle \to s'}
   \hypo{\langle S_2, s' \rangle \to s''}
   \infer[left label=[comp$_{\text{ns}}$]]2{ \langle S_1;\ S_2, s \rangle \to s''}
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{3em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [if@\color{green!40!black}$^{tt}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{1}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\(\color{green!40!black}\mathcal{B}[\![b]\!]\)@ s = true we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s')
   | if_true {b S@$_{1}$@ S@$_{2}$@ s s'} :
     (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true) @\to@
     (h_then : big_step S@$_{1}$@ s s') @\to@
@@ -457,7 +463,8 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{\langle S_1, s \rangle \to s'}
   \infer[
@@ -468,13 +475,12 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
     \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to s'
   }
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{3em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [if@\color{green!40!black}$^{ff}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S@\color{green!40!black}$_{2}$@, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s' and @\(\color{green!40!black}\mathcal{B}[\![b]\!]\)@ s = false we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s')
   | if_false {b S@$_{1}$@ S@$_{2}$@ s s'}
     (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false)
     (h_else : big_step S@$_{2}$@ s s') :
@@ -482,7 +488,8 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{\langle S_2, s \rangle \to s'}
   \infer[
@@ -493,13 +500,12 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
     \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to s'
   }
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{3em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [while@\color{green!40!black}$^{tt}_{ns}$@] rule (given @\color{green!40!black}$\langle$@S', s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s', @\color{green!40!black}$\langle$@while b do S', s'@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'' and @\color{green!40!black}\(\mathcal{B}[\![b]\!]\)@ s = true we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s'')
   | while_true {b S s s' s''}
     (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true)
     (h_step : big_step S s s')
@@ -508,7 +514,8 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{\langle S, s \rangle \to s'}
   \hypo{\langle \textbf{while}\ b\ \textbf{do}\ S, s' \rangle \to s''}
@@ -520,23 +527,23 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
     \langle \textbf{while}\ b\ \textbf{do}\ S, s \rangle \to s''
   }
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
-
+    \vspace{2em}
     \switchcolumn*
     \begin{leftcolumn}
         \begin{Lean_Code}
-  -- [while@\color{green!40!black}$^{ff}_{ns}$@] rule (given @\color{green!40!black}\(\mathcal{B}[\![b]\!]\)@ s = false we produce @\color{green!40!black}$\langle$@S, s@\color{green!40!black}$\rangle$@ @\color{green!40!black}\to@ s)
   | while_false {b S' s}
     (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false) :
       big_step (Stmt.loop b S') s s
 
 -- Define the standard Nielson & Nielson notation
-notation:40 "@$\langle$@" S "," s "@$\rangle$@" " @\to$_{ns}$@ " s' => big_step S s s'
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{ns}$\ @" s' => @\leanbreak@ big_step S s s'
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}
-            \[
+        \vspace{1.1em}
+            \(
 \begin{prooftree}
   \hypo{} % Empty hypothesis for an axiom
   \infer[
@@ -547,7 +554,7 @@ notation:40 "@$\langle$@" S "," s "@$\rangle$@" " @\to$_{ns}$@ " s' => big_step 
     \langle \textbf{while}\ b\ \textbf{do}\ S, s \rangle \to s
   }
 \end{prooftree}
-            \]
+            \)
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
@@ -558,26 +565,247 @@ notation:40 "@$\langle$@" S "," s "@$\rangle$@" " @\to$_{ns}$@ " s' => big_step 
 %
 \section{Formalizing Structural Operational Semantics (Small-Step)}
 \label{formal_ns_sos_equiv:sec:sos:formalization}
-\todo{Add text}
-\RED{\lipsum[1]}
+Similar to the way we define natural semantics we can define structural operational semantics,
+with the biggest diffrence being that not all statments will terminate to a final state after the first evaluation,but
+instead might requier multiple steps to reach a final step for the operation. This is most notable for composiotion rules.
 
-%
-\subsection{Formalization in Lean}
-\label{formal_ns_sos_equiv:subsec:sos:formalization_lean}
-\todo{Add text}
-\RED{\lipsum[1]}
+\vspace{1em}
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
 
-%
-\subsection{Challenges and Solutions}
-\label{formal_ns_sos_equiv:subsec:sos:chall_sol}
-\todo{Add text}
-\RED{\lipsum[1]}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Config where
+  | step : Stmt  @\to@ State  @\to@ Config
+  | final : State  @\to@ Config
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive small_step : Stmt @\to@ State @\to@ Config @\to@ Prop @\leanbreak@ where
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | ass {s x a} :
+      small_step (Stmt.ass x a) s (Config.final (s[x @\mapsto@ @\(\mathcal{A}[\![a]\!]\)@ s]))
+\end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[ass$_{\text{sos}}$]]1{ \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | skip {s} :
+      small_step Stmt.skip s (Config.final s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[skip$_{\text{sos}}$]]1{ \langle \textbf{skip}, s \rangle \to s}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | comp1 {S@$_{1}$@ S@$_{1}$@' S@$_{2}$@ s s'}
+    (h_step  : small_step S@$_{1}$@ s  (Config.step S@$_{1}$@' s')) :
+      small_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s (Config.step (Stmt.composition S@$_{1}$@' S@$_{2}$@) s')
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to \langle S_1', s' \rangle}
+  \infer[
+    left label=[comp$_{\text{sos}}^{1}$]
+    ]1{
+        \langle S_1;\ S_2, s \rangle \to \langle S_1';\ S_2, s' \rangle
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | comp2 {S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_left  : small_step S@$_{1}$@ s (Config.final s')) :
+      small_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{2}$@ s')
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \infer[
+    left label=[comp$_{\text{sos}}^{2}$]
+  ]1{
+    \langle S_1;\ S_2, s \rangle \to \langle S_2, s'\rangle}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_true {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond_true : @\(\mathcal{B}[\![b]\!]\)@ s = true) : 
+      small_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{1}$@ s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty for axionm
+  \infer[
+    left label={[if$_{\text{sos}}^{\text{\ tt}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+        \parbox{4cm}{$
+    \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to \langle S_1, s\rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_false {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond_false : @\(\mathcal{B}[\![b]\!]\)@ s = false) : 
+      small_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{2}$@ s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty for axionom
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+        \parbox{4cm}{$
+    \langle \textbf{if}\ b\ \textbf{then}\ S_1\ \textbf{else}\ S_2, s \rangle \to \langle S_2, s\rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn*
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | while {b S s s' s''}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true)
+    (h_step : big_step S s s')
+    (h_rest : big_step (Stmt.loop b S) s' s'') :
+      big_step (Stmt.loop b S) s s''
 
-%
-\subsection{Insights Gained}
-\label{formal_ns_sos_equiv:subsec:sos:insights}
-\todo{Add text}
-\RED{\lipsum[1]}
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step S s (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}$\ @" s':40 => @\leanbreak@ small_step S s (Config.final s')
+
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{}
+  \infer[
+      left label={[while$_{\text{sos}}$]}
+      ]1{
+        \parbox{4cm}{$
+            \langle \textbf{while}\ b\ \textbf{do}\ S, s \rangle \to \\
+            \langle \textbf{if}\ b\ \textbf{then}\ (S;\ \textbf{while}\ b\ \textbf{do}\ S)\ \textbf{else}\ \textbf{skip}, s \rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+What we have defined is taking a single step using structural operationla semantics, but this can become cumbersome to reason with,
+so the textbook added notation for taking some \(k\) steps using the notation \(\langle S, s\rangle \Rightarrow^{k} s'\),
+and taking a finite amount of steps using the notation \(\langle S, s\rangle \Rightarrow^{*} s'\),
+where the star is a unknown, but finite amount of steps,
+this is used when the amount of steps is not important for the validity of the proof.
+To use the same ideas in Lean 4, we need to introduce two new inductive types as follows:
+
+\begin{Lean_Code}
+inductive small_step_k : Config @\to@ Nat @\to@ Config @\to@ Prop where
+  | refl {@\gamma@} :
+      small_step_k @\gamma@ 0 @\gamma@
+  | step {S s @\gamma@' @\gamma@'' k}
+    (step : small_step S s @\gamma@')
+    (rest : small_step_k @\gamma@' k @\gamma@'') :
+      small_step_k (Config.step S s) (k + 1) @\gamma@''
+
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}[$\ @" k "@\ \color{purple}$]$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_k (Config.step S s) k (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}[$\ @" k "@\ \color{purple}$]$\ @" s':40 => @\leanbreak@ small_step_k (Config.step S s) k (Config.final s')
+
+\end{Lean_Code}
+and
+\begin{Lean_Code}
+inductive small_step_star : Config @\to@ Nat @\to@ Config @\to@ Prop where
+  | refl {@\gamma@} :
+      small_step_star @\gamma@ 0 @\gamma@
+  | step {S s @\gamma@' @\gamma@'' k}
+    (step : small_step S s @\gamma@')
+    (rest : small_step_star @\gamma@' @\gamma@'') :
+      small_step_star (Config.step S s) @\gamma@''
+
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}*$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_star (Config.step S s) (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}*$\ @" s':40 => @\leanbreak@ small_step_star (Config.step S s) (Config.final s')
+
+\end{Lean_Code}
 
 %
 %
