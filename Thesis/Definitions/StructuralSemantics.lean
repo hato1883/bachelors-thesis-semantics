@@ -28,12 +28,12 @@ inductive small_step : Stmt → State → Config → Prop where
   -- [comp1ₛₒₛ]
   | comp1 {S₁ S₁' S₂ s s'}
     (progress : small_step S₁ s (Config.step S₁' s')) :
-      small_step (Stmt.sequence S₁ S₂) s (Config.step (Stmt.sequence S₁' S₂) s')
+      small_step (Stmt.composition S₁ S₂) s (Config.step (Stmt.composition S₁' S₂) s')
 
   -- [comp2ₛₒₛ]
   | comp2 {S₁ S₂ s s'}
     (terminates : small_step S₁ s (Config.final s')) :
-      small_step (Stmt.sequence S₁ S₂) s (Config.step S₂ s')
+      small_step (Stmt.composition S₁ S₂) s (Config.step S₂ s')
 
   -- [ifᵗᵗₛₒₛ]
   | if_true {b S₁ S₂ s}
@@ -47,7 +47,7 @@ inductive small_step : Stmt → State → Config → Prop where
 
   -- [whileₛₒₛ]
   | while_unroll {b S s} :
-      small_step (Stmt.loop b S) s (Config.step (Stmt.cond b (Stmt.sequence S (Stmt.loop b S)) Stmt.skip) s)
+      small_step (Stmt.loop b S) s (Config.step (Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip) s)
 
 
 notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " "⟨" S' "," s':40 "⟩" => small_step S s (Config.step S' s')

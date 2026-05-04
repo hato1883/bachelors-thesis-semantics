@@ -20,10 +20,10 @@ inductive big_step : Stmt → State → State → Prop where
       big_step Stmt.skip s s
 
   -- [compₙₛ] rule (given ⟨S₁, s⟩ → s' and ⟨S₂, s'⟩ → s'' we produce ⟨S, s⟩ → s'')
-  | seq {S₁ S₂ s s' s''}
+  | comp {S₁ S₂ s s' s''}
     (h_left  : big_step S₁ s  s')
     (h_right : big_step S₂ s' s'') :
-      big_step (Stmt.sequence S₁ S₂) s s''
+      big_step (Stmt.composition S₁ S₂) s s''
 
   -- [ifᵗᵗₙₛ] rule (given ⟨S₁, s⟩ → s' and 𝓑⟦b⟧ s = true we produce ⟨S, s⟩ → s')
   | if_true {b S₁ S₂ s s'} :

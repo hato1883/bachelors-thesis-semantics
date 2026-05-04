@@ -36,7 +36,7 @@ inductive Bexp where
 inductive Stmt where
   | ass  (x : Var)  (a : Aexp)     -- S = n
   | skip                           -- S = x
-  | sequence        (S₁ S₂ : Stmt) -- S = S₁; S₂
+  | composition        (S₁ S₂ : Stmt) -- S = S₁; S₂
   | cond (b : Bexp) (S₁ S₂ : Stmt) -- S = if b then S₁ else S₂
   | loop (b : Bexp) (S₁ : Stmt)    -- S = while b then S₁
 
@@ -177,7 +177,7 @@ attribute [simp, reducible] Num_to_Z Aexp_eval Bexp_eval assign
 -- === Notation for While Syntax ===
 
 -- Sequence (composition): S₁ ; S₂
-infixl:80 "; " => While.Stmt.sequence
+infixl:80 "; " => While.Stmt.composition
 
 -- Assignment: x ≔ a (coloneqq, U+2254)
 infixr:90 " :≡ " => While.Stmt.ass
@@ -296,7 +296,7 @@ open Lean PrettyPrinter
   | `(_) => `(1)
   | _ => throw ()
 
-@[app_unexpander Stmt.sequence] def unexpandSeq : Lean.PrettyPrinter.Unexpander
+@[app_unexpander Stmt.composition] def unexpandSeq : Lean.PrettyPrinter.Unexpander
   | `($_ $S1 $S2) => `($S1 ; $S2)
   | _ => throw ()
 

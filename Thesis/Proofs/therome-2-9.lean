@@ -43,10 +43,10 @@ theorem deterministic (S : Stmt) (s s' s'' : State) (h: ⟨S, s⟩ →ₙₛ s')
       rfl
 
   -- verifying tree built using [compₙₛ] rule
-  | seq _ _ ihSeqLeft ihSeqRight =>
+  | comp _ _ ihSeqLeft ihSeqRight =>
     intro hDerivAlt
     cases hDerivAlt with
-    | seq hDerivSeqLeftAlt hDerivSeqRightAlt =>
+    | comp hDerivSeqLeftAlt hDerivSeqRightAlt =>
       -- textbook [compₙₛ]: first premises give equal intermediate state, then second premises give final equality
       have hStateEq : _ = _ := ihSeqLeft _ hDerivSeqLeftAlt
       subst hStateEq

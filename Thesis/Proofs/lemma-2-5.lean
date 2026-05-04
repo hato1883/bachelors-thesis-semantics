@@ -21,7 +21,7 @@ open NaturalSemantics
   - `s...`  : states (e.g. `s`, `s'`, `sMid`).
 -/
 lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨Stmt.loop b S, s⟩ →ₙₛ s') ↔ (⟨Stmt.cond b (Stmt.sequence S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') := by
+  (⟨Stmt.loop b S, s⟩ →ₙₛ s') ↔ (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') := by
   apply Iff.intro
   -- Forward direction: while → if
   case mp =>
@@ -55,7 +55,7 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
       cases hDerivIf with
       | if_true hCondTrue' hDerivSeq =>
         cases hDerivSeq with
-        | seq hDerivSeqLeft hDerivSeqRight =>
+        | comp hDerivSeqLeft hDerivSeqRight =>
           rename_i sMid
           apply big_step.while_true
           · exact hCondTrue

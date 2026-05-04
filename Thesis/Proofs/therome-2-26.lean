@@ -42,7 +42,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     apply small_step.skip
     apply small_step_star.refl
 
-  | seq ih1 ih2 ih3 ih4 =>
+  | comp ih1 ih2 ih3 ih4 =>
     rename_i S₁ S₂ s s' s''
     -- ih1: ⟨S₁, s⟩ →ₛₒₛ* s_mid
     -- ih2: ⟨S₂, s_mid⟩ →ₛₒₛ* s_final

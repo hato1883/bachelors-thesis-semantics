@@ -19,7 +19,7 @@ open NaturalSemantics
 partial def eval : Stmt → State → Option State
   | Stmt.ass x a, s => some (s[x ↦ 𝓐⟦a⟧ s])
   | Stmt.skip, s => some s
-  | Stmt.sequence S₁ S₂, s => do
+  | Stmt.composition S₁ S₂, s => do
       (eval S₁ s).bind (fun s' => eval S₂ s')
   | Stmt.cond b S₁ S₂, s =>
       if 𝓑⟦b⟧ s then eval S₁ s else eval S₂ s
@@ -48,7 +48,7 @@ theorem ns_to_eval : ∀ (S : Stmt) (s s' : State),
       -- eval (Stmt.ass x a) s = some (s[x ↦ 𝓐⟦a⟧ s])
       rfl
   | skip => rfl
-  | seq h₁ h₂ ih₁ ih₂ =>
+  | comp h₁ h₂ ih₁ ih₂ =>
       simp [eval]
       rw [ih₁, ih₂]
   | if_true hb h ih =>

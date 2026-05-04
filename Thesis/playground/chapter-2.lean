@@ -10,8 +10,8 @@ open NaturalSemantics
 section example_2_1
 
 example (s : State) :
-  let S := Stmt.sequence
-    (Stmt.sequence (Stmt.ass "x" 1) (Stmt.ass "y" 2))
+  let S := Stmt.composition
+    (Stmt.composition (Stmt.ass "x" 1) (Stmt.ass "y" 2))
     (Stmt.ass "z" 3)
   let s'   := s["x" ↦ 1]
   let s''  := s'["y" ↦ 2]
@@ -36,11 +36,11 @@ end example_2_1
 section example_2_2
 
 example :
-  let S := Stmt.sequence
+  let S := Stmt.composition
     (Stmt.ass "y" 1)
     (Stmt.loop
       (Bexp.not (Bexp.eq "x" 1))
-      (Stmt.sequence
+      (Stmt.composition
         (Stmt.ass "y" (Aexp.mul "y" "x"))
         (Stmt.ass "x" (Aexp.sub "x" 1)))
     )
@@ -87,11 +87,11 @@ end example_2_2
 section example_2_2
 
 example :
-  let S := Stmt.sequence
+  let S := Stmt.composition
     (Stmt.ass "y" 1)
     (Stmt.loop
       (Bexp.not (Bexp.eq "x" 1))
-      (Stmt.sequence
+      (Stmt.composition
         (Stmt.ass "y" (Aexp.mul "y" "x"))
         (Stmt.ass "x" (Aexp.sub "x" 1)))
     )
