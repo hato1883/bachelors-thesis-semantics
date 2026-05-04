@@ -46,3 +46,38 @@ lemma seq_exec_preserve_right {S₁ S₂ : Stmt} {s s' : State} {k : Nat}
           exact ih h_rest
 
 end Exercise_2_21
+
+lemma small_step_k_to_star {γ₁ γ₂ : Config} {k : Nat}
+  (h : small_step_k γ₁ k γ₂) : small_step_star γ₁ γ₂ := by
+  induction h with
+  | refl => exact small_step_star.refl
+  | step s rest ih => exact small_step_star.step s ih
+
+
+lemma star_to_small_step_k {γ₁ γ₂ : Config}
+  (h : small_step_star γ₁ γ₂) : ∃ k, small_step_k γ₁ k γ₂ := by
+  induction h with
+  | refl =>
+    exists 0
+    exact small_step_k.refl
+  | step s rest ih =>
+    let ⟨k, hk⟩ := ih
+    exists k + 1
+    exact small_step_k.step s hk
+
+lemma small_step_star_trans {γ₁ γ₂ γ₃ : Config}
+  (h1 : small_step_star γ₁ γ₂) (h2 : small_step_star γ₂ γ₃) :
+  small_step_star γ₁ γ₃ := by
+  induction h1 with
+  | refl => exact h2
+  | step s rest ih => exact small_step_star.step s (ih h2)
+
+lemma seq_exec_preserve_right_star {S₁ S₂ : Stmt} {s s' : State}
+  (h : ⟨S₁, s⟩ →ₛₒₛ* s') : ⟨S₁ ; S₂, s⟩ →ₛₒₛ* ⟨S₂, s'⟩ := by
+  -- 1. Convert star to k-step
+  let ⟨k, hk⟩ := star_to_small_step_k h
+  -- 2. Explicitly tell Lean to use S₂ from the goal
+  -- We use (S₂ := S₂) to map the lemma's parameter to our local variable
+  let h_k := seq_exec_preserve_right (S₂ := S₂) hk
+  -- 3. Convert back to star
+  exact small_step_k_to_star h_k

@@ -1,6 +1,7 @@
 import Thesis.Definitions.While
 import Thesis.Definitions.NaturalSemantics
 import Thesis.Definitions.StructuralSemantics
+import Thesis.Proofs.Exercise_2_21
 
 open While
 open NaturalSemantics
@@ -41,15 +42,16 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     apply small_step.skip
     apply small_step_star.refl
 
-  | seq _ _ ih3 ih4 =>
-    apply small_step_star.step
-    sorry
-    -- stuck:
-    -- Missing Exercise 2.21
-    -- ih3 : ⟨S₁✝,s✝⟩ →ₛₒₛ* s'✝
-    -- ih4 : ⟨S₂✝,s'✝⟩ →ₛₒₛ* s''✝
-    -- ⊢ ⟨S₁✝; S₂✝,s✝⟩ →ₛₒₛ ?seq.γ'
-    apply ih4
+  | seq ih1 ih2 ih3 ih4 =>
+    rename_i S₁ S₂ s s' s''
+    -- ih1: ⟨S₁, s⟩ →ₛₒₛ* s_mid
+    -- ih2: ⟨S₂, s_mid⟩ →ₛₒₛ* s_final
+
+    -- 1. Using your k-step derived lemma: ⟨S₁; S₂, s⟩ →ₛₒₛ* ⟨S₂, s_mid⟩
+    let h_first_part := seq_exec_preserve_right_star (S₂ := S₂) ih3
+
+    -- 2. Glue the first part to the second part (ih2)
+    exact small_step_star_trans h_first_part ih4
 
   | if_true hcond h ih =>
     apply small_step_star.step
@@ -63,18 +65,18 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     exact hcond
     exact ih
 
-  | while_true hcond h1 h2 ih1 ih2 =>
+  | while_true hcond h1 h2 ih_body ih_loop =>
+    rename_i b S₂ s s' s''
+    -- 1. Unroll: while b do S₂ →ₛₒₛ if b then (S₂; while b do S₂) else skip
     apply small_step_star.step
-    apply small_step.while_unroll
+    · exact small_step.while_unroll
+    -- 2. Condition is true: if b then ... →ₛₒₛ ⟨S₂; while b do S₂, s⟩
     apply small_step_star.step
-    apply small_step.if_true
-    exact hcond
-    sorry
-    -- Stuck
-    -- Missing Exercise 2.21
-    -- ih1 : ⟨S✝,s✝⟩ →ₛₒₛ* s'✝
-    -- ih2 : ⟨whileₛ✝ b✝ doₛ✝ S✝,s'✝⟩ →ₛₒₛ* s''✝
-    -- ⊢ ⟨S✝; whileₛ✝ b✝ doₛ✝ S✝,s✝⟩ →ₛₒₛ* s''✝
+    · exact small_step.if_true hcond
+    -- 3. Use the local S₂ for the suffix of the sequence
+    let h_seq := seq_exec_preserve_right_star (S₂ := Stmt.loop b S₂) ih_body
+    -- 4. Transitivity: ⟨S₂; while b do S₂, s⟩ →* ⟨while b do S₂, s'⟩ →* s''
+    exact small_step_star_trans h_seq ih_loop
 
   | while_false h_cond =>
     apply small_step_star.step
