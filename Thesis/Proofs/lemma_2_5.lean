@@ -33,7 +33,7 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
       · -- First explicit Lean-only inversion: invert the while derivation tree.
         cases hDerivWhile with
         | while_true hCondTrue' hDerivSeqLeft hDerivWhileRest =>
-          apply big_step.seq
+          apply big_step.comp
           · exact hDerivSeqLeft
           · exact hDerivWhileRest
         | while_false hCondFalseAlt =>
