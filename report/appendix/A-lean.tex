@@ -1,2 +1,79 @@
 
 \chapter{Lean Source Code}
+\section{Auxiliary Lean Proofs}
+This section contains all proofs needed to mechanize the definitions and thier sourounding semnatic functions.
+
+
+\subsection*{State}
+\label{app:lean:state}
+State is loosely defined in the textbook as one of multiple different choices,
+In this thesis we opted to use the Functional approach as Lean is very good at handling it.
+To do this we need to introduce some structure, first of which is the definition of what \emph{State} is.
+
+\begin{Lean_Code}
+def State := Var @\to@ @ \(\mathbb{Z}\)@
+\end{Lean_Code}
+Now that we have the functional definition, it can be helpful to create a "standard implementation", in this case a state which maps all values to \(0\):
+
+\begin{Lean_Code}
+def default_state : State :=
+  fun _ => 0
+\end{Lean_Code}
+By adding a default state that satisfies the total function property we can then use the assignment operator to create the states used in specific examples.
+
+In this case the assignment was defined as follows:
+
+\begin{Lean_Code}
+def assign (s : State) (x : Var) (z : @\(\mathbb{Z}\)@) : State :=
+  fun (v: Var) => if v = x then z else s v
+\end{Lean_Code}
+with the following notation:
+
+\begin{Lean_Code}
+notation:max s "[" x "@\mapsto@" z "]" => assign s x z
+\end{Lean_Code}
+Next we need some scaffolding proofs to be able to reason if 2 states are equivalent or not.
+This is provided by the two theorems:
+\begin{Lean_Code}
+theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
+  s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by @\dots@
+  apply funext @\todo{Move to appendix}@
+  intro v
+  repeat rw [assign]
+  split_ifs
+  · rfl
+  · rfl
+\end{Lean_Code}
+and
+\begin{Lean_Code}
+theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
+  s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by @\dots@
+  apply funext @\todo{Move to appendix}@
+  intro v
+  repeat rw [assign]
+  split_ifs with h1 h2
+  -- h1 : v = y
+  -- h2 : v = x
+  · show z2 = z1
+    subst h1 h2
+    contradiction
+  · show z2 = z2
+    rfl
+  · show z1 = z1
+    rfl
+  · show s v = s v
+    rfl
+\end{Lean_Code}
+which together allows us to know that the following is true:
+\begin{align*}
+  s[x \mapsto 0][y \mapsto 6] &= s[x \mapsto 3][y \mapsto 1][x \mapsto 2][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_comm}   &= s[x \mapsto 3][x \mapsto 2][y \mapsto 1][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 2][y \mapsto 1][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 2][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_comm}   &= s[x \mapsto 2][x \mapsto 1][y \mapsto 3][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 1][y \mapsto 3][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] \\
+  \text{assign\_comm}   &= s[x \mapsto 1][x \mapsto 0][y \mapsto 6][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 0][y \mapsto 6][y \mapsto 6] \\
+  \text{assign\_shadow} &= s[x \mapsto 0][y \mapsto 6]
+\end{align*}
