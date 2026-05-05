@@ -17,7 +17,7 @@ Naming scheme used in this file:
 - `h...`  : hypothesis/proof term (examples: ...).
 - `ih...` : induction hypothesis supplied by `induction` (examples: ...).
 - `s...`  : states (examples: ...).
-- `hDerivAlt` : the second derivation provided after `intro`.
+- `h_deriv_alt` : the second derivation provided after `intro`.
 --/
 lemma seq_split {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
     (h : ⟨S₁; S₂, s⟩ →ₛₒₛ[k] s'') :

@@ -1,7 +1,7 @@
 import Thesis.Definitions.While
 import Thesis.Definitions.NaturalSemantics
 import Thesis.Definitions.StructuralSemantics
-import Thesis.Proofs.Exercise_2_21
+import Thesis.Proofs.exercise_2_21
 import Thesis.Proofs.lemma_2_19
 import Thesis.Proofs.lemma_2_5
 
@@ -67,7 +67,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     exact hcond
     exact ih
 
-  | while_true hcond h1 h2 ih_body ih_loop =>
+  | while_true hcond h_body h_rest ih_body ih_loop =>
     rename_i b S₂ s s' s''
     -- 1. Unroll: while b do S₂ →ₛₒₛ if b then (S₂; while b do S₂) else skip
     apply small_step_star.step
@@ -126,9 +126,9 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
           obtain ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := seq_split h_rest
           apply big_step.comp (s' := s_mid)
           case h_left => -- Goal: ⟨S, s⟩ →ₙₛ s_mid
-            -- We combine the very first step (h_step_S1) with the rest of S (h_S1'_steps)
-            have h_S_full : ⟨S, s⟩ →ₛₒₛ[k₁ + 1] s_mid := by
-              apply small_step_k.step h_step_S1 hk1
+            -- We combine the very first step (h_step_s1) with the rest of S.
+            have h_s_full : ⟨S, s⟩ →ₛₒₛ[k₁ + 1] s_mid := by
+              apply small_step_k.step h_step_s1 hk1
 
             have h_k2_pos : k₂ > 0 := by
               -- Inversion on hk2: a 0-step derivation to a state s' is impossible for a Stmt
@@ -136,30 +136,30 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
               case zero => cases hk2 -- This should reach a contradiction
               case succ => linarith
 
-            apply ih (k₁ + 1) (by linarith) _ _ _ h_S_full
+            apply ih (k₁ + 1) (by linarith) _ _ _ h_s_full
 
           case h_right =>
             -- Goal: ⟨S2, s_mid⟩ →ₙₛ s'
             -- Use hk2: ⟨S2, s_mid⟩ →ₛₒₛ[k₂] s'
             apply ih k₂ (by linarith) S2 s_mid s' hk2
 
-        case comp2 S1 S2 s_next h_step_S1 =>
+        case comp2 S1 S2 s_next h_step_s1 =>
           -- S1 has terminated in one step to s_next
           -- h_rest: ⟨S2, s_next⟩ →ₛₒₛ[k₀] s'
           apply big_step.comp (s' := s_next)
           case h_left =>
             -- 1. We need to prove 1 < k₀ + 1 to satisfy the IH
             -- As discussed, S2 must take at least 1 step to reach a state, so k₀ > 0.
-            have h1 : 1 < k₀ + 1 := by
+            have h_lt_one : 1 < k₀ + 1 := by
               cases k₀
               case zero => cases h_rest -- Contradiction: S2 can't finish in 0 steps
               case succ => linarith
 
             -- 2. Apply IH for exactly 1 step
-            apply ih 1 h1 S1 s s_next
+            apply ih 1 h_lt_one S1 s s_next
 
             -- 3. Construct a 1-step derivation: (first step) + (0 steps)
-            exact small_step_k.step h_step_S1 small_step_k.refl
+            exact small_step_k.step h_step_s1 small_step_k.refl
 
           case h_right =>
             -- Goal: ⟨S2, s_next⟩ →ₙₛ s'

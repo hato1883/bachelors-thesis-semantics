@@ -6,7 +6,7 @@ open While
 open NaturalSemantics
 open StructuralSemantics
 
-section Exercise_2_21
+section exercise_2_21
 
 
 
@@ -45,13 +45,13 @@ lemma seq_exec_preserve_right {S₁ S₂ : Stmt} {s s' : State} {k : Nat}
           -- This is exactly our IH applied to the remaining steps h_rest
           exact ih h_rest
 
-end Exercise_2_21
+end exercise_2_21
 
 lemma small_step_k_to_star {γ₁ γ₂ : Config} {k : Nat}
   (h : small_step_k γ₁ k γ₂) : small_step_star γ₁ γ₂ := by
   induction h with
   | refl => exact small_step_star.refl
-  | step s rest ih => exact small_step_star.step s ih
+  | step s h_rest ih => exact small_step_star.step s ih
 
 
 lemma star_to_small_step_k {γ₁ γ₂ : Config}
@@ -60,17 +60,17 @@ lemma star_to_small_step_k {γ₁ γ₂ : Config}
   | refl =>
     exists 0
     exact small_step_k.refl
-  | step s rest ih =>
+  | step s h_rest ih =>
     let ⟨k, hk⟩ := ih
     exists k + 1
     exact small_step_k.step s hk
 
 lemma small_step_star_trans {γ₁ γ₂ γ₃ : Config}
-  (h1 : small_step_star γ₁ γ₂) (h2 : small_step_star γ₂ γ₃) :
+  (h_left : small_step_star γ₁ γ₂) (h_right : small_step_star γ₂ γ₃) :
   small_step_star γ₁ γ₃ := by
-  induction h1 with
-  | refl => exact h2
-  | step s rest ih => exact small_step_star.step s (ih h2)
+  induction h_left with
+  | refl => exact h_right
+  | step s h_rest ih => exact small_step_star.step s (ih h_right)
 
 lemma seq_exec_preserve_right_star {S₁ S₂ : Stmt} {s s' : State}
   (h : ⟨S₁, s⟩ →ₛₒₛ* s') : ⟨S₁ ; S₂, s⟩ →ₛₒₛ* ⟨S₂, s'⟩ := by

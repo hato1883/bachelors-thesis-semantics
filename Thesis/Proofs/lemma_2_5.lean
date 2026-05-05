@@ -16,59 +16,82 @@ open NaturalSemantics
   - The first explicit Lean-only inversion is marked below.
 
   Naming scheme:
-  - `h...`  : hypothesis/proof term (e.g. `hCondTrue`, `hDerivWhileTrue`, `hDerivSeqRight`).
-  - `hDeriv...Alt` : alternative derivation in the direction.
-  - `s...`  : states (e.g. `s`, `s'`, `sMid`).
+  - `h...`  : hypothesis/proof term (e.g. `h_cond_true`, `h_deriv_while_true`, `h_deriv_seq_right`).
+  - `h_deriv..._alt` : alternative derivation in the direction.
+  - `s...`  : states (e.g. `s`, `s'`, `s_mid`).
 -/
+theorem while_expand (b : Bexp) (S : Stmt) (s s' : State) :
+  (⟨Stmt.loop b S, s⟩ →ₙₛ s') →
+  (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') := by
+  intro h_while
+  cases h_while with
+
+  | while_true
+    h_cond_true h_deriv_seq_left h_while_rest =>
+    have h_comp :
+      (⟨Stmt.composition S (Stmt.loop b S), s⟩ →ₙₛ s') :=
+      big_step.comp h_deriv_seq_left h_while_rest
+    exact big_step.if_true
+      h_cond_true -- Condition
+      h_comp      -- Then case
+
+  -- Invert while statement to
+  -- access condition
+  | while_false
+    h_cond_false =>
+
+    -- build skip statement
+    have comp_stmt :
+      (⟨Stmt.skip, s⟩ →ₙₛ s) :=
+      -- Use axiom
+      big_step.skip
+
+    exact big_step.if_false
+      h_cond_false -- Condition
+      comp_stmt -- Else case
+
+theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
+  (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') →
+  (⟨Stmt.loop b S, s⟩ →ₙₛ s') := by
+  intro h_if
+  cases h_if with
+
+  | if_true
+    h_cond_true
+    h_deriv_seq =>
+    -- Deconstruct the composition derivation into its two parts.
+    cases h_deriv_seq with
+    | comp
+      h_deriv_seq_left
+      h_deriv_seq_right =>
+      -- Build the `while` derivation from the condition and the two sub-derivations.
+      exact big_step.while_true
+        h_cond_true
+        h_deriv_seq_left
+        h_deriv_seq_right
+
+  | if_false
+    h_cond_false
+    h_deriv_skip =>
+    -- The `else` branch is `skip`; invert that derivation and produce `while_false`.
+    cases h_deriv_skip
+    exact big_step.while_false h_cond_false
+
 lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨Stmt.loop b S, s⟩ →ₙₛ s') ↔ (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') := by
+(⟨Stmt.cond
+  b
+  (Stmt.composition S (Stmt.loop b S))
+  Stmt.skip, s⟩ →ₙₛ s')  ↔
+(⟨Stmt.loop b S, s⟩ →ₙₛ s') := by
+  -- equivalence introduction
   apply Iff.intro
-  -- Forward direction: while → if
+
+  -- Forward direction: if => while
   case mp =>
-    intro hDerivWhile
-    by_cases hCondTrue : 𝓑⟦b⟧ s = true
-    case pos =>
-      apply big_step.if_true
-      · exact hCondTrue
-      · -- First explicit Lean-only inversion: invert the while derivation tree.
-        cases hDerivWhile with
-        | while_true hCondTrue' hDerivSeqLeft hDerivWhileRest =>
-          apply big_step.comp
-          · exact hDerivSeqLeft
-          · exact hDerivWhileRest
-        | while_false hCondFalseAlt =>
-          rw [hCondTrue] at hCondFalseAlt
-          contradiction
-    case neg =>
-      cases hDerivWhile with
-      | while_false hCondFalse =>
-        apply big_step.if_false
-        · exact hCondFalse
-        · exact big_step.skip
-      | while_true hCondTrue' _ _ =>
-        contradiction
-  -- Backward direction: if → while
+    -- Reusing our previous proof for if => while
+    exact if_compact b S s s'
+
+  -- Backward direction: while => if
   case mpr =>
-    intro hDerivIf
-    by_cases hCondTrue : 𝓑⟦b⟧ s = true
-    case pos =>
-      cases hDerivIf with
-      | if_true hCondTrue' hDerivSeq =>
-        cases hDerivSeq with
-        | comp hDerivSeqLeft hDerivSeqRight =>
-          rename_i sMid
-          apply big_step.while_true
-          · exact hCondTrue
-          · exact hDerivSeqLeft
-          · exact hDerivSeqRight
-      | if_false hCondFalseAlt _ =>
-        rw [hCondTrue] at hCondFalseAlt
-        contradiction
-    case neg =>
-      cases hDerivIf with
-      | if_true hCondTrue' _ =>
-        contradiction
-      | if_false hCondFalse hDerivSkip =>
-        cases hDerivSkip
-        apply big_step.while_false
-        exact hCondFalse
+    -- Reusing our previous proof for while => if
+    exact while_expand b S s s'
