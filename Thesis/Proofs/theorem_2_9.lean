@@ -61,8 +61,13 @@ theorem deterministic (S : Stmt) (s s' s'' : State) (h: ⟨S, s⟩ →ₙₛ s')
   | if_true h_cond_true h_deriv_then ih_then =>
     intro h_deriv_alt
     cases h_deriv_alt with
-    | if_true _ h_deriv_then_alt =>
-      exact ih_then _ h_deriv_then_alt
+    | if_true
+      _
+      h_deriv_then_alt =>
+      exact ih_then
+        _
+        h_deriv_then_alt
+
     | if_false h_cond_false_alt _ =>
       rw [h_cond_true] at h_cond_false_alt
       contradiction
@@ -71,9 +76,14 @@ theorem deterministic (S : Stmt) (s s' s'' : State) (h: ⟨S, s⟩ →ₙₛ s')
   | if_false h_cond_false h_deriv_else ih_else =>
     intro h_deriv_alt
     cases h_deriv_alt with
-    | if_false _ h_deriv_else_alt =>
+    | if_false
+      _
+      h_deriv_else_alt =>
       exact ih_else _ h_deriv_else_alt
-    | if_true h_cond_true_alt _ =>
+
+    | if_true
+      h_cond_true_alt
+      _ =>
       rw [h_cond_false] at h_cond_true_alt
       contradiction
 
@@ -98,4 +108,4 @@ theorem deterministic (S : Stmt) (s s' s'' : State) (h: ⟨S, s⟩ →ₙₛ s')
       rw [h_cond_false] at h_cond_true_alt
       contradiction
     | while_false _ =>
-      rfl
+      trivial

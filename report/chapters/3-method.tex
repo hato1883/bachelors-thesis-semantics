@@ -1123,10 +1123,16 @@ so it follows that \(s''\) must be \(s[x \mapsto \mathcal{A}[\![a]\!] s]\) and t
 \begin{leftcolumn}
     \begin{Lean_Code}
   -- [comp@\color{green!40!black}$_{ns}$@] rule
-  | comp h_left h_right ih_left ih_right =>
+  | comp
+    h_left
+    h_right
+    ih_left
+    ih_right =>
     intro h_deriv_alt
     cases h_deriv_alt with
-    | comp h_alt_left h_alt_right =>
+    | comp
+      h_alt_left
+      h_alt_right =>
       -- textbook [compₙₛ]: first premises give equal intermediate state, then second premises give final equality
       have h_mid_eq := ih_left _ h_alt_left
       subst h_mid_eq
@@ -1158,12 +1164,30 @@ to the premise \(\langle S_2,\ s_0 \rangle \to s'\) and from \(\langle S_2,\ s \
 \begin{leftcolumn}
     \begin{Lean_Code}
   -- [if@\color{green!40!black}$_{\text{ns}}^{\ \text{tt}}$@] rule
-  | if_true h_cond_true h_deriv_then ih_then =>
+  | if_true
+    h_cond_true
+    h_deriv_then
+    ih_then =>
     intro h_deriv_alt
     cases h_deriv_alt with
-    | if_true _ h_deriv_then_alt =>
-      exact ih_then _ h_deriv_then_alt
-    | if_false h_cond_false_alt _ =>
+    | if_true
+      _ -- can ignore condition
+      h_deriv_then_alt =>
+      exact ih_then
+        _
+        h_deriv_then_alt
+
+      -- Compared to the book
+      -- we must consider the [if@\color{green!40!black}$_{\text{ns}}^{\ \text{ff}}$@] rule
+      -- as we do not use side conditions in lean.
+    | if_false
+      h_cond_false_alt
+      _ -- ignore statement
+      =>
+      -- We ignore the else stmt
+      -- due to the trivial proof 
+      -- from the contradiction
+      -- of h_cond_true, and h_cond_false_alt.
       rw [h_cond_true] at h_cond_false_alt
       contradiction
     \end{Lean_Code}
@@ -1179,10 +1203,130 @@ holds because
 \]
 From \(\mathcal{B}[\![b]\!] = \mathbf{tt}\) we get that the only rule that could be applied to give the
 alternative \(\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s''\) is 
+[if$_{\text{ns}}^{\ \text{tt}}$]. So it must be the case that
 \[
 \langle S_1,\ s \rangle \to s'
 \]
+But then the induction hypothesis can be applied to the premise \(\langle S_1,\ s \rangle \to s'\)
 and from \(\langle S_1,\ s \rangle \to s''\) we get \(s' = s''\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- same principle as above
+  -- but with if_false instead of if_true
+  -- and conditions being flipped
+  -- [if@\color{green!40!black}$_{\text{ns}}^{\ \text{ff}}$@] rule
+  | if_false
+    h_cond_false
+    h_deriv_else
+    ih_else =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | if_false
+      _
+      h_deriv_else_alt =>
+      exact ih_else _ h_deriv_else_alt
+
+    | if_true
+      h_cond_true_alt
+      _ =>
+      rw [h_cond_false] at h_cond_true_alt
+      contradiction
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- [while@\color{green!40!black}$_{\text{ns}}^{\ \text{tt}}$@] rule
+  | while_true
+    h_cond_true
+    h_deriv_body
+    h_deriv_rest
+    ih_while_body
+    ih_while_rest =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | while_false
+      h_cond_false_alt =>
+      rw [h_cond_true] at h_cond_false_alt
+      contradiction
+    | while_true
+      _ -- can ignore condition
+      h_deriv_body_alt
+      h_deriv_rest_alt =>
+      -- textbook [whileᵗᵗₙₛ]: align intermediate state via body IH, then apply loop IH
+      have h_state_eq : _ = _ := ih_while_body _ h_deriv_body_alt
+      subst h_state_eq
+      exact ih_while_rest _ h_deriv_rest_alt
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s'
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s_0\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'
+\]
+The only rule that could be applied to give \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''\)
+is [while$_{\text{ns}}^{\ \text{tt}}$] because \(\mathcal{B}[\![b]\!] = \mathbf{tt}\), and this means that
+\[
+\langle S,\ s \rangle \to s_1\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_1 \rangle \to s''
+\]
+must hold for some \(s_1\). Again the induction hypothesis can be applied to the premise
+\(\langle S,\ s \rangle \to s_0\), and from \(\langle S,\ s \rangle \to s_1\) we get \(s_0 = s_1\).
+Thus we have
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s' \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''
+\]
+Since \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'\) is a premise of [while$_{\text{ns}}^{\ \text{tt}}$],
+we can apply the induction hypothesis to it. From \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''\)
+we therefore get \(s' = s''\) as required.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- [while@\color{green!40!black}$_{\text{ns}}^{\ \text{ff}}$@] rule
+  | while_false
+    h_cond_false =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+
+    -- Test creating from true rule
+    | while_true
+      h_cond_true_alt
+      _ -- can ignore statment 
+      _ -- can ignore remaining loops
+      =>
+      -- we have both that b is true, and false
+      -- this is a contradiction
+      rw [h_cond_false] at h_cond_true_alt
+      contradiction
+
+    | while_false
+      _ -- we can ignore condition
+      =>
+      -- this is an axiom
+      -- which is trivially true
+      trivial
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{ff}}$]: Straightforward.
 \end{rightcolumn}
 \end{paracol}
 
