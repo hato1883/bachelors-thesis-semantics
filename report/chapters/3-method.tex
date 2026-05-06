@@ -20,11 +20,11 @@ and to create them we also need a langugae to apply them to, in our case this wi
 The first step in formalizing the equivalence between semantics is to mechanize the language itself.
 Due to Lean 4 being a programming language, terms must be defined before they are used, which occasionally forces a different order than traditional textbook presentations.
 
-\subsection*{Syntactic Categories and Domains}
+\subsection*{Syntactic Categories}
 
 We begin by mechanizing the syntactic categories defined in chapter 1.2 of the literature. 
 The categories for \While are defined using BNF notation, mapping numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets.
-
+Using Lean 4's \texttt{inductive} keyword, we translate each BNF rule directly into a constructor:
 \begin{paracol}{2}
     \begin{leftcolumn}
         \centering \textbf{Mechanized (Lean 4)}
@@ -55,26 +55,8 @@ inductive Num where
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-As shown above, the translation of inductive categories are easy to translate into Lean 4.
-Using the keyword \texttt{inductive} starts the definition, where we then give it a name, in this case \emph{Num}, we then continue with the keyword \emph{where}
-which marks the start of the case by case definition.
-Next we give our inductive case a name, then follow it by its type, in this case \emph{Num}.
-On the last two lines we also include a variable $n$, this marks a recursive relationship to itself.
 
-\paragraph{Comparison and Result: Numerals}
-The discretization of numerals in Lean 4 requires a constructive approach compared to the meta-level assumption of numbers in the textbook.
-While the textbook allows for binary representation at a syntactic level, the Lean version treats them as a distinct inductive type, mirroring the structure but enforcing type safety.
-
-We continue with arithmetic expressions:
 \begin{paracol}{2}
-    \begin{leftcolumn}
-        \centering \textbf{Mechanized (Lean 4)}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
-    \end{rightcolumn}
-
-    \switchcolumn[1]*[]
     \begin{leftcolumn}
         \begin{Lean_Code}
 inductive Aexp where
@@ -98,13 +80,6 @@ inductive Aexp where
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-Here we can see a more clear usage of other categories used to define this new category.
-In this case we use \emph{Num}, \emph{Var} and \emph{Aexp}. Notice also that we are able to give the same type to multiple variables at once as seen in the binary operations.
-
-\paragraph{Comparison and Result: Arithmetic Expressions}
-The mapping of arithmetic expressions is nearly one-to-one. The primary difference lies in the explicit naming of constructors (e.g., \texttt{add}, \texttt{mul}) vs the infix notation used in pen-and-paper. In Lean, we latter define notation to restore this readability, but the underlying structure remains a tree of constructors.
-
-We continue with boolean expressions:
 \begin{paracol}{2}
     \begin{leftcolumn}
         \begin{Lean_Code}
@@ -131,13 +106,7 @@ inductive Bexp where
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-One interesting decision is to use the mathematical \texttt{true} and \texttt{false} instead of the \textbf{tt} and \textbf{ff} often used in semantic literature.
-This decision was made to be able to use the built-in methods in Lean to reason about boolean algebra, such as negation of a negation etc.
 
-\paragraph{Comparison and Result: Boolean Expressions}
-Utilizing Lean's built-in \texttt{Bool} capabilities through "Boolean Realism" allows for the reuse of existing boolean logic theorems. This significantly reduces the overhead needed to prove properties like double negation, which in the textbook would require manual development of the truth-value semantics.
-
-Lastly we define our statements:
 \begin{paracol}{2}
     \begin{leftcolumn}
         \begin{Lean_Code}
@@ -163,16 +132,23 @@ inductive Stmt where
 \end{paracol}
 \vspace{1em}
 
-\paragraph{Comparison and Result: Statements}
-The formalization of the \textit{While} statements illustrates the transition from mathematical notation to a typed system:
+\subsubsection*{Comparison of Syntactic Categories}
+The translation of BNF to Lean's inductive types is largely direct, with several key differences:
 \begin{itemize}
-    \item \textbf{Namespace Management}: Lean 4 uses keywords like \texttt{if} and \texttt{while} for its own control flow. To avoid collisions, the mechanized version uses \texttt{cond} (for \texttt{if}) and \texttt{loop} (for \texttt{while}). This highlights a practical constraint of embedding a language into a host language.
-    \item \textbf{Typed BNF}: While the textbook uses symbolic BNF, Lean requires explicit typing for constructors (e.g., \texttt{composition (S1 S2 : Stmt)}). This provides immediate feedback on the "well-formedness" of statements.
+    \item \textbf{Constructive Numerals}: While the textbook assumes numerals as given, Lean requires explicit inductive definition to ensure type safety and enable structural induction over binary representations.
+    \item \textbf{Boolean Realism}: Using built-in \texttt{true} and \texttt{false} rather than symbolic $\mathbf{tt}$ and $\mathbf{ff}$ enables us to leverage Lean's internal boolean logic theorems, reducing proof effort.
+    \item \textbf{Namespace Constraints}: To avoid collisions with Lean keywords, we rename \texttt{if} to \texttt{cond} and \texttt{while} to \texttt{loop}---a practical constraint absent in informal notation.
+    \item \textbf{Explicit Typing}: Each constructor explicitly specifies its type, providing immediate feedback on well-formedness, unlike the meta-level assumptions in pen-and-paper BNF.
 \end{itemize}
 
-\subsection*{Semantic Domains and State}
-The \textbf{State} represents memory as a total function from variables to integers.
-A definition for substitution is also needed.
+With the syntactic structure of \While now formalized, we turn our attention to the semantic components,
+the domains and evaluation functions that give meaning to these syntactic terms.
+
+\subsection*{Semantic Domains and Functions}
+
+With syntax formalized, we now specify the semantic domains and evaluation functions that interpret programs. These include the state representation and the functions that evaluate numerals, arithmetic expressions, and boolean expressions.
+
+The \textbf{State} represents memory as a total function from variables to integers:
 \begin{paracol}{2}
     % --- SECTION: SEMANTIC DOMAINS ---
     \begin{leftcolumn}
@@ -212,44 +188,15 @@ notation s "[" x " @\color{purple}\mapsto@ " z "]" @\leanbreak@=> assign s x z
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-For a more detailed breakdown see \autoref{app:lean:state} in the appendix.
-The character "\(\mbox{\textcolor{gray}{$\hookrightarrow$}}\)" denotes a line break due to length limitations in the report, in the code this line is unbroken.
 
-Notice that the notation is after the definition, this is due to a technicality that the function \emph{assign} is not defined untill the end of its definition,
-which means that anything that is referring to the function \emph{assign} must be placed underneath its definition to be valid.
-Now that we have defined the syntactic categories we can provide the semantic functions and equations.
-We skip defining the syntactic domains as they are implicitly defined in the functions to come.
+The notation is defined after the \emph{assign} function to ensure the function is fully defined first.
+The character "\(\mbox{\textcolor{gray}{$\hookrightarrow$}}\)" denotes a line break due to space constraints;
+in actual code this is unbroken. For detailed proofs see \autoref{app:lean:state} in the appendix.
 
-Each function is first  defined as a relation from one domain to another, and then the implementation of the function is given using the different semantic clauses.
-We will begin by providing the definition for Numerals (\Num):
+We now define the semantic evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$,
+which map syntactic categories to their mathematical interpretations:
 \begin{paracol}{2}
     % --- SECTION: SEMANTIC FUNCTIONS ---
-    \begin{leftcolumn}
-        \centering \textbf{Mechanized (Lean 4)}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
-    \end{rightcolumn}
-
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
-def Num_to_Z : Num @\to@ @\(\mathbb{Z}\)@
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \[
-        \mathcal{N} : Num \to \mathbb{Z}
-        \]
-    \end{rightcolumn}
-\end{paracol}
-\vspace{1em}
-The start of defining the function using our categories is the same,
-the only difference here is the usage of keyword \emph{def}.
-
-To define how the function works we in the lean case follow by doing a case by case break down in the same definitions,
-compared to the textbook which can defer the definition until later.
-\begin{paracol}{2}
     \begin{leftcolumn}
         \centering \textbf{Mechanized (Lean 4)}
     \end{leftcolumn}
@@ -271,6 +218,10 @@ notation "@\color{purple}\(\mathcal{N}[\![\)@" n "@\color{purple}\(]\!]\)@" => N
     \end{leftcolumn}
     \begin{rightcolumn}
         \[
+        \mathcal{N} : Num \to \mathbb{Z}
+        \]
+        and is defined by
+        \[
         \begin{array}{rcl}
             \mathcal{N}[\![0]\!]s &=& 0 \\[0.6em]
             \mathcal{N}[\![1]\!]s &=& 1 \\[0.6em]
@@ -281,20 +232,8 @@ notation "@\color{purple}\(\mathcal{N}[\![\)@" n "@\color{purple}\(]\!]\)@" => N
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-Here we create a function, denoted by the \emph{def} keyword, in Lean this defaults to being a Total Function.
-By defining how the function acts for all inductive cases of the type we are working with (in this case \emph{Num}) we ensure that it is total.
-The case by case implementation is trivial and directly lifted from the literature.
 
-Next we will provide the definition for arithmetic expressions (\Aexp):
 \begin{paracol}{2}
-    \begin{leftcolumn}
-        \centering \textbf{Mechanized (Lean 4)}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
-    \end{rightcolumn}
-
-    \switchcolumn[1]*[]
     \begin{leftcolumn}
         \begin{Lean_Code}
 def Aexp_eval : Aexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
@@ -324,18 +263,8 @@ notation "@\color{purple}\(\mathcal{A}[\![\)@" a "@\color{purple}\(]\!]\)@" @\le
     \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-In the above snippet we have the first underscore "\_" used, this is a reserved character used to let Lean 4 itself infer
-what variable to use, in this case it is used instead of writing out the state \emph{s}, which the rule does not care for.
-Lastly we will provide the definition for boolean expressions (\Bexp):
-\begin{paracol}{2}
-    \begin{leftcolumn}
-        \centering \textbf{Mechanized (Lean 4)}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
-    \end{rightcolumn}
 
-    \switchcolumn[1]*[]
+\begin{paracol}{2}
     \begin{leftcolumn}
         \begin{Lean_Code}
 def Bexp_eval : Bexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
@@ -353,6 +282,7 @@ notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\le
         \[
         \mathcal{B} : Bexp \to (State \to \mathbb{Z})
         \]
+        and is defined by
         \[
         \begin{array}{rcl}
             \mathcal{B}[\![true]\!]s &=& \textbf{tt} \\[0.6em]
@@ -370,8 +300,8 @@ notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\le
         \textbf{ff} & \text{if } \mathcal{B}[\![b]\!]s
         \end{cases} \\[1.2em]
             \mathcal{B}[\![b_1 \land b_2]\!]s &=& \begin{cases} 
-        \textbf{tt} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{tt} \text{ and } \mathcal{B}[\![b_2]\!]s = \textbf{tt} \\ 
-        \textbf{ff} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{ff} \text{ or } \mathcal{B}[\![b_2]\!]s = \textbf{ff} \\ 
+        \textbf{tt} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{tt} \\ & \text{and } \mathcal{B}[\![b_2]\!]s = \textbf{tt} \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{ff} \\ & \text{or } \mathcal{B}[\![b_2]\!]s = \textbf{ff} \\ 
         \end{cases}
         \end{array}
         \]
@@ -379,74 +309,59 @@ notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\le
 \end{paracol}
 \vspace{1em}
 
-\paragraph{Comparison and Result: Semantic Functions}
-Formalizing the evaluation functions (\(\mathcal{N}, \mathcal{A}, \mathcal{B}\)) reveals the strictness of the mechanized environment:
-In addition to the above definitions we will also need some extra proofs to allow us to reason about states.
-First we need a proof to prove that
+
+\subsubsection*{Comparison of Semantic Functions}
+Formalizing evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$ reveals key differences between mechanized and pen-and-paper approaches:
+\begin{itemize}
+    \item \textbf{Explicit Totality}: Lean enforces that every function be total by requiring coverage of all constructors. The textbook leaves certain cases (e.g., syntax errors) implicit.
+    \item \textbf{Constructor Coverage}: In Lean, each inductive case must be explicitly handled with a case-by-case pattern match, whereas textbooks often omit obvious or degenerate cases.
+    \item \textbf{Type Consistency}: Lean's type system forces consistent return types (e.g., $\mathbb{Z}$ for $\mathcal{A}$), whereas pen-and-paper notation sometimes glosses over type-checking details.
+\end{itemize}
+
+Beyond these core evaluation functions, mechanized reasoning about programs requires formal properties of state manipulation that pen-and-paper proofs often treat implicitly.
+
+\subsection*{Auxiliary Proofs}
+
+Beyond evaluation functions, state operations require formal verification. In addition to the above definitions, we need proofs to reason about state substitution:
+First, we prove that repeated assignments to the same variable can be collapsed:
 \[
     s[x \mapsto z_1][x \mapsto z_2] = s[x \mapsto z_2]
 \]
-This proof would allow us to remove redundant assignments which will be useful when reasoning about repeated assignments in things like loops.
-There was no pen-and-paper proof provided for this property in the textbook.
-However, we can provide a proof by extension:
-\begin{quotation}
-    Two states $s_1$ and $s_2$ are equal if for all variables $y$, $s_1 y = s_2 y$.
-    Let $s' = s[x \mapsto z_1][x \mapsto z_2]$.
-    By definition of assignment:
-    \[
-    s' y = \begin{cases} 
-        z_2 & \text{if } y = x \\ 
-        s[x \mapsto z_1] y & \text{if } y \neq x 
-        \end{cases}
-    \]
-    If $y = x$, then $s' x = z_2$. This matches $(s[x \mapsto z_2])x = z_2$.
-    If $y \neq x$, then $s' y = s[x \mapsto z_1] y$. Again by definition of assignment, since $y \neq x$, $s[x \mapsto z_1] y = s y$.
-    This matches $(s[x \mapsto z_2])y = s y$ for $y \neq x$.
-    Thus, for all $y$, $s' y = (s[x \mapsto z_2]) y$, so $s' = s[x \mapsto z_2]$.
-\end{quotation}
+This proof allows us to remove redundant assignments during semantic reasoning.
+The informal proof is straightforward by extensionality: two states are equal if they agree on all variables.
+By definition of state assignment, both $s[x \mapsto z_1][x \mapsto z_2]$ and $s[x \mapsto z_2]$
+map $x$ to $z_2$ and any other variable $y \neq x$ to $s(y)$.
 
 \noindent
-In Lean this proof is constructed  using the following:
+In Lean, this is formalized as:
 \begin{Lean_Code}
 theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
   s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by @\dots@
 \end{Lean_Code}
 
-The next property is commutative property of distinct substitutions.
-A proof of this property needs to effectively prove the statement:
+Second, we prove the commutativity of assignments to distinct variables:
 \[
-    s[x \mapsto z_1][y \mapsto z_2] = s[y \mapsto z_2][x \mapsto z_1], y \neq x
+    s[x \mapsto z_1][y \mapsto z_2] = s[y \mapsto z_2][x \mapsto z_1], \quad y \neq x
 \]
-This proof would allow us to remove even more redundant assignments which will be useful when reasoning about repeated assignments in things like loops.
-There was no pen-and-paper proof provided for this property in the textbook.
-However, we can provide a proof by extension:
-\begin{quotation}
-    Let $s_1 = s[x \mapsto z_1][y \mapsto z_2]$ and $s_2 = s[y \mapsto z_2][x \mapsto z_1]$. Assume $x \neq y$.
-    For any variable $v$:
-    \begin{itemize}
-        \item If $v = y$, then $s_1 v = z_2$ by definition of the outer assignment. For $s_2$, since $y \neq x$ and $v = y$, $s_2 y = s[y \mapsto z_2] y = z_2$.
-        \item If $v = x$, then $s_2 v = z_1$ by definition of the outer assignment. For $s_1$, since $x \neq y$ and $v = x$, $s_1 x = s[x \mapsto z_1] x = z_1$.
-        \item If $v \neq x$ and $v \neq y$, then $s_1 v = s[x \mapsto z_1] v = s v$ and $s_2 v = s[y \mapsto z_2] v = s v$.
-    \end{itemize}
-    In all cases $s_1 v = s_2 v$, hence $s_1 = s_2$.
-\end{quotation}
 
-\noindent
-In Lean this proof is constructed  using the following theorem:
+This allows us to reorder assignments to different variables, further simplifying state manipulation proofs.
+The proof is again by extensionality: when $x \neq y$, both sides assign $z_1$ to $x$, $z_2$ to $y$,
+and leave all other variables unchanged.
 \begin{Lean_Code}
 theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
   s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by @\dots@
 \end{Lean_Code}
-Full proofs for the two auxiliary theorems can be found in \autoref{app:lean:state} in the appendix.
-By adding  these proofs it becomes trivial to prove a statement such as:
+
+Full proofs for these auxiliary theorems can be found in \autoref{app:lean:state} in the appendix.
+With these properties in place, apparently redundant or reordered assignments can be formally simplified, e.g.:
 \[
     s[x \mapsto 3][x \mapsto 2][x \mapsto 1][x \mapsto 0] = s[x \mapsto 0]
 \]
-and things like
-\[
-    s[x \mapsto 3][y \mapsto 1][x \mapsto 2][y \mapsto 3][x \mapsto 1][y \mapsto 6][x \mapsto 0][y \mapsto 6] = s[x \mapsto 0][y \mapsto 6]
-\]
-which otherwise might not be obvious for the reader, and definitely not for the Lean 4 compiler.
+
+Having established the syntactic categories, semantic domains, and evaluation functions,
+we now possess the foundation needed to define the transition systems.
+The next section formalizes Natural Semantics (also called big-step semantics) for the \While language,
+followed by Structural Operational Semantics (small-step), and finally establishes their equivalence.
 
 %
 %
@@ -634,6 +549,18 @@ notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\le
 \end{paracol}
 \vspace{1em}
 
+\subsubsection*{Comparison and Result}
+
+The transition system for Natural Semantics is formalized as an inductive relation \texttt{big\_step} that captures the complete execution of a \While program from initial state to final state. This big-step approach mirrors the pen-and-paper formulation: each rule represents either an axiom (for atomic statements like assignment and skip) or a deductive rule (for composite constructs). The relation mechanizes the textbook's informal rules by encoding:
+\begin{itemize}
+    \item \textbf{Axioms}: Atomic rules with no premises (assignment and skip) become inductive cases with no dependencies.
+    \item \textbf{Deductive Rules}: Composite rules with premises (composition, conditionals, loops) become inductive cases where the conclusions depend on recursive applications of \texttt{big\_step}.
+    \item \textbf{Conditions}: Side conditions in pen-and-paper rules (e.g., "$\mathcal{B}[\![b]\!]s = \mathbf{tt}$") become explicit logical conditions in Lean that must be proven as part of the rule application.
+\end{itemize}
+
+This mechanization preserves the meaning of the original rules while enforcing that all premises must be discharged before the conclusion can be derived. The notation $\langle S, s \rangle \to_{ns} s'$ is defined to match the textbook's presentation, allowing proofs to read similarly to their pen-and-paper counterparts.
+
+With the transition system now formalized, we can prove properties about Natural Semantics.
 
 %
 %
@@ -865,6 +792,7 @@ and we can now apply the rule [if$_{\text{ns}}^{\ \text{ff}}$] to construct a de
 This completes the first part of the proof.
 \end{rightcolumn}
 \end{paracol}
+\vspace{1em}
 
 As we can see the two versions mimic each other very closely.
 This proof builds the deduction tree from the top and moving down towards the
@@ -1048,11 +976,11 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
 
 \subsubsection*{Comparison and Result}
 This proof demonstrates the modular nature of both formal and informal proofs. By splitting the equivalence (\(\iff\)) into two implications (\(\implies\) and \(\impliedby\)), we can prove each direction independently. This modularity is mirrored in Lean through separate theorems (\texttt{while\_expand} and \texttt{if\_compact}) which are then combined using \texttt{Iff.intro}. Key observations include:
-\begin{enumerate}
+\begin{itemize}
     \item \textbf{Syntactic Correspondence}: The mechanized proof maps nearly 1:1 to the textbook's structure. Each "case" in Lean corresponds to a branch in the manual proof, and each rule application (e.g., \texttt{big\_step.comp}) matches the "construction of a new tree" in the text.
     \item \textbf{Explicit vs. Implicit Construction}: In Lean, we use the \texttt{have} tactic to explicitly name intermediate derivation trees (like \texttt{comp\_stmt}). The textbook does this narratively ("we can construct the derivation tree...").
     \item \textbf{Exhaustive Matching}: Lean's \texttt{cases} tactic on the \texttt{if} statement automatically identifies that only \texttt{if\_true} and \texttt{if\_false} are possible, mirroring the textbook's "Only two rules could give rise to...".
-\end{enumerate}
+\end{itemize}
 
 
 %
@@ -1289,12 +1217,12 @@ we therefore get \(s' = s''\) as required.
 
 \subsubsection*{Comparison and Result}
 The formalization of determinism highlights several key differences in how "obvious" steps are handled:
-\begin{enumerate}
+\begin{itemize}
     \item \textbf{Inversion and Case Analysis}: The textbook frequently uses the phrase "the only rule that could be applied is...". In Lean, this is explicitly handled by the \texttt{cases} tactic on the second derivation (\texttt{h\_deriv\_alt}). This forces the user to explicitly handle (or dismiss via contradiction) cases that the textbook ignores.
     \item \textbf{Handling Side Conditions}: In the \texttt{if} and \texttt{while} cases, the textbook assumes that because \(\mathcal{B}[\![b]\!]\) is true, only the "true" rule applies. In the mechanized proof, we must explicitly show that the "false" rule choice leads to a \texttt{contradiction} (e.g., \texttt{true = false}).
     \item \textbf{Explicit Substitutions}: When the induction hypothesis reveals that an intermediate state is equal (\(s_0 = s_1\)), the mechanized proof requires an explicit \texttt{subst} to update all occurrences of the variable in the goal. The textbook performs this substitution implicitly in its narrative flow.
     \item \textbf{State Generalization}: To prove the theorem, the variable \(s''\) must be \texttt{generalized} in the induction. This ensures the IH is strong enough to talk about \textit{any} potential second derivation, not just one specific fixed \(s''\).
-\end{enumerate}
+\end{itemize}
 
 
 %
@@ -1507,12 +1435,26 @@ notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\le
 \end{paracol}
 \vspace{1em}
 
-What we have defined is taking a single step using structural operationla semantics, but this can become cumbersome to reason with,
-so the textbook added notation for taking some \(k\) steps using the notation \(\langle S, s\rangle \Rightarrow^{k} s'\),
-and taking a finite amount of steps using the notation \(\langle S, s\rangle \Rightarrow^{*} s'\),
-where the star is a unknown, but finite amount of steps,
-this is used when the amount of steps is not important for the validity of the proof.
-To use the same ideas in Lean 4, we need to introduce two new inductive types as follows:
+\paragraph{Formalization of Structural Operational Semantics}
+
+The transition system for Structural Operational Semantics is formalized as an inductive relation \texttt{small\_step} that captures single-step program execution. A key innovation in the mechanized version is the introduction of the \texttt{Config} type, which distinguishes between two configuration states: \texttt{step} (representing a non-terminal configuration with remaining computation) and \texttt{final} (representing a terminal configuration with the final state). This mechanizes the distinction that pen-and-paper notation handles implicitly through different arrow notations ($\to$ vs. termination).
+
+The rules themselves closely mirror the textbook:
+\begin{itemize}
+    \item \textbf{Atomic Rules}: Assignment and skip both reduce to final configurations in a single step.
+    \item \textbf{Decomposition Rules}: Composition rules split the execution: the first rule continues stepping the left component, and the second rule activates the right component once the left completes.
+    \item \textbf{Conditional Rules}: The two conditional branches are explicitly separated, with the condition determining which rule applies.
+    \item \textbf{While Loop Rule}: Rather than recursive application, the while loop is unrolled into an equivalent conditional-composition structure, which then proceeds by small steps.
+\end{itemize}
+
+While the single-step relation \texttt{small\_step} captures individual
+program transitions, practical reasoning about complete program execution
+requires multi-step relations. The textbook introduces convenient shorthand
+notation for these ($\langle S, s\rangle \Rightarrow^{k} s'$ for exactly
+$k$ steps and $\langle S, s\rangle \Rightarrow^{*} s'$ for any finite number
+of steps). The mechanized version must explicitly formalize these as inductive
+types to enable rigorous proof construction. To use the same ideas in Lean 4,
+we introduce two new inductive types as follows:
 
 \begin{Lean_Code}
 inductive small_step_k : Config @\to@ Nat @\to@ Config @\to@ Prop where
