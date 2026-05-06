@@ -22,46 +22,52 @@ Naming scheme used in this file:
 lemma seq_split {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
     (h : ⟨S₁; S₂, s⟩ →ₛₒₛ[k] s'') :
     ∃ s' k₁ k₂, ⟨S₁, s⟩ →ₛₒₛ[k₁] s' ∧ ⟨S₂, s'⟩ →ₛₒₛ[k₂] s'' ∧ k = k₁ + k₂ := by
-  -- Proof by induction on the number k
+  -- Proof by induction on the number k (length of the derivation sequence).
   induction k generalizing s S₁ with
   | zero =>
-    -- If k = 0, the result holds vacuously (no rule for ⟨S₁; S₂, s⟩ →ₛₒₛ[0] s'')
+    -- Base case k = 0: impossible for a starting configuration ⟨S₁; S₂, s⟩
     cases h
   | succ k₀ ih =>
-    -- Assume the lemma holds for k₀, prove for k₀ + 1
-    -- This means the derivation sequence is ⟨S₁; S₂, s⟩ ⇒ γ ⇒k₀ s''
+    -- Inductive step: assume the statement for k₀, prove for k₀ + 1.
+    -- The derivation can be written as a first small-step to some configuration γ,
+    -- followed by k₀ further steps to s''.
     cases h with
-    | step h_step h_rest =>
-      -- Branch on which rule was used: [comp1_sos] or [comp2_sos]
-      cases h_step with
-      | comp1 hS₁ =>
-        -- Case 1: γ = ⟨S₁'; S₂, s'⟩ and ⟨S₁, s⟩ ⇒ ⟨S₁', s'⟩
-        -- Apply the induction hypothesis to the shorter sequence ⟨S₁'; S₂, s'⟩ ⇒k₀ s''
-        specialize ih h_rest
-
-        -- Deconstruct the induction hypothesis
-        -- into 3 separate parts sharing the same state and k₁ k₂ values
+    | step gamma_step h_tail =>
+      -- gamma_step : small_step (composition S₁ S₂) s γ  (the first step)
+      -- h_tail     : small_step_k γ k₀ (Config.final s'')
+      -- Now inspect which rule produced that first step: [comp1] or [comp2].
+      cases gamma_step with
+      | comp1 progress =>
+        -- [comp1]: γ = ⟨S₁'; S₂, s'⟩ because
+        -- progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩.
+        -- We therefore have ⟨S₁'; S₂, s'⟩ →ₛₒₛ[k₀] s'', so apply IH to that shorter derivation.
+        specialize ih h_tail
         let ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
 
-        -- We have ⟨S₁, s⟩ ⇒ ⟨S₁', s'⟩ and ⟨S₁', s'⟩ ⇒k₁ s₀, so ⟨S₁, s⟩ ⇒k₁+1 s₀
+        -- From progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩ and hk₁ : ⟨S₁', s'⟩ →ₛₒₛ[k₁] s₀
+        -- we obtain ⟨S₁, s⟩ →ₛₒₛ[k₁ + 1] s₀.
         exists s₀, k₁ + 1, k₂
         constructor
-        · exact small_step_k.step hS₁ hk₁
-        constructor
-        · exact hk₂
-        · -- Since (k₁ + 1) + k₂ = k₀ + 1
-          simp [h_sum]
-          linarith
+        case left =>
+          exact small_step_k.step progress hk₁
+        case right =>
+          constructor
+          case left => exact hk₂
+          case right =>
+            -- arithmetic: (k₁ + 1) + k₂ = k₀ + 1
+            simp [h_sum]
+            linarith
 
-      | comp2 hS₁ =>
-        -- Case 2: ⟨S₁, s⟩ ⇒ s' and γ = ⟨S₂, s'⟩
-        -- We have ⟨S₂, s'⟩ ⇒k₀ s''
-        -- Choosing k₁ = 1 and k₂ = k₀
+      | comp2 terminates =>
+        -- [comp2]: the first step returns γ = ⟨S₂, s'⟩ because
+        -- terminates : ⟨S₁, s⟩ →ₛₒₛ s'. We have ⟨S₂, s'⟩ →ₛₒₛ[k₀] s''.
+        -- Choose k₁ = 1 and k₂ = k₀.
         rename_i s'
         exists s', 1, k₀
         constructor
-        · -- ⟨S₁, s⟩ ⇒₁ s'
-          exact small_step_k.step hS₁ small_step_k.refl
-        constructor
-        · exact h_rest
-        · linarith
+        case left =>
+          exact small_step_k.step terminates small_step_k.refl
+        case right =>
+          constructor
+          case left => exact h_tail
+          case right => linarith
