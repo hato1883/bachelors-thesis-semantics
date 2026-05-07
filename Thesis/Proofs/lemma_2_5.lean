@@ -77,7 +77,7 @@ theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
     cases h_deriv_skip
     exact big_step.while_false h_cond_false
 
-lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
+lemma lemma_2_5 (b : Bexp) (S : Stmt) (s s' : State) :
 (⟨Stmt.cond
   b
   (Stmt.composition S (Stmt.loop b S))

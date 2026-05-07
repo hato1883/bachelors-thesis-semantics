@@ -1765,5 +1765,274 @@ While the pen-and-paper proof follows a high-level logical flow, the mechanized 
 %
 \section{Proving Natural Semantics $\equiv$ Structural Operational Semantics}
 \label{formal_ns_sos_equiv:sec:ns_equiv_sos}
-\todo{Add text}
-\RED{\lipsum[1]}
+
+\todo{Fix an intro message, present proof, and why it is interesting to evaluate in thesis}
+\todo{Explain that semantic function can be model in lean as it is partial, and one can not create
+proofs using partial functions in lean 4}
+
+\begin{quotation}
+\noindent
+For every statment S of \While, we have \(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\).
+This result expresses two properties:
+\begin{itemize}
+    \item If the execution of \(S\) from some state terminates in of of the semnatics,
+    then it also terminates in the other and the resulting states will be equal.
+    \item If the execution of \(S\) from some state loops in one of the semantics,
+    then it will also loop in the other.
+\end{itemize}
+It should be fairly obvious that the first property follows from the theorem because
+there are no stuck configurations in the structural operational semantics of \While.
+For the other property, suppose that the execution of \(S\) on state \(s\) loops in one semnatics.
+If it terminates in the other semantics, we have a contradiction with the first property
+beacuse both semantics are deterministic (Theorem 2.9 and Exercise 2.22).
+Hence \(S\) will have to loop on state \(s\) also in the other semnatics.
+
+The theorem is proved in two stages, as expressed by Lemma 2.27 and Lemma 2.28.
+We shall first prove Lemma 2.27.
+\end{quotation}
+
+\subsubsection*{Lemma 2.27}
+For every statement \(S\) of \While and states \(s\) and \(s'\) we have
+\[
+\langle S, s \rangle \to s'\ \mbox{implies}\ \langle S, s \rangle \Rightarrow^{*} s'
+\]
+So if the execution of \(S\) from \(s\) terminates in the natural semantics, then it will terminate
+in the smae state in the structural operational semantics.
+\vspace{1em}
+\begin{paracol}{2}
+\begin{leftcolumn}
+\centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+\centering \textbf{Pen-and-Paper (Textbook)}
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem ns_to_sos
+  (S : Stmt)
+  (s s' : State) :
+  (@\(\langle S, s\rangle \to_{ns} s'\)@) @\to@ (@\(\langle S, s \rangle \to_{sos}^{*} s'\)@)
+  := by
+  intro h
+  -- Proof outline:
+  -- 1. Induction on `h : @\(\langle S, s\rangle \to_{ns} s'\)@`.
+  -- 2. For each constructor of the natural semantics, construct the
+  --    corresponding multi-step SOS derivation.
+  induction h with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Proof: The proof proceeds by induction on the shpae of the derivation tree for\\
+\(\langle S, s \rangle \to s'\).
+
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | ass =>
+    apply small_step_star.step
+    apply small_step.ass
+    apply small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [ass$_{\text{ns}}$]: We assume that
+\[
+\langle x:=a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]
+\]
+From [ass$_{\text{sos}}$], we get the required
+\[
+\langle x:=a, s \rangle \Rightarrow s[x \mapsto \mathcal{A}[\![a]\!] s]
+\]
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | skip =>
+    apply small_step_star.step
+    apply small_step.skip
+    apply small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [skip$_{\text{ns}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | comp ih1 ih2 h1 h2 =>
+    rename_i S₁ S₂ s s' s''
+    -- Exercise 2.21
+    have h_comp_first_part := exercise_2_21 (S₂ := S₂) h1
+    -- Transitivity
+    exact small_step_star_trans h_comp_first_part h2
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [comp$_{\text{ns}}$]: Assume that
+\[
+\langle S_1;\ S_2,\ s \rangle \to s''
+\]
+because
+\[
+\langle S_1,\ s \rangle \to s'\ \mbox{and}\ \langle S_2,\ s' \rangle \to s''
+\]
+The induction hypothesis can be applied to both of the premises
+\(\langle S_1,\ s \rangle \to s'\) and \(\langle S_2,\ s' \rangle \to s''\)
+and gives
+\[
+\langle S_1,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle S_2,\ s' \rangle \Rightarrow^{*} s''
+\]
+From Exercise 2.21, we get
+\[
+\langle S_1;\ S_2,\ s \rangle \Rightarrow^{*} \langle S_2,\ s' \rangle
+\]
+and thereby \(\langle S_1;\ S_2,\ s \rangle \Rightarrow^{*} s''\).
+
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_true hcond h ih =>
+    -- Text: ⟨if b then S₁ else S₂, s⟩ ⇒ ⟨S₁, s⟩ ⇒* s'
+    -- We decompose into one SOS step followed by multi-step derivation
+    apply small_step_star.step
+    -- Step 1: Apply [if_true_sos] rule with condition B[[b]] = tt
+    · apply small_step.if_true hcond
+    -- Remaining steps: IH applied to ⟨S₁, s⟩ →ₙₛ s'
+    · exact ih
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s'
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}\ \mbox{and}\ \langle S_1,\ s \rangle \to s'
+\]
+Since \(\mathcal{B}[\![b]\!] = \mathbf{tt}\), we get
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \Rightarrow \langle S_1,\ s \rangle \Rightarrow^{*} s'
+\]
+where the first relationship comes from [if$_{\text{ns}}^{\ \text{tt}}$] and the secound
+from the induction hypothesis applied to the premise\\
+\(\langle S_1,\ s \rangle \to s'\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_false hcond h ih =>
+    -- [if_false_sos]
+    apply small_step_star.step
+    · apply small_step.if_false hcond
+    · exact ih
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_true hcond h_body h_rest ih_body ih_loop =>
+    rename_i b S s s' s''
+    -- Exercise 2.21
+    have h_after_ex21 := exercise_2_21 (S₂ := Stmt.loop b S) ih_body
+    -- while_sos step
+    apply small_step_star.step
+    · exact small_step.while_unroll
+    -- if_sos^tt step
+    apply small_step_star.step
+    · exact small_step.if_true hcond
+    -- Transitivity
+    exact small_step_star_trans h_after_ex21 ih_loop
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''
+\]
+The induction hypothesis can be applied to both of the premises \(\langle S,\ s \rangle \to s'\)
+and \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''\)
+and gives
+\[
+\langle S,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \Rightarrow^{*} s''
+\]
+Using Exercise 2.21, we get
+\[
+\langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \Rightarrow^{*} s''
+\]
+Using [while$_{\text{sos}}$] and [if$_{\text{sos}}^{\ \text{tt}}$] (with \(\mathcal{B}[\![b]\!] = \mathbf{tt}\)),
+we get the first two steps of
+\begin{align*}
+    &\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ & \Rightarrow
+    \langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \\ & \Rightarrow
+    \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ &\Rightarrow^{*}
+    s''
+\end{align*}
+and we have already argued for the last part.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_false h_cond =>
+    -- while_sos step
+    apply small_step_star.step
+    · exact small_step.while_unroll
+    -- if_sos^ff step
+    apply small_step_star.step
+    · exact small_step.if_false h_cond
+    -- skip_sos step + reflexivity
+    apply small_step_star.step
+    · exact small_step.skip
+    · exact small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{ff}}$]: Straightforward.
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+This completes the proof of Lemma 2.27. The second part of the theorem
+follows from Lemma 2.28.
+
+\subsubsection*{Lemma 2.28}
+For every statement \(S\) of While, states \(s\) and \(s'\) and natural number \(k\), we
+have that
+\[
+\langle S, s \rangle \Rightarrow^{k} s'\ \mbox{implies}\ \langle S, s \rangle \to s'
+\]
+So if the execution of \(S\) from \(s\) terminates in the structural operational semantics,
+then it will terminate in the same state in the natural semantics.
+
+
+

@@ -72,7 +72,7 @@ lemma small_step_star_trans {γ₁ γ₂ γ₃ : Config}
   | refl => exact h_right
   | step s h_rest ih => exact small_step_star.step s (ih h_right)
 
-lemma seq_exec_preserve_right_star {S₁ S₂ : Stmt} {s s' : State}
+lemma exercise_2_21 {S₁ S₂ : Stmt} {s s' : State}
   (h : ⟨S₁, s⟩ →ₛₒₛ* s') : ⟨S₁ ; S₂, s⟩ →ₛₒₛ* ⟨S₂, s'⟩ := by
   -- 1. Convert star to k-step
   let ⟨k, hk⟩ := star_to_small_step_k h
