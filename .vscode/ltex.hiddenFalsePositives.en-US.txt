@@ -21,3 +21,5 @@
 {"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QWhile the syntax defines what we can write, the semantic domains define what those writings actually mean in terms of mathematical objects .\\E$"}
 {"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QTo address this, a common praxis is to invent a \"toy\" programming language that lacks a physical implementation but possesses rigorous rules .\\E$"}
 {"rule":"COMMA_PARENTHESIS_WHITESPACE","sentence":"^\\QIn this case, we use , a simplified imperative language defined in the literature of our case study .\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QThe while-loop unrolling proof demonstrates that splitting a biconditional proof into two directed implications (whileexpand and ifcompact) mirrors good mathematical practice.\\E$"}
+{"rule":"MORFOLOGIK_RULE_EN_US","sentence":"^\\QIndependent Lemmas: Proving \\E(?:Dummy|Ina|Jimmy-|Dummy-|Maniquí-|Maniquíes-|Dummy\\+|Dummy's\\+)[0-9]+\\Q and \\E(?:Dummy|Ina|Jimmy-|Dummy-|Maniquí-|Maniquíes-|Dummy\\+|Dummy's\\+)[0-9]+\\Q separately, then combining via Iff.intro, mirrors the textbook's two-part structure.\\E$"}

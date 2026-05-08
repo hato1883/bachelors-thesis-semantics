@@ -1750,13 +1750,13 @@ The result now follows by choosing \(k_1 = 1\) and \(k_2 = k_0\).
 
 \subsubsection*{Comparison and Result}
 While the pen-and-paper proof follows a high-level logical flow, the mechanized proof requires explicit handling of Lean-specific concepts:
-\begin{enumerate}
+\begin{itemize}
     \item \textbf{Formalization of the Relation}: The textbook uses a somewhat informal "where \(k = k_1 + k_2\)" clause. In Lean, this must be part of the explicit existential bundle (\(\land k = k_1 + k_2\)), requiring the use of \texttt{constructor} to split the logical conjunctions.
     \item \textbf{Generalization}: The \texttt{generalizing} keyword is used in the induction to ensure that the induction hypothesis remains applicable to different states and statements as the execution progresses.
     \item \textbf{Specialization}: Tactics like \texttt{specialize} are used to "fix" a generalized induction hypothesis to a specific derivation (\texttt{h\_tail}), allowing for direct application to the sub-problem.
     \item \textbf{Existential Unpacking}: The mechanized proof uses \texttt{let} with pattern matching (the angle brackets) to "unpack" the witnesses from the induction hypothesis, whereas the textbook simply states "this means there is a state \(s_0\)".
     \item \textbf{Automation}: The proof relies on automation tactics like \texttt{simp} and \texttt{linarith} (or \texttt{linarity}) to handle the arithmetic bookkeeping regarding the step counts, which is often dismissed as "trivial" or "obvious" in manual proofs.
-\end{enumerate}
+\end{itemize}
 
 
 
@@ -2025,6 +2025,16 @@ and we have already argued for the last part.
 This completes the proof of Lemma 2.27. The second part of the theorem
 follows from Lemma 2.28.
 
+\subsubsection*{Comparison and Result (Lemma 2.27)}
+The mechanized proof of \texttt{ns\_to\_sos} mirrors the textbook's inductive structure but requires explicit handling of Lean-specific machinery:
+\begin{itemize}
+    \item \textbf{Constructor-Based Induction}: The textbook performs induction on ``the shape of the derivation tree'' informally. Lean explicitly matches on constructors (\texttt{ass}, \texttt{skip}, \texttt{comp}, \texttt{if\_true}, \texttt{if\_false}, \texttt{while\_true}, \texttt{while\_false}) using \texttt{induction h with}.
+    \item \textbf{Applying Lemmas Conditionally}: The textbook references Exercise 2.21 as a ``helper fact'' and applies it where needed. In Lean, this becomes an explicit call to \texttt{exercise\_2\_21} with the relevant statement \texttt{S2} specified as a named argument.
+    \item \textbf{Transitivity}: The textbook's logical chaining (``we have already argued for the last part'') is formalized via \texttt{small\_step\_star\_trans}, which explicitly composes the multi-step derivations.
+    \item \textbf{Variable Renaming}: The \texttt{rename\_i} tactic is used to introduce shadow variables introduced by induction (e.g., \(S_1, S_2, s, s', s''\)) into the local context when the inductive constructors do not bind them explicitly.
+    \item \textbf{Decomposition vs. Composition}: While the textbook focuses on decomposing a complex case (composition) into simpler parts, the Lean proof must explicitly apply multiple inference rules (\texttt{small\_step.ass}, \texttt{small\_step.skip}, etc.) and use \texttt{apply small\_step\_star.step} to build up the derivation.
+\end{itemize}
+
 \subsubsection*{Lemma 2.28}
 For every statement \(S\) of While, states \(s\) and \(s'\) and natural number \(k\), we
 have that
@@ -2035,4 +2045,277 @@ So if the execution of \(S\) from \(s\) terminates in the structural operational
 then it will terminate in the same state in the natural semantics.
 
 
+
+\vspace{1em}
+\begin{paracol}{2}
+\begin{leftcolumn}
+\centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+\centering \textbf{Pen-and-Paper (Textbook)}
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
+  (⟨S, s⟩ →ₛₒₛ[k] s') → (⟨S, s⟩ →ₙₛ s') := by
+  -- Use strong induction on k to allow for arbitrary k1, k2 < k
+  induction k using Nat.strongRecOn generalizing S s s'
+  rename_i n ih
+  intro h_k_step
+  match n with
+    | 0 =>
+      -- Case k = 0: Vacuous as per text
+      cases h_k_step
+    | k₀ + 1 =>
+      -- Case k = k0 + 1: This is where we "inspect the first step"
+      cases h_k_step with
+      | step h_first h_rest =>
+        -- h_first: ⟨S, s⟩ →ₛₒₛ next_cfg
+        -- h_rest : next_cfg →ₛₒₛ[k0] s'
+
+        -- Now you can perform `cases h_first` to inspect the SOS rule tree
+        cases h_first
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Proof: The proof proceeds by induction on the length of of the derivation sequence 
+\(\langle S, s \rangle \Rightarrow^{k} s'\); that is, by induction on \(k\)
+
+If \(k = 0\), then the result holds vacuously. \\
+
+
+To prove the the induction step we assume that the lemma holds for \(k \leq k_0\),
+and we shall then prove that it holds for \(k_0 + 1\).
+We procced by cases on how the first step of \(\langle S, s \rangle \Rightarrow^{k_+1} s'\)
+is obtained; that is, by inspecting the derivation tree for the first step of computation in structural operational semantics.
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case ass x a =>
+          -- Text: "The case [ass_sos]: Straightforward (and k0 = 0)"
+          cases h_rest -- This must be refl because assignment terminates in 1 step
+          apply big_step.ass
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [ass$_{\text{sos}}$]: Straightforward (and \(k_0 = 0\)).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case skip =>
+          -- Text: "The case [skip_sos]: Straightforward (and k0 = 0)"
+          cases h_rest
+          apply big_step.skip
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [skip$_{\text{sos}}$]: Straightforward (and \(k_0 = 0\)).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case comp1 S1 S1' S2 s_next h_step_S1 =>
+          -- [Step 1: Apply Lemma 2.19 to split the sequence]
+          obtain ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := seq_split h_rest
+
+          -- [Step 4: Use the [comp_ns] rule to combine results]
+          apply big_step.comp (s' := s_mid)
+          case h_left =>
+            -- [Step 2: Establish the derivation for S1]
+            have h_s1_full : ⟨S1, s⟩ →ₛₒₛ[k₁ + 1] s_mid := small_step_k.step h_step_S1 hk1
+            -- [Step 3a: Justify that k₁ + 1 is strictly smaller than the total]
+            have h_k2_pos : k₂ > 0 := by
+              cases k₂
+              case zero => cases hk2
+              case succ => linarith
+            -- [Step 3b: Apply the Induction Hypothesis (IH)]
+            apply ih (k₁ + 1) (by linarith) S1 s s_mid h_s1_full
+            
+          case h_right =>
+            -- [Step 3: Apply the Induction Hypothesis (IH) for S2]
+            apply ih k₂ (by linarith) S2 s_mid s' hk2
+
+        case comp2 S1 S2 s_next h_step_s1 =>
+          apply big_step.comp (s' := s_next)
+          case h_left =>
+            -- Unlike comp1, S1 terminates fully in this first step (S1' is skip)
+            -- We apply the IH to a 1-step derivation instead of (k₁ + 1)
+            have h_lt_one : 1 < k₀ + 1 := by
+              cases k₀
+              case zero => cases h_rest
+              case succ => linarith
+
+            apply ih 1 h_lt_one S1 s s_next
+            exact small_step_k.step h_step_s1 small_step_k.refl
+
+          case h_right =>
+            -- In comp1, the second part takes k₂ steps; here, it takes the full remaining k₀ steps
+            apply ih k₀ (by linarith) S2 s_next s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [comp$_{\text{sos}}^{\text{1}}$] and [comp$_{\text{sos}}^{\text{2}}$]:
+In both cases we assume that
+\[
+\langle S_1;\ S_2,\ s \rangle \Rightarrow^{k_0 + 1} s''
+\]
+We can now apply Lemma 2.19 and get that there exist a state \(s'\) and natural numbers
+\(k_1\) and \(k_2\) such that
+\[
+\langle S_1,\ s \rangle \Rightarrow^{k_1} s'\ \mbox{and}\ \langle S_2,\ s' \rangle \Rightarrow^{k_2} s''
+\]
+where \(k_1 + k_2 = k_0 + 1\). The induction hypothesis can now be applied to each of these
+derivation sequences because \(k_1 \leq k_0\) and \(k_2 \leq k_0\). So we get
+\[
+\langle S_1,\ s \rangle \to s'\ \mbox{and}\ \langle S_2,\ s' \rangle \to s''
+\]
+Using [comp$_{\text{ns}}$], we now get required \(\langle S_1;\ S_2,\ s \rangle \to s''\)
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case if_true
+            b S1 S2 h_cond =>
+          apply big_step.if_true
+            h_cond
+          -- apply induction hypothesis
+          apply ih k₀
+            (by linarith) S1
+            s s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{sos}}^{\ \text{tt}}$]: Assume that
+\(\mathcal{B}[\![b]\!] = \mathbf{tt}\) and that
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \Rightarrow \langle S_1,\ s \rangle \Rightarrow^{k_0} s'
+\]
+The induction hypothesis can be applied to the derivation \(\langle S_1,\ s \rangle \Rightarrow^{k_0} s'\) and
+give
+\[
+\langle S_1,\ s \rangle \to s'
+\]
+The result now follows using [if$_{\text{ns}}^{\ \text{tt}}$].
+
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case if_false
+            b S1 S2 h_cond =>
+          apply big_step.if_false
+            h_cond
+          apply ih k₀
+            (by linarith) S2
+            s s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{sos}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case while_unroll b S_body =>
+          -- First step: ⟨while...⟩ → ⟨if b then (S; while...) else skip, s⟩
+          -- We apply the IH to the resulting k0 steps starting from the 'if'
+          have h_ns_if := ih k₀ (by linarith) _ _ _ h_rest
+          -- Then use the bridge: if_ns → while_ns (via lemma_2_5.mp)
+          apply (lemma_2_5 b S_body s s').mp
+          exact h_ns_if
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{sos}}$]: We have
+
+\begin{align*}
+    &\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ & \Rightarrow
+    \langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \\ & \Rightarrow
+    \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ &\Rightarrow^{k_0}
+    s''
+\end{align*}
+The induction hypothesis can be applied to the \(k_0\) last steps of the derivation sequence and gives
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \to s''
+\]
+and from Lemma 2.5 we get the required
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''
+\]
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result (Lemma 2.28)}
+The mechanized proof of \texttt{sos\_k\_to\_ns} demonstrates how to formalize a proof by induction on the ``length'' of a derivation:
+\begin{itemize}
+    \item \textbf{Strong Induction}: The textbook states ``by induction on the length \(k\) of the derivation sequence''; Lean uses \texttt{Nat.strongRecOn} to enable strong induction, allowing the induction hypothesis to apply to any \(m < k_0\), not just \(m = k_0 - 1\). This is essential for reasoning about decomposed sub-derivations with unknown step counts.
+    \item \textbf{Pattern Matching on Inductive Families}: The textbook separates the base case (\(k = 0\)) and inductive step (\(k = k_0 + 1\)) informally. In Lean, this is done with \texttt{match n with} to branch on the natural number, then \texttt{cases h\_k\_step} to decompose the derivation proof.
+    \item \textbf{Composition Rule Handling}: The textbook treats [comp\(_{sos}^1\)] and [comp\(_{sos}^2\)] as two cases, and uses Lemma 2.19 to split the sequence. Lean calls \texttt{seq\_split} to obtain witnesses (\(s\_mid\), \(k_1\), \(k_2\)) and then applies the induction hypothesis to each piece. The two cases are \texttt{case comp1} and \texttt{case comp2}.
+    \item \textbf{Justifying Step Counts}: The textbook glosses over arithmetic details like ``\(k_1 + k_2 = k_0 + 1\)'' or ``\(k_2 > 0\)''. In Lean, these must be explicitly verified: checking that \(k_2 > 0\) via \texttt{cases k₂}, and using \texttt{linarith} to discharge arithmetic goals.
+    \item \textbf{Bridging Lemmas}: The while case uses a helper lemma \texttt{lemma\_2\_5} to convert between the natural semantics and structural operational semantics for while loops. This formalizes the informal statement ``from Lemma 2.5 we get the required''.
+\end{itemize}
+
+\subsubsection*{Completion of the Theorem}
+\begin{paracol}{2}
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem sos_to_ns (S : Stmt) (s s' : State) :
+  (⟨S, s⟩ →ₛₒₛ* s') → (⟨S, s⟩ →ₙₛ s') := by
+  intro h
+  -- 1. Convert star to a k-step relation
+  obtain ⟨k, hk⟩ := star_to_small_step_k h
+  -- 2. Call a helper lemma that works via induction on k
+  exact sos_k_to_ns S s s' k hk
+
+theorem ns_equvivlent_sos (S : Stmt) (s s' : State) :
+  (⟨S, s⟩ →ₙₛ s') ↔ (⟨ S, s⟩ →ₛₒₛ* s') := by
+  apply Iff.intro
+  case mp => exact ns_to_sos S s s'
+  case mpr => exact sos_to_ns S s s'
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\begin{quotation}
+\noindent
+Proof of Theorem 2.26:
+For an arbitrary statement \(S\) and state \(s\), it follows from
+Lemmas 2.27 and 2.28 that if \(\mathcal{S}_{ns}[\![S]\!]s = s'\) then \(\mathcal{S}_{sos}[\![S]\!]s = s'\) and vice versa.
+This suﬃces for showing that the functions \(\mathcal{S}_{ns}[\![S]\!]\) and \(\mathcal{S}_{sos}[\![S]\!]\) must be equal:
+if one is deﬁned on a state s, then so is the other, and therefore if one is not
+deﬁned on a state s, then neither is the other.
+\end{quotation}
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result (Complete Proof)}
+The proof of Theorem 2.26 (\texttt{ns\_equvivlent\_sos}) is concise in both the textbook and mechanized versions, but reveals important differences in how mechanized proofs handle logical equivalences:
+\begin{itemize}
+    \item \textbf{Biconditional Construction}: The textbook simply states ``\(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\)'' and argues both directions. Lean must explicitly construct a biconditional (\(\leftrightarrow\)) using \texttt{Iff.intro}, which takes the forward direction (\texttt{mp}, ``modus ponens'') and backward direction (\texttt{mpr}, ``modus ponens reverse'').
+    \item \textbf{Delegating to Sub-Lemmas}: The proof of Theorem 2.26 in Lean does not repeat the inductive arguments; instead, it applies \texttt{ns\_to\_sos} for the forward direction and \texttt{sos\_to\_ns} for the backward direction. This mirrors the textbook's informal reference to Lemmas 2.27 and 2.28, but makes the logical dependencies explicit.
+    \item \textbf{Reduction to Relations}: Both Lemma 2.27 (\texttt{ns\_to\_sos}) and Lemma 2.28 (\texttt{sos\_k\_to\_ns}) are formulated as implications on the evaluation relations (\(\to_{ns}\) and \(\to_{sos}\)) rather than on the semantic functions \(\mathcal{S}_{ns}\) and \(\mathcal{S}_{sos}\). This is a key difference: the textbook informal statement about ``functions'' is given a relational interpretation in Lean, which is more amenable to formal proof.
+    \item \textbf{Semantic Function as Partial}: As noted in the TODO comments at the beginning of the section, the semantic function cannot be used directly in Lean 4 proofs (it is partial), so the proofs work with the underlying relations. This is a practical constraint of mechanized mathematics that the textbook omits.
+\end{itemize}
 
