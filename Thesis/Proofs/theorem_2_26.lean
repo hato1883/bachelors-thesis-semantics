@@ -118,51 +118,42 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
           cases h_rest
           apply big_step.skip
 
-        case comp1 S S1' S2 s_next h_step_S1 =>
-          -- Text: "The cases [comp1_sos] and [comp2_sos]... apply Lemma 2.19"
-          -- We go back to the original h_k_step and apply seq_split
+        case comp1 S1 S1' S2 s_next h_step_S1 =>
+          -- [Step 1: Apply Lemma 2.19 to split the sequence]
           obtain ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := seq_split h_rest
+
+          -- [Step 4: Use the [comp_ns] rule to combine results]
           apply big_step.comp (s' := s_mid)
-          case h_left => -- Goal: ⟨S, s⟩ →ₙₛ s_mid
-            -- We combine the very first step (h_step_s1) with the rest of S.
-            have h_s_full : ⟨S, s⟩ →ₛₒₛ[k₁ + 1] s_mid := by
-              apply small_step_k.step h_step_S1 hk1
-
+          case h_left =>
+            -- [Step 2: Establish the derivation for S1]
+            have h_s1_full : ⟨S1, s⟩ →ₛₒₛ[k₁ + 1] s_mid := small_step_k.step h_step_S1 hk1
+            -- [Step 3a: Justify that k₁ + 1 is strictly smaller than the total]
             have h_k2_pos : k₂ > 0 := by
-              -- Inversion on hk2: a 0-step derivation to a state s' is impossible for a Stmt
               cases k₂
-              case zero => cases hk2 -- This should reach a contradiction
+              case zero => cases hk2
               case succ => linarith
-
-            apply ih (k₁ + 1) (by linarith) _ _ _ h_s_full
-
+            -- [Step 3b: Apply the Induction Hypothesis (IH)]
+            apply ih (k₁ + 1) (by linarith) S1 s s_mid h_s1_full
+            
           case h_right =>
-            -- Goal: ⟨S2, s_mid⟩ →ₙₛ s'
-            -- Use hk2: ⟨S2, s_mid⟩ →ₛₒₛ[k₂] s'
+            -- [Step 3: Apply the Induction Hypothesis (IH) for S2]
             apply ih k₂ (by linarith) S2 s_mid s' hk2
 
         case comp2 S1 S2 s_next h_step_s1 =>
-          -- S1 has terminated in one step to s_next
-          -- h_rest: ⟨S2, s_next⟩ →ₛₒₛ[k₀] s'
           apply big_step.comp (s' := s_next)
           case h_left =>
-            -- 1. We need to prove 1 < k₀ + 1 to satisfy the IH
-            -- As discussed, S2 must take at least 1 step to reach a state, so k₀ > 0.
+            -- Unlike comp1, S1 terminates fully in this first step (S1' is skip)
+            -- We apply the IH to a 1-step derivation instead of (k₁ + 1)
             have h_lt_one : 1 < k₀ + 1 := by
               cases k₀
-              case zero => cases h_rest -- Contradiction: S2 can't finish in 0 steps
+              case zero => cases h_rest
               case succ => linarith
 
-            -- 2. Apply IH for exactly 1 step
             apply ih 1 h_lt_one S1 s s_next
-
-            -- 3. Construct a 1-step derivation: (first step) + (0 steps)
             exact small_step_k.step h_step_s1 small_step_k.refl
 
           case h_right =>
-            -- Goal: ⟨S2, s_next⟩ →ₙₛ s'
-            -- We have h_rest: ⟨S2, s_next⟩ →ₛₒₛ[k₀] s'
-            -- And we know k₀ < k₀ + 1
+            -- In comp1, the second part takes k₂ steps; here, it takes the full remaining k₀ steps
             apply ih k₀ (by linarith) S2 s_next s' h_rest
 
         case if_true b S1 S2 h_cond =>
