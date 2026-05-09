@@ -1,0 +1,2321 @@
+
+%
+%
+%
+%
+%
+%
+\chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
+\label{formal_ns_sos_equiv}
+First steps before reasoning whether or not Natural Semantics and Structural Operational Semantics are equivalent is to create them.
+and to create them we also need a language to apply them to, in our case this will be \While.
+
+
+%
+%
+%
+\section{Formalizing \While}
+\label{formal_ns_sos_equiv:sec:while:formalization}
+
+The first step in formalizing the equivalence between semantics is to mechanize the language itself.
+Due to Lean 4 being a programming language, terms must be defined before they are used, which occasionally forces a different order than traditional textbook presentations.
+
+\subsection*{Syntactic Categories}
+
+We begin by mechanizing the syntactic categories defined in chapter 1.2 of the literature. 
+The categories for \While are defined using BNF notation, mapping numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets.
+Using Lean 4's \texttt{inductive} keyword, we translate each BNF rule directly into a constructor:
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Num where
+  | zero : Num
+  | one  : Num
+  | succ0 (n : Num) : Num
+  | succ1 (n : Num) : Num
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+            n &::=& 0 \\ 
+              &\mid& 1 \\ 
+              &\mid& n\ 1 \\ 
+              &\mid& n\ 0
+        \end{array}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Aexp where
+  | num (n : Num)
+  | var (x : Var)
+  | add (a1 a2 : Aexp)
+  | mul (a1 a2 : Aexp)
+  | sub (a1 a2 : Aexp)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+            a &::=& n \\ 
+              &\mid& x \\ 
+              &\mid& a_1 + a_2 \\ 
+              &\mid& a_1 \star a_2 \\ 
+              &\mid& a_1 - a_2 \\
+        \end{array}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Bexp where
+  | true
+  | false
+  | eq  (a1 a2 : Aexp)
+  | le  (a1 a2 : Aexp)
+  | not (b1 : Bexp)
+  | and (b1 b2 : Bexp)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+            b &::=& \mathbf{true} \\ 
+              &\mid& \mathbf{false} \\ 
+              &\mid& a_1 = a_2 \\ 
+              &\mid& a_1 \leq a_2 \\ 
+              &\mid& \neg b_1 \\ 
+              &\mid& b_1 \land b_2
+        \end{array}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Stmt where
+  | ass  (x : Var)  (a : Aexp)
+  | skip
+  | composition (S@$_{1}$@ S@$_{2}$@ : Stmt)
+  | cond (b : Bexp) (S@$_{1}$@ S@$_{2}$@ : Stmt)
+  | loop (b : Bexp) (S@$_{1}$@ : Stmt)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        \begin{array}{lcl}
+    S &::=& x := a \\
+      &\mid& \mathtt{skip} \\
+      &\mid& S_1; S_2 \\
+      &\mid& \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2 \\
+      &\mid& \mathtt{while}\ b\ \mathtt{do}\ S
+        \end{array}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison of Syntactic Categories}
+The translation of BNF to Lean's inductive types is largely direct, with several key differences:
+\begin{itemize}
+    \item \textbf{Constructive Numerals}: While the textbook assumes numerals as given, Lean requires explicit inductive definition to ensure type safety and enable structural induction over binary representations.
+    \item \textbf{Boolean Realism}: Using built-in \texttt{true} and \texttt{false} rather than symbolic $\mathbf{tt}$ and $\mathbf{ff}$ enables us to leverage Lean's internal boolean logic theorems, reducing proof effort.
+    \item \textbf{Namespace Constraints}: To avoid collisions with Lean keywords, we rename \texttt{if} to \texttt{cond} and \texttt{while} to \texttt{loop}---a practical constraint absent in informal notation.
+    \item \textbf{Explicit Typing}: Each constructor explicitly specifies its type, providing immediate feedback on well-formedness, unlike the meta-level assumptions in pen-and-paper BNF.
+\end{itemize}
+
+With the syntactic structure of \While now formalized, we turn our attention to the semantic components,
+the domains and evaluation functions that give meaning to these syntactic terms.
+
+\subsection*{Semantic Domains and Functions}
+
+With syntax formalized, we now specify the semantic domains and evaluation functions that interpret programs. These include the state representation and the functions that evaluate numerals, arithmetic expressions, and boolean expressions.
+
+The \textbf{State} represents memory as a total function from variables to integers:
+\begin{paracol}{2}
+    % --- SECTION: SEMANTIC DOMAINS ---
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def State := Var @\to@ @ \(\mathbb{Z}\)@
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle s : \mathbf{Var} \to \mathbb{Z} \)
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def assign (s : State) (x : Var) (z : @\(\mathbb{Z}\)@) : State :=
+  fun (v: Var) => 
+    if v = x then z else s v
+
+notation s "[" x " @\color{purple}\mapsto@ " z "]" @\leanbreak@=> assign s x z
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \(\displaystyle
+        s[x \mapsto v]y = \begin{cases} 
+        v & \text{if } y = x \\ 
+        s\,y & \text{if } y \neq x 
+        \end{cases}
+        \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+The notation is defined after the \emph{assign} function to ensure the function is fully defined first.
+The character "\(\mbox{\textcolor{gray}{$\hookrightarrow$}}\)" denotes a line break due to space constraints;
+in actual code this is unbroken. For detailed proofs see \autoref{app:lean:state} in the appendix.
+
+We now define the semantic evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$,
+which map syntactic categories to their mathematical interpretations:
+\begin{paracol}{2}
+    % --- SECTION: SEMANTIC FUNCTIONS ---
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Num_to_Z : Num @\to@ @\(\mathbb{Z}\)@
+  | Num.zero    => 0
+  | Num.one     => 1
+  | Num.succ0 n => 2 * (Num_to_Z n)
+  | Num.succ1 n => 2 * (Num_to_Z n) + 1
+
+notation "@\color{purple}\(\mathcal{N}[\![\)@" n "@\color{purple}\(]\!]\)@" => Num_to_Z n
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{N} : Num \to \mathbb{Z}
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{N}[\![0]\!]s &=& 0 \\[0.6em]
+            \mathcal{N}[\![1]\!]s &=& 1 \\[0.6em]
+            \mathcal{N}[\![n\ 0]\!]s &=& 2 \cdot \mathcal{N}[\![n]\!] \\[0.6em]
+            \mathcal{N}[\![n\ 1]\!]s &=& 2 \cdot \mathcal{N}[\![n]\!] + 1
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Aexp_eval : Aexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
+  | Aexp.num n, _ => @ \(\mathcal{N}[\![n]\!]\)@
+  | Aexp.var x, s => s x
+  | Aexp.add @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s + Aexp_eval @\(a_2\)@ s
+  | Aexp.mul @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s * Aexp_eval @\(a_2\)@ s
+  | Aexp.sub @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s - Aexp_eval @\(a_2\)@ s
+
+notation "@\color{purple}\(\mathcal{A}[\![\)@" a "@\color{purple}\(]\!]\)@" @\leanbreak@=> Aexp_eval a
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{A} : Aexp \to (State \to \mathbb{Z})
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\[0.6em]
+            \mathcal{A}[\![x]\!]s &=& s \, x \\[0.6em]
+            \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s \\[0.6em]
+            \mathcal{A}[\![a_1 \star a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s \cdot \mathcal{A}[\![a_2]\!]s \\[0.6em]
+            \mathcal{A}[\![a_1 - a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s - \mathcal{A}[\![a_2]\!]s
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+def Bexp_eval : Bexp @\to@ (State @\to@ @\(\mathbb{Z}\)@)
+  | Bexp.@true@, _ => true
+  | Bexp.@false@, _ => false
+  | Bexp.eq @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s == Aexp_eval @\(a_2\)@ s
+  | Bexp.le @\(a_1\)@ @\(a_2\)@, s => Aexp_eval @\(a_1\)@ s @\leq@ Aexp_eval @\(a_2\)@ s
+  | Bexp.not @\(b\)@, s => @\leanbreak@ @\neg@ Bexp_eval @\(b\)@ s
+  | Bexp.and @\(b_1\)@ @\(b_2\)@, s => Bexp_eval @\(b_1\)@ s @\land@ Bexp_eval @\(b_2\)@ s
+
+notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\leanbreak@=> Bexp_eval b
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \[
+        \mathcal{B} : Bexp \to (State \to \mathbb{Z})
+        \]
+        and is defined by
+        \[
+        \begin{array}{rcl}
+            \mathcal{B}[\![true]\!]s &=& \textbf{tt} \\[0.6em]
+            \mathcal{B}[\![false]\!]s &=& \textbf{ff} \\[0.6em]
+            \mathcal{B}[\![a_1 = a_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{A}[\![a_1]\!]s = \mathcal{A}[\![a_2]\!]s \\ 
+        \textbf{ff} & \text{if } \mathcal{A}[\![a_1]\!]s \neq \mathcal{A}[\![a_2]\!]s
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![a_1 \leq a_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{A}[\![a_1]\!]s \leq \mathcal{A}[\![a_2]\!]s  \\ 
+        \textbf{ff} & \text{if } \mathcal{A}[\![a_1]\!]s > \mathcal{A}[\![a_2]\!]s 
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![\neg b]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \neg \mathcal{B}[\![b]\!]s \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b]\!]s
+        \end{cases} \\[1.2em]
+            \mathcal{B}[\![b_1 \land b_2]\!]s &=& \begin{cases} 
+        \textbf{tt} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{tt} \\ & \text{and } \mathcal{B}[\![b_2]\!]s = \textbf{tt} \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b_1]\!]s = \textbf{ff} \\ & \text{or } \mathcal{B}[\![b_2]\!]s = \textbf{ff} \\ 
+        \end{cases}
+        \end{array}
+        \]
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+
+\subsubsection*{Comparison of Semantic Functions}
+Formalizing evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$ reveals key differences between mechanized and pen-and-paper approaches:
+\begin{itemize}
+    \item \textbf{Explicit Totality}: Lean enforces that every function be total by requiring coverage of all constructors. The textbook leaves certain cases (e.g., syntax errors) implicit.
+    \item \textbf{Constructor Coverage}: In Lean, each inductive case must be explicitly handled with a case-by-case pattern match, whereas textbooks often omit obvious or degenerate cases.
+    \item \textbf{Type Consistency}: Lean's type system forces consistent return types (e.g., $\mathbb{Z}$ for $\mathcal{A}$), whereas pen-and-paper notation sometimes glosses over type-checking details.
+\end{itemize}
+
+Beyond these core evaluation functions, mechanized reasoning about programs requires formal properties of state manipulation that pen-and-paper proofs often treat implicitly.
+
+\subsection*{Auxiliary Proofs}
+
+Beyond evaluation functions, state operations require formal verification. In addition to the above definitions, we need proofs to reason about state substitution:
+First, we prove that repeated assignments to the same variable can be collapsed:
+\[
+    s[x \mapsto z_1][x \mapsto z_2] = s[x \mapsto z_2]
+\]
+This proof allows us to remove redundant assignments during semantic reasoning.
+The informal proof is straightforward by extensionality: two states are equal if they agree on all variables.
+By definition of state assignment, both $s[x \mapsto z_1][x \mapsto z_2]$ and $s[x \mapsto z_2]$
+map $x$ to $z_2$ and any other variable $y \neq x$ to $s(y)$.
+
+\noindent
+In Lean, this is formalized as:
+\begin{Lean_Code}
+theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
+  s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by @\dots@
+\end{Lean_Code}
+
+Second, we prove the commutativity of assignments to distinct variables:
+\[
+    s[x \mapsto z_1][y \mapsto z_2] = s[y \mapsto z_2][x \mapsto z_1], \quad y \neq x
+\]
+
+This allows us to reorder assignments to different variables, further simplifying state manipulation proofs.
+The proof is again by extensionality: when $x \neq y$, both sides assign $z_1$ to $x$, $z_2$ to $y$,
+and leave all other variables unchanged.
+\begin{Lean_Code}
+theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
+  s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by @\dots@
+\end{Lean_Code}
+
+Full proofs for these auxiliary theorems can be found in \autoref{app:lean:state} in the appendix.
+With these properties in place, apparently redundant or reordered assignments can be formally simplified, e.g.:
+\[
+    s[x \mapsto 3][x \mapsto 2][x \mapsto 1][x \mapsto 0] = s[x \mapsto 0]
+\]
+
+Having established the syntactic categories, semantic domains, and evaluation functions,
+we now possess the foundation needed to define the transition systems.
+The next section formalizes Natural Semantics (also called big-step semantics) for the \While language,
+followed by Structural Operational Semantics (small-step), and finally establishes their equivalence.
+
+%
+%
+%
+\section{Formalizing Natural Semantics (Big-Step)}
+\label{formal_ns_sos_equiv:sec:ns:formalization}
+Now that we have a mechanized definition of the \While language we can proceed by defining the actual semantics of running a \While language program. 
+We will start by defining the natural operational semantics often referred to as "big step semantics".
+When it comes to operational semantics we use deduction tree syntax to provide rules and axioms.
+
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | ass {s x a} :
+      big_step (Stmt.ass x a) s (s[x @\mapsto@ @\(\mathcal{A}[\![a]\!]\)@ s])
+\end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[ass$_{\text{ns}}$]]1{ \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | skip {s} :
+      big_step Stmt.skip s s
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[skip$_{\text{ns}}$]]1{ \langle \mathtt{skip}, s \rangle \to s}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | comp {S@$_{1}$@ S@$_{2}$@ s s' s''}
+    (h_left  : big_step S@$_{1}$@ s  s')
+    (h_right : big_step S@$_{2}$@ s' s'') :
+      big_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s s''
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \hypo{\langle S_2, s' \rangle \to s''}
+  \infer[left label=[comp$_{\text{ns}}$]]2{ \langle S_1;\ S_2, s \rangle \to s''}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_true {b S@$_{1}$@ S@$_{2}$@ s s'} :
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true) @\to@
+    (h_then : big_step S@$_{1}$@ s s') @\to@
+      big_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ tt}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
+  }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_false {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false)
+    (h_else : big_step S@$_{2}$@ s s') :
+      big_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_2, s \rangle \to s'}
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
+  }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | while_true {b S s s' s''}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true)
+    (h_step : big_step S s s')
+    (h_rest : big_step (Stmt.loop b S) s' s'') :
+      big_step (Stmt.loop b S) s s''
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S, s \rangle \to s'}
+  \hypo{\langle \mathtt{while}\ b\ \mathtt{do}\ S, s' \rangle \to s''}
+  \infer[
+      left label={[while$_{\text{ns}}^{\text{\ tt}}$]}
+      ]2[
+      if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+      ]{
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \to s''
+  }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{2em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | while_false {b S' s}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false) :
+      big_step (Stmt.loop b S') s s
+
+-- Define the standard Nielson & Nielson notation
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{ns}$\ @" s' => @\leanbreak@ big_step S s s'
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[
+    left label={[while$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \to s
+  }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result}
+
+The transition system for Natural Semantics is formalized as an inductive relation \texttt{big\_step} that captures the complete execution of a \While program from initial state to final state. This big-step approach mirrors the pen-and-paper formulation: each rule represents either an axiom (for atomic statements like assignment and skip) or a deductive rule (for composite constructs). The relation mechanizes the textbook's informal rules by encoding:
+\begin{itemize}
+    \item \textbf{Axioms}: Atomic rules with no premises (assignment and skip) become inductive cases with no dependencies.
+    \item \textbf{Deductive Rules}: Composite rules with premises (composition, conditionals, loops) become inductive cases where the conclusions depend on recursive applications of \texttt{big\_step}.
+    \item \textbf{Conditions}: Side conditions in pen-and-paper rules (e.g., "$\mathcal{B}[\![b]\!]s = \mathbf{tt}$") become explicit logical conditions in Lean that must be proven as part of the rule application.
+\end{itemize}
+
+This mechanization preserves the meaning of the original rules while enforcing that all premises must be discharged before the conclusion can be derived. The notation $\langle S, s \rangle \to_{ns} s'$ is defined to match the textbook's presentation, allowing proofs to read similarly to their pen-and-paper counterparts.
+
+With the transition system now formalized, we can prove properties about Natural Semantics.
+
+%
+%
+%
+\section{Formalizing Proofs in Natural Semantics}
+\label{formal_ns_sos_equiv:sec:ns:proofs}
+Proofs made for natural semantics in the literature tend to share a pattern in using induction over the shape of the tree.
+More formally the book uses the following definition:
+\begin{quotation}
+\noindent
+Induction on the Shape of Derivation Trees\vspace{1em} \\  \noindent
+1: Prove that the property holds for all the simple derivation trees by
+showing that it holds for the axioms of the transition system.\vspace{1em} \\ \noindent
+2: Prove that the property holds for all composite derivation trees: For
+each rule assume that the property holds for its premises (this is
+called the induction hypothesis) and prove that it also holds for the
+conclusion of the rule provided that the conditions of the rule are
+satisfied.
+\end{quotation}
+Doing induction over the shape will be used in the proof in \autoref{formal_ns_sos_equiv:sec:ns:while_unroll}
+Let's start with an easier proof without any induction.
+
+%
+%
+\subsection{While-loop Unrolling (Lemma 2.5)}
+\label{formal_ns_sos_equiv:sec:ns:while_unroll}
+In the textbook they provide a lemma stating the following:
+\begin{quote}
+The statement
+\[\mathtt{while}\ b\ \mathtt{do}\ S\]
+is semantically equivalent to
+\[\mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip}\]
+\end{quote}
+This would be equivalent with stating the following:
+\[
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \iff  \langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+\]
+Making sure to label them the same way they do in the textbook we get the following:
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \tag{*}
+\]
+\[
+\langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s'' \tag{**}
+\]
+In the textbook they divide the proof into to two parts, first part is to prove that given (*) that (**) holds,
+the second part proves the reverse, namely proving that given (**) that (*) holds. Which is the normal way to prove equivalence of two statements.
+
+\subsubsection*{Forward Direction: $(*) \implies (**)$}
+Let us now compare the textbook proof with the mechanized equivalent for the case where we show that (*) holds, implies that (**) holds.
+\begin{paracol}{2}
+\begin{leftcolumn}
+    \centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+    \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem while_expand
+    (b : Bexp)
+    (S : Stmt)
+    (s s' : State) :
+  (@\(\langle\)@Stmt.loop b S, s@\(\rangle\)@ @\(\to_{ns}\)@ s') @\to@
+  (@\(\langle\)@Stmt.cond
+      b
+      (Stmt.composition
+          S
+          (Stmt.loop b S))
+      Stmt.skip, s@\(\rangle\)@ @\(\to_{ns}\)@ s') := by
+
+  -- Assume (*) holds
+  intro h_while
+
+  -- Split into cases based on the
+  -- last rule applied to derive (*)
+  cases h_while with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Because (*) holds, we know that we have a derivation tree T for it. It can
+have one of two forms depending on whether it has been constructed using the
+rule [while$_{\text{ns}}^{\text{\ tt}}$] or the axiom [while$_{\text{ns}}^{\text{\ ff}}$].
+\end{rightcolumn}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- Case: [while@$_{\text{ns}}^{\text{\ tt}}$@]
+  | while_true h_cond_true T@$_1$@ T@$_2$@ =>
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+In the first case, the derivation tree T has the form
+\[
+    \begin{prooftree}
+        \hypo{T_1}
+        \hypo{T_2}
+        \infer[
+            ]2{
+            \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''
+            }
+    \end{prooftree}
+\]
+where \(T_1\) is a derivation tree with root \(\langle S,\ s\rangle \to s'\) and \(T_2\) is a derivation tree
+with root \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''\).
+Furthermore, \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\).
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Construct the composition [comp@$_{\text{ns}}$@]
+    -- using T@$_1$@ and T@$_2$@
+    have comp_stmt :
+      (@\(\langle\)@Stmt.composition S (Stmt.loop b S), s@\(\rangle\)@ @\(\to_{ns}\)@ s') :=
+      big_step.comp T@$_1$@ T@$_2$@
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\begin{rightcolumn} \noindent
+Using the derivation trees \(T_1\) and \(T_2\) as the premises for the rules [comp$_{\text{ns}}$], we can construct the derivation tree
+\[
+    \begin{prooftree}
+        \hypo{T_1}
+        \hypo{T_2}
+        \infer[
+            % left label=[comp$_{\text{ns}}$]
+            ]2{
+            \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''
+            }
+    \end{prooftree}
+\]
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Apply [if@$_{\text{ns}}^{\ \text{tt}}$@] rule
+    exact big_step.if_true
+      h_cond_true
+      comp_stmt
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\begin{rightcolumn} \noindent
+Using that \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\), we can use the rule [if$_{\text{ns}}^{\ \text{tt}}$]
+to construct the derivation tree
+\[
+    \begin{prooftree}
+        \hypo{T_1}
+        \hypo{T_2}
+        \infer[
+            % left label=[comp$_{\text{ns}}$]
+            ]2{
+            \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''
+            }
+        \infer[
+            % left label=[if$_{\text{ns}}^{\ \text{tt}}$]
+            ]1{
+            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+            }
+    \end{prooftree}
+\]
+hereby showing that (**) holds.
+\end{rightcolumn}
+\vspace{2em}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- Case: [while@$_{\text{ns}}^{\text{\ ff}}$@]
+  | while_false h_cond_false =>
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Alternatively, the derivation tree \(T\) is an instance of [while$_{\text{ns}}^{\ \text{ff}}$].
+Then \(\mathcal{B}[\![b]\!]s = \mathbf{ff}\) and we must have that \(s'' = s\). So \(T\) simply is
+\[
+    \begin{prooftree}
+        \hypo{\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s}
+    \end{prooftree}
+\]
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Construct [skip@$_{\text{ns}}$@] axiom
+    have skip_stmt :
+      (@\(\langle\)@Stmt.skip, s@\(\rangle\)@ @\(\to_{ns}\)@ s) :=
+      big_step.skip
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Using the axiom [skip$_{\text{ns}}$], we get a derivation tree
+\[
+    \begin{prooftree}
+        \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
+    \end{prooftree}
+\]
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Apply [if@$_{\text{ns}}^{\ \text{ff}}$@] rule
+    exact big_step.if_false
+      h_cond_false
+      skip_stmt
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\switchcolumn
+\begin{rightcolumn} \noindent
+and we can now apply the rule [if$_{\text{ns}}^{\ \text{ff}}$] to construct a derivation tree for (**):
+\[
+    \begin{prooftree}
+        \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
+        \infer[
+        ]1{
+            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+        }
+    \end{prooftree}
+\]
+This completes the first part of the proof.
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+As we can see the two versions mimic each other very closely.
+This proof builds the deduction tree from the top and moving down towards the
+root with our wanted result. This method is also possible as demonstrated in Lean,
+but a more common approach is to build bottom up; it is entirely up to the
+writer which approach to use.
+
+\subsubsection*{Backward Direction: $(**) \implies (*)$}
+Now we will show that (**) holds, implies that (*) holds.
+\begin{paracol}{2}
+\begin{leftcolumn}
+    \centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+    \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
+  (@\(\langle\)@Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s@\(\rangle\)@ @\to$_{ns}$@ s') →
+  (@\(\langle\)@Stmt.loop b S, s@\(\rangle\)@ @\to$_{ns}$@ s') := by
+  
+  -- Assume (**) holds
+  intro h_if
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+For the second part of the proof, we assume that (**) holds and shall prove
+that (*) holds. So we have a derivation tree \(T\) for (**) and must construct one
+for (*).
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- Only [if@$_{\text{ns}}^{\ \text{tt}}$@] or [if@$_{\text{ns}}^{\ \text{ff}}$@]
+  -- can have been used for (**)
+  cases h_if with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Only two rules could give rise to the derivation tree \(T\) for (**), namely
+[while$_{\text{ns}}^{\text{\ tt}}$] or [while$_{\text{ns}}^{\text{\ ff}}$].
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- Case: [if@$_{\text{ns}}^{\ \text{tt}}$@]
+  | if_true h_cond_true T@$_1$@ =>
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+In the first case, \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\) and we have a derivation tree \(T_1\)
+with root
+\[
+    \begin{prooftree}
+        \hypo{\langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''}
+    \end{prooftree}
+\]
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Destruct composition [comp@$_{\text{ns}}$@]
+    cases T@$_1$@ with
+    | comp T@$_2$@ T@$_3$@ =>
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+The statement has the general form \(S_1;\ S_2\), and the only rule that could give
+this is [comp$_{\text{ns}}$]. Therefore there are derivation trees \(T _2\) and \(T_3\) for
+\[
+    \begin{prooftree}
+        \hypo{\langle S,\ s\rangle \to s'}
+    \end{prooftree}
+\]
+and
+\[
+    \begin{prooftree}
+        \hypo{\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s'\rangle \to s''}
+    \end{prooftree}
+\]
+for some state \(s'\).
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+      -- Combine into [while@$_{\text{ns}}^{\text{\ tt}}$@]
+      exact big_step.while_true
+        h_cond_true
+        T@$_2$@ T@$_3$@
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+It is now straightforward to use the rule [while$_{\text{ns}}^{\text{\ tt}}$] to combine
+\(T _2\) and \(T_3\) into a derivation tree for (*).
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  -- Case: [if@$_{\text{ns}}^{\ \text{ff}}$@]
+  | if_false h_cond_false h_deriv_skip =>
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\begin{rightcolumn} \noindent
+In the second case, \(\mathcal{B}[\![b]\!]s = \mathbf{ff}\) and \(T\) is constructed using the rule [while$_{\text{ns}}^{\text{\ ff}}$].
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Invert [skip@$_{\text{ns}}$@] axiom
+    cases h_deriv_skip
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\begin{rightcolumn} \noindent
+This means that we have a derivation tree for
+\[
+    \begin{prooftree}
+        \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
+    \end{prooftree}
+\]
+and according to axiom [skip$_{\text{ns}}$] it must be the case that \(s = s''\).
+\end{rightcolumn}
+\vspace{1.5em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Apply [while@$_{\text{ns}}^{\text{\ ff}}$@] rule
+    exact big_step.while_false
+      h_cond_false
+    \end{Lean_Code}
+\end{leftcolumn}
+
+\begin{rightcolumn} \noindent
+But then we can use the axiom [while$_{\text{ns}}^{\text{\ ff}}$] to construct a derivation tree for (*).
+This completes the proof.
+\end{rightcolumn}
+\vspace{1.5em}
+
+\end{paracol} 
+
+\subsubsection*{Applying the Equivalence}
+Whilst the textbook is now done with their proof, we must continue to formulate the equivalence relation,
+this is done by using the previous two proofs in a new final proof constructed as following:
+\begin{Lean_Code}
+lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
+(@\(\langle\)@(Stmt.cond
+    b
+    (Stmt.composition S (Stmt.loop b S))
+    Stmt.skip), s@\(\rangle\)@ @\(\to_{ns}\)@ s') @\(\leftrightarrow\)@
+(@\(\langle\)@Stmt.loop b S, s@\(\rangle\)@ @\(\to_{ns}\)@ s') := by
+  -- equivalence introduction
+  apply Iff.intro
+
+  -- Forward direction: if => while
+  case mp =>
+    -- Reusing our previous proof for if => while
+    exact if_compact b S s s'
+
+  -- Backward direction: while => if
+  case mpr =>
+    -- Reusing our previous proof for while => if
+    exact while_expand b S s s'
+\end{Lean_Code}
+
+\subsubsection*{Comparison and Result}
+This proof demonstrates the modular nature of both formal and informal proofs. By splitting the equivalence (\(\iff\)) into two implications (\(\implies\) and \(\impliedby\)), we can prove each direction independently. This modularity is mirrored in Lean through separate theorems (\texttt{while\_expand} and \texttt{if\_compact}) which are then combined using \texttt{Iff.intro}. Key observations include:
+\begin{itemize}
+    \item \textbf{Syntactic Correspondence}: The mechanized proof maps nearly 1:1 to the textbook's structure. Each "case" in Lean corresponds to a branch in the manual proof, and each rule application (e.g., \texttt{big\_step.comp}) matches the "construction of a new tree" in the text.
+    \item \textbf{Explicit vs. Implicit Construction}: In Lean, we use the \texttt{have} tactic to explicitly name intermediate derivation trees (like \texttt{comp\_stmt}). The textbook does this narratively ("we can construct the derivation tree...").
+    \item \textbf{Exhaustive Matching}: Lean's \texttt{cases} tactic on the \texttt{if} statement automatically identifies that only \texttt{if\_true} and \texttt{if\_false} are possible, mirroring the textbook's "Only two rules could give rise to...".
+\end{itemize}
+
+
+%
+%
+\subsection{Determinism (Lemma 2.9)}
+\label{formal_ns_sos_equiv:sec:ns:determinism}
+The next proof made in the textbook refers to determinism, where the definition of determinism is given
+\begin{quotation}
+\dots semantics is called deterministic if for all choices of
+\(S\), \(s\), \(s'\) and \(s''\) we have that
+\[
+\langle S,\ s \rangle \to s'\ \mbox{and}\ \langle S,\ s \rangle \to s''\ \mbox{imply}\ s' = s''
+\]
+This means that for every statement \(S\) and initial state \(s\) we can uniquely
+determine a final state \(s'\) if and only if the execution of \(S\) terminates.
+\end{quotation}
+By using this definition we can construct a proof using the following formulation:
+\[
+\langle S,\ s \rangle \to s' \implies \left(\langle S,\ s \rangle \to s'' \implies s' = s''\right)
+\]
+We will show the proofs side by side to show what the equivalent steps would be in Lean 4 compared to the textbook.
+\vspace{1em}
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+    \vspace{1.5em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem deterministic
+  (S : Stmt)
+  (s s' s'' : State)
+  (h: ⟨S, s⟩ @\to$_{ns}$@ s') :
+  (⟨ S, s⟩ @\to$_{ns}$@ s'')
+  @\to@
+  (s' = s'') := by
+  -- Induction over the shape
+  induction h
+  generalizing s'' with
+        \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+We assume that \(\langle S,\ s \rangle \to s'\) and shall prove that
+if \(\langle S,\ s \rangle \to s''\) then \(s' = s''\).
+We shall proceed by induction on the shape of the derivation tree for \(\langle S,\ s \rangle \to s'\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | ass =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | ass => rfl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [ass$_{\text{ns}}$]: Then \(S\) is \(x := a\) and \(s'\) is \(s[x\mapsto\mathcal{A}[\![a]\!]s]\).
+The only axiom or rule that could be used to give \( \langle x := a, s \rangle \to s'' \) is [ass$_{\text{ns}}$],
+so it follows that \(s''\) must be \(s[x \mapsto \mathcal{A}[\![a]\!] s]\) and thereby \(s' = s''\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | skip =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | skip => rfl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [skip$_{\text{ns}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | comp h_left h_right ih_left ih_right =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | comp h_alt_left h_alt_right =>
+      have h_mid_eq := ih_left _ h_alt_left
+      subst h_mid_eq
+      exact ih_right _ h_alt_right
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [comp$_{\text{ns}}$]: Assume that
+\[
+\langle S_1;\ S_2,\ s \rangle \to s'
+\]
+holds because
+\[
+\langle S_1,\ s \rangle \to s_0\ \mbox{and}\ \langle S_2,\ s_0 \rangle \to s'
+\]
+for some \(s_0\). The only rule that could be applied to give \(\langle S_1;\ S_2,\ s \rangle \to s''\) is
+[comp$_{\text{ns}}$], so there is a state \(s_1\) such that
+\[
+\langle S_1,\ s \rangle \to s_1\ \mbox{and}\ \langle S_2,\ s_1 \rangle \to s'
+\]
+The induction hypothesis can be applied to the premise \(\langle S_1,\ s \rangle \to s_0\) and from
+\(\langle S_1,\ s \rangle \to s_1\) we get \(s_0 = s_1\). Similarly, the induction hypothesis can be applied
+to the premise \(\langle S_2,\ s_0 \rangle \to s'\) and from \(\langle S_2,\ s \rangle \to s''\) we get \(s' = s''\) as required.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_true h_cond_true h_deriv_then ih_then =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | if_true _ h_deriv_then_alt =>
+      exact ih_then _ h_deriv_then_alt
+    | if_false h_cond_false_alt _ =>
+      rw [h_cond_true] at h_cond_false_alt
+      contradiction
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s'
+\]
+holds because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}\ \mbox{and}\ \langle S_1,\ s \rangle \to s'
+\]
+From \(\mathcal{B}[\![b]\!] = \mathbf{tt}\) we get that the only rule that could be applied to give the
+alternative \(\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s''\) is 
+[if$_{\text{ns}}^{\ \text{tt}}$]. So it must be the case that
+\[
+\langle S_1,\ s \rangle \to s'
+\]
+But then the induction hypothesis can be applied to the premise \(\langle S_1,\ s \rangle \to s'\)
+and from \(\langle S_1,\ s \rangle \to s''\) we get \(s' = s''\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_false h_cond_false h_deriv_else ih_else =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | if_false _ h_deriv_else_alt =>
+      exact ih_else _ h_deriv_else_alt
+    | if_true h_cond_true_alt _ =>
+      rw [h_cond_false] at h_cond_true_alt
+      contradiction
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_true h_cond_true h_deriv_body h_deriv_rest ih_while_body ih_while_rest =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | while_false h_cond_false_alt =>
+      rw [h_cond_true] at h_cond_false_alt
+      contradiction
+    | while_true _ h_deriv_body_alt h_deriv_rest_alt =>
+      have h_state_eq := ih_while_body _ h_deriv_body_alt
+      subst h_state_eq
+      exact ih_while_rest _ h_deriv_rest_alt
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s'
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s_0\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'
+\]
+The only rule that could be applied to give \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''\)
+is [while$_{\text{ns}}^{\ \text{tt}}$] because \(\mathcal{B}[\![b]\!] = \mathbf{tt}\), and this means that
+\[
+\langle S,\ s \rangle \to s_1\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_1 \rangle \to s''
+\]
+must hold for some \(s_1\). Again the induction hypothesis can be applied to the premise
+\(\langle S,\ s \rangle \to s_0\), and from \(\langle S,\ s \rangle \to s_1\) we get \(s_0 = s_1\).
+Thus we have
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s' \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''
+\]
+Since \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'\) is a premise of [while$_{\text{ns}}^{\ \text{tt}}$],
+we can apply the induction hypothesis to it. From \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''\)
+we therefore get \(s' = s''\) as required.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_false h_cond_false =>
+    intro h_deriv_alt
+    cases h_deriv_alt with
+    | while_true h_cond_true_alt _ _ =>
+      rw [h_cond_false] at h_cond_true_alt
+      contradiction
+    | while_false _ =>
+      trivial
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{ff}}$]: Straightforward.
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result}
+The formalization of determinism highlights several key differences in how "obvious" steps are handled:
+\begin{itemize}
+    \item \textbf{Inversion and Case Analysis}: The textbook frequently uses the phrase "the only rule that could be applied is...". In Lean, this is explicitly handled by the \texttt{cases} tactic on the second derivation (\texttt{h\_deriv\_alt}). This forces the user to explicitly handle (or dismiss via contradiction) cases that the textbook ignores.
+    \item \textbf{Handling Side Conditions}: In the \texttt{if} and \texttt{while} cases, the textbook assumes that because \(\mathcal{B}[\![b]\!]\) is true, only the "true" rule applies. In the mechanized proof, we must explicitly show that the "false" rule choice leads to a \texttt{contradiction} (e.g., \texttt{true = false}).
+    \item \textbf{Explicit Substitutions}: When the induction hypothesis reveals that an intermediate state is equal (\(s_0 = s_1\)), the mechanized proof requires an explicit \texttt{subst} to update all occurrences of the variable in the goal. The textbook performs this substitution implicitly in its narrative flow.
+    \item \textbf{State Generalization}: To prove the theorem, the variable \(s''\) must be \texttt{generalized} in the induction. This ensures the IH is strong enough to talk about \textit{any} potential second derivation, not just one specific fixed \(s''\).
+\end{itemize}
+
+
+%
+%
+%
+\section{Formalizing Structural Operational Semantics (Small-Step)}
+\label{formal_ns_sos_equiv:sec:sos:formalization}
+Similar to the way we define natural semantics we can define structural operational semantics,
+with the biggest difference being that not all statements will terminate to a final state after the first evaluation,but
+instead might require multiple steps to reach a final step for the operation. This is most notable for composition rules.
+
+\vspace{1em}
+\begin{paracol}{2}
+    \begin{leftcolumn}
+        \centering \textbf{Mechanized (Lean 4)}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+    \end{rightcolumn}
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive Config where
+  | step : Stmt  @\to@ State  @\to@ Config
+  | final : State  @\to@ Config
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+inductive small_step : Stmt @\to@ State @\to@ Config @\to@ Prop @\leanbreak@ where
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+    \end{rightcolumn}
+    \vspace{2em}
+
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | ass {s x a} :
+      small_step (Stmt.ass x a) s (Config.final (s[x @\mapsto@ @\(\mathcal{A}[\![a]\!]\)@ s]))
+\end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[ass$_{\text{sos}}$]]1{ \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+
+
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | skip {s} :
+      small_step Stmt.skip s (Config.final s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer[left label=[skip$_{\text{sos}}$]]1{ \langle \mathtt{skip}, s \rangle \to s}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{1em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | comp1 {S@$_{1}$@ S@$_{1}$@' S@$_{2}$@ s s'}
+    (h_step  : small_step S@$_{1}$@ s  (Config.step S@$_{1}$@' s')) :
+      small_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s (Config.step (Stmt.composition S@$_{1}$@' S@$_{2}$@) s')
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to \langle S_1', s' \rangle}
+  \infer[
+    left label=[comp$_{\text{sos}}^{1}$]
+    ]1{
+        \langle S_1;\ S_2, s \rangle \to \langle S_1';\ S_2, s' \rangle
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | comp2 {S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_left  : small_step S@$_{1}$@ s (Config.final s')) :
+      small_step (Stmt.composition S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{2}$@ s')
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \infer[
+    left label=[comp$_{\text{sos}}^{2}$]
+  ]1{
+    \langle S_1;\ S_2, s \rangle \to \langle S_2, s'\rangle}
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_true {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond_true : @\(\mathcal{B}[\![b]\!]\)@ s = true) : 
+      small_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{1}$@ s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty for axiom
+  \infer[
+    left label={[if$_{\text{sos}}^{\text{\ tt}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+        \parbox{4cm}{$
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to \langle S_1, s\rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | if_false {b S@$_{1}$@ S@$_{2}$@ s s'}
+    (h_cond_false : @\(\mathcal{B}[\![b]\!]\)@ s = false) : 
+      small_step (Stmt.cond b S@$_{1}$@ S@$_{2}$@) s (Config.step S@$_{2}$@ s)
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{} % Empty for axiom
+  \infer[
+    left label={[if$_{\text{ns}}^{\text{\ ff}}$]}
+    ]1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+        \parbox{4cm}{$
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to \langle S_2, s\rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+    \vspace{3em}
+    \switchcolumn[1]*[]
+    \begin{leftcolumn}
+        \begin{Lean_Code}
+  | while {b S s s' s''}
+    (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = true)
+    (h_step : big_step S s s')
+    (h_rest : big_step (Stmt.loop b S) s' s'') :
+      big_step (Stmt.loop b S) s s''
+
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step S s (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}$\ @" s':40 => @\leanbreak@ small_step S s (Config.final s')
+
+        \end{Lean_Code}
+    \end{leftcolumn}
+    \begin{rightcolumn}
+        \vspace{1.1em}
+            \(
+\begin{prooftree}
+  \hypo{}
+  \infer[
+      left label={[while$_{\text{sos}}$]}
+      ]1{
+        \parbox{4cm}{$
+            \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \to \\
+            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip}, s \rangle
+        $}
+    }
+\end{prooftree}
+            \)
+    \end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\paragraph{Formalization of Structural Operational Semantics}
+
+The transition system for Structural Operational Semantics is formalized as an inductive relation \texttt{small\_step} that captures single-step program execution. A key innovation in the mechanized version is the introduction of the \texttt{Config} type, which distinguishes between two configuration states: \texttt{step} (representing a non-terminal configuration with remaining computation) and \texttt{final} (representing a terminal configuration with the final state). This mechanizes the distinction that pen-and-paper notation handles implicitly through different arrow notations ($\to$ vs. termination).
+
+The rules themselves closely mirror the textbook:
+\begin{itemize}
+    \item \textbf{Atomic Rules}: Assignment and skip both reduce to final configurations in a single step.
+    \item \textbf{Decomposition Rules}: Composition rules split the execution: the first rule continues stepping the left component, and the second rule activates the right component once the left completes.
+    \item \textbf{Conditional Rules}: The two conditional branches are explicitly separated, with the condition determining which rule applies.
+    \item \textbf{While Loop Rule}: Rather than recursive application, the while loop is unrolled into an equivalent conditional-composition structure, which then proceeds by small steps.
+\end{itemize}
+
+While the single-step relation \texttt{small\_step} captures individual
+program transitions, practical reasoning about complete program execution
+requires multi-step relations. The textbook introduces convenient shorthand
+notation for these ($\langle S, s\rangle \Rightarrow^{k} s'$ for exactly
+$k$ steps and $\langle S, s\rangle \Rightarrow^{*} s'$ for any finite number
+of steps). The mechanized version must explicitly formalize these as inductive
+types to enable rigorous proof construction. To use the same ideas in Lean 4,
+we introduce two new inductive types as follows:
+
+\begin{Lean_Code}
+inductive small_step_k : Config @\to@ Nat @\to@ Config @\to@ Prop where
+  | refl {@\gamma@} :
+      small_step_k @\gamma@ 0 @\gamma@
+  | step {S s @\gamma@' @\gamma@'' k}
+    (step : small_step S s @\gamma@')
+    (rest : small_step_k @\gamma@' k @\gamma@'') :
+      small_step_k (Config.step S s) (k + 1) @\gamma@''
+
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}[$\ @" k "@\ \color{purple}$]$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_k (Config.step S s) k (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}[$\ @" k "@\ \color{purple}$]$\ @" s':40 => @\leanbreak@ small_step_k (Config.step S s) k (Config.final s')
+
+\end{Lean_Code}
+and
+\begin{Lean_Code}
+inductive small_step_star : Config @\to@ Nat @\to@ Config @\to@ Prop where
+  | refl {@\gamma@} :
+      small_step_star @\gamma@ 0 @\gamma@
+  | step {S s @\gamma@' @\gamma@'' k}
+    (step : small_step S s @\gamma@')
+    (rest : small_step_star @\gamma@' @\gamma@'') :
+      small_step_star (Config.step S s) @\gamma@''
+
+-- Define the standard Nielson & Nielson notation
+-- Non terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}*$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_star (Config.step S s) (Config.step S' s')
+
+-- Terminal configuration
+notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}*$\ @" s':40 => @\leanbreak@ small_step_star (Config.step S s) (Config.final s')
+
+\end{Lean_Code}
+
+
+%
+%
+%
+\section{Formalizing Proofs in Structural Operational Semantics}
+Proofs made for structural operational semantics in the literature tend to share a pattern in using induction over the length of the derivation sequence.
+More formally the book uses the following definition:
+\begin{quotation}
+\noindent
+Induction on the Length of Derivation Sequences\vspace{1em} \\  \noindent
+1: Prove that the property holds for all derivation sequences of length 0. \vspace{1em} \\ \noindent
+2: Prove that the property holds for all finite derivation sequences:
+Assume that the property holds for all derivation sequences of length at
+most \(k\) (this is called the induction hypothesis) and show that it holds
+for derivation sequences of length \(k+1\).
+\end{quotation}
+Doing induction over the length will be used in the proof in all structural operational semantics proofs in this thesis.
+Let's start with a simpler proof before moving on to the final boss of equivalence between the two semantics.
+
+%
+%
+\subsection{Decomposition (Lemma 2.19)}
+\label{formal_ns_sos_equiv:sos:comp_split}
+The first real proof provided for structural operational semantics is the proof that states
+that a composition of two statements which terminates, can be split into two individual executions for each statement.
+
+\begin{quotation}
+    \noindent
+    If \(\langle S_1;\ S_2, s \rangle \Rightarrow^k s''\), then there exists
+    a state \(s'\) and natural numbers \(k_1\) and \(k_2\) such that
+    \(\langle S_1, s \rangle \Rightarrow^{k_1} s'\) and \(\langle S_2, s' \rangle \Rightarrow^{k_2} s''\),
+    where \(k = k_1 + k_2\).
+\end{quotation}
+
+
+
+\vspace{1em}
+\begin{paracol}{2}
+\begin{leftcolumn}
+\centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+\centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+lemma seq_split {S@$_1$@ S@$_2$@ : Stmt}
+    {s s'' : State} {k : Nat}
+    (h : @\(\langle S_1; S_2, s \rangle \to_{sos}[k] s''\)@) :
+    @\(\exists\)@ s' k@\(_1\)@ k@\(_2\)@, @\(\langle S_1, s \rangle \to_{sos}[k_1] s'\)@
+    @\(\land\)@ @\(\langle S_2, s' \rangle \to_{sos}[k_2] s''\)@
+    @\(\land\)@ k = k@\(_1\)@ + k@\(_2\)@ := by
+  -- Proof by induction on
+  -- the number k
+  -- (length of the
+  -- derivation sequence).
+  induction k
+  generalizing s S@$_1$@ with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+Proof: The proof is by induction on the number \(k\); that is, by induction on the
+length of the derivation sequence \(\langle S_1;\ S_2, s \rangle \Rightarrow^k s''\).
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | zero =>
+    -- Base case k = 0:
+    -- impossible for a starting
+    -- configuration @\color{green!40!black}{\(\langle S_1; S_2, s \rangle\)}@
+    cases h
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+If \(k = 0\), then the result holds vacuously
+(because \(\langle S_1;\ S_2, s \rangle\) and \(s''\) are different).
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | succ k@\color{green!40!black}{\(_0\)}@ ih =>
+    -- Inductive step:
+    -- assume the statement
+    -- for @\color{green!40!black}{\(k_0\)}@, prove for k@\color{green!40!black}{\(_0\)}@ + 1.
+    -- The derivation can be
+    -- written as a first small-
+    -- step to some configuration
+    -- @\color{green!40!black}{\(\gamma\)}@, followed by k@\color{green!40!black}{\(_0\)}@ further
+    -- steps to s''.
+    cases h with
+    | step gamma_step h_tail =>
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+For the induction step, we assume that the lemma hold for \(k \leq k_0\), and we
+shall prove it for \(k_0 + 1\). So assume that
+\[
+\langle S_1;\ S_2, s \rangle \Rightarrow^{k_0 + 1} s''
+\]
+This mean that the derivation sequence can be written as
+\[
+\langle S_1;\ S_2, s \rangle \Rightarrow \gamma \Rightarrow^{k_0} s''
+\]
+for some configuration \(\gamma\).
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+      -- Now inspect which rule
+      -- produced that first step:
+      -- [comp1] or [comp2].
+      cases gamma_step with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+Now one of two cases applies depending on
+which of the two rules [comp\(_{sos}^{1}\)] and [comp\(_{sos}^{2}\)] is used.
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+      | comp1 progress =>
+        -- [comp1]:
+        -- @\color{green!40!black}{\(\gamma = \langle S_1'; S_2, s' \rangle\)}@
+        -- because progress :
+        -- @\color{green!40!black}{\(\langle S_1, s \rangle \to_{sos} \langle S_1', s' \rangle\)}@.
+        -- We therefore have
+        -- @\color{green!40!black}{\(\langle S_1'; S_2, s' \rangle \to_{sos}[k_0] s''\)}@,
+        -- so apply IH to that
+        -- shorter derivation.
+        specialize ih h_tail
+        let @\(\langle s_0, k_1, k_2, hk_1, hk_2, h_{sum} \rangle\)@ := ih
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+In the first case, were [comp\(_{sos}^{1}\)] is used, we have
+\(\gamma = \langle S_1';\ S_2, s' \rangle\) and
+\[
+\langle S_1;\ S_2, s \rangle \Rightarrow \langle S_1';\ S_2, s' \rangle
+\]
+because
+\[
+\langle S_1, s \rangle \Rightarrow \langle S_1', s' \rangle
+\]
+We therefore have
+\[
+\langle S_1';\ S_2, s' \rangle \Rightarrow^{k_0} s''
+\]
+and the induction hypothesis can be applied to this derivation sequence because it
+is shorter than the one with which we started.
+This means that there is a state \(s_0\) and natural numbers \(k_1\) and \(k_2\) such that
+\[
+\langle S_1', s' \rangle \Rightarrow^{k_1} s_0\ \mbox{and}\ \langle S_2, s_0 \rangle \Rightarrow^{k_2} s''
+\]
+where \(k_1 + k_2 = k_0\).
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        -- From progress:
+        -- @\color{green!40!black}{\(\langle S_1, s \rangle \to_{sos} \langle S_1', s' \rangle\)}@
+        -- and
+        -- hk@\color{green!40!black}{\(_1\)}@ : @\color{green!40!black}{\(\langle S_1', s' \rangle \to_{sos}[k_1] s_0\)}@
+        -- we obtain
+        -- @\color{green!40!black}{\(\langle S_1, s \rangle \to_{sos}[k_1 + 1] s_0\)}@.
+        exists s@\(_0\)@, k@\(_1\)@ + 1, k@\(_2\)@
+
+        constructor
+        case left =>
+          exact small_step_k.step
+                progress
+                hk@\(_1\)@
+
+        case right =>
+          constructor
+          case left => exact hk@\(_2\)@
+
+          case right =>
+            -- arithmetic:
+            -- (k@\color{green!40!black}{\(_1\)}@ + 1) + k@\color{green!40!black}{\(_2\)}@ =
+            -- k@\color{green!40!black}{\(_0\)}@ + 1
+            simp [h_sum]
+            linarity
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+Using that \(\langle S_1, s \rangle \Rightarrow \langle S_1', s' \rangle\) and
+\(\langle S_1', s' \rangle \Rightarrow^{k_1} s_0\), we get
+\[
+\langle S_1, s \rangle \Rightarrow^{k_1+1} s_0
+\]
+We have already seen that \(\langle S_2, s_0 \rangle \Rightarrow^{k_2} s''\), and since
+\((k_1 + 1) + k_2 = k_0 + 1\) we have proved the required result.
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+      | comp2 terminates =>
+        -- [comp2]:
+        -- the first step returns
+        -- @\color{green!40!black}{\(\gamma = \langle S_2, s' \rangle\)}@
+        -- because
+        -- terminates :
+        -- @\color{green!40!black}{\(\langle S_1, s \rangle \to_{sos} s'\)}@.
+        -- We have
+        -- @\color{green!40!black}{\(\langle S_2, s' \rangle \to_{sos}[k_0] s''\)}@.
+        -- Choose k@\color{green!40!black}{\(_1\)}@ = 1
+        -- and k@\color{green!40!black}{\(_2\)}@ = k@\color{green!40!black}{\(_0\)}@.
+        rename_i s'
+        exists s', 1, k@\(_0\)@
+        constructor
+        case left =>
+          exact small_step_k.step terminates small_step_k.refl
+
+        case right =>
+          constructor
+          case left =>
+            exact h_tail
+          
+          case right => linarith
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+The second possibility is that [comp\(_{sos}^{1}\)]
+has been used to obtain the derivation
+\(\langle S_1;\ S_2, s \rangle \Rightarrow \gamma\)
+Then we have
+\[
+\langle S_1, s \rangle \Rightarrow s'
+\]
+and \(\gamma\) is \(\langle S_2, s' \rangle\) so that
+\[
+\langle S_2, s' \rangle \Rightarrow^{k_0} s''
+\]
+The result now follows by choosing \(k_1 = 1\) and \(k_2 = k_0\).
+\end{rightcolumn}
+
+
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result}
+While the pen-and-paper proof follows a high-level logical flow, the mechanized proof requires explicit handling of Lean-specific concepts:
+\begin{itemize}
+    \item \textbf{Formalization of the Relation}: The textbook uses a somewhat informal "where \(k = k_1 + k_2\)" clause. In Lean, this must be part of the explicit existential bundle (\(\land k = k_1 + k_2\)), requiring the use of \texttt{constructor} to split the logical conjunctions.
+    \item \textbf{Generalization}: The \texttt{generalizing} keyword is used in the induction to ensure that the induction hypothesis remains applicable to different states and statements as the execution progresses.
+    \item \textbf{Specialization}: Tactics like \texttt{specialize} are used to "fix" a generalized induction hypothesis to a specific derivation (\texttt{h\_tail}), allowing for direct application to the sub-problem.
+    \item \textbf{Existential Unpacking}: The mechanized proof uses \texttt{let} with pattern matching (the angle brackets) to "unpack" the witnesses from the induction hypothesis, whereas the textbook simply states "this means there is a state \(s_0\)".
+    \item \textbf{Automation}: The proof relies on automation tactics like \texttt{simp} and \texttt{linarith} (or \texttt{linarity}) to handle the arithmetic bookkeeping regarding the step counts, which is often dismissed as "trivial" or "obvious" in manual proofs.
+\end{itemize}
+
+
+
+%
+%
+%
+\section{Proving Natural Semantics $\equiv$ Structural Operational Semantics}
+\label{formal_ns_sos_equiv:sec:ns_equiv_sos}
+
+\todo{Fix an intro message, present proof, and why it is interesting to evaluate in thesis}
+\todo{Explain that semantic function can be model in lean as it is partial, and one can not create
+proofs using partial functions in lean 4}
+
+\begin{quotation}
+\noindent
+For every statement S of \While, we have \(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\).
+This result expresses two properties:
+\begin{itemize}
+    \item If the execution of \(S\) from some state terminates in of of the semantics,
+    then it also terminates in the other and the resulting states will be equal.
+    \item If the execution of \(S\) from some state loops in one of the semantics,
+    then it will also loop in the other.
+\end{itemize}
+It should be fairly obvious that the first property follows from the theorem because
+there are no stuck configurations in the structural operational semantics of \While.
+For the other property, suppose that the execution of \(S\) on state \(s\) loops in one semantics.
+If it terminates in the other semantics, we have a contradiction with the first property
+because both semantics are deterministic (Theorem 2.9 and Exercise 2.22).
+Hence \(S\) will have to loop on state \(s\) also in the other semantics.
+
+The theorem is proved in two stages, as expressed by Lemma 2.27 and Lemma 2.28.
+We shall first prove Lemma 2.27.
+\end{quotation}
+
+\subsubsection*{Lemma 2.27}
+For every statement \(S\) of \While and states \(s\) and \(s'\) we have
+\[
+\langle S, s \rangle \to s'\ \mbox{implies}\ \langle S, s \rangle \Rightarrow^{*} s'
+\]
+So if the execution of \(S\) from \(s\) terminates in the natural semantics, then it will terminate
+in the same state in the structural operational semantics.
+\vspace{1em}
+\begin{paracol}{2}
+\begin{leftcolumn}
+\centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+\centering \textbf{Pen-and-Paper (Textbook)}
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem ns_to_sos
+  (S : Stmt)
+  (s s' : State) :
+  (@\(\langle S, s\rangle \to_{ns} s'\)@) @\to@ (@\(\langle S, s \rangle \to_{sos}^{*} s'\)@)
+  := by
+  intro h
+  -- Proof outline:
+  -- 1. Induction on `h : @\(\langle S, s\rangle \to_{ns} s'\)@`.
+  -- 2. For each constructor of the natural semantics, construct the
+  --    corresponding multi-step SOS derivation.
+  induction h with
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Proof: The proof proceeds by induction on the shape of the derivation tree for\\
+\(\langle S, s \rangle \to s'\).
+
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | ass =>
+    apply small_step_star.step
+    apply small_step.ass
+    apply small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [ass$_{\text{ns}}$]: We assume that
+\[
+\langle x:=a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]
+\]
+From [ass$_{\text{sos}}$], we get the required
+\[
+\langle x:=a, s \rangle \Rightarrow s[x \mapsto \mathcal{A}[\![a]\!] s]
+\]
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | skip =>
+    apply small_step_star.step
+    apply small_step.skip
+    apply small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [skip$_{\text{ns}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | comp ih1 ih2 h1 h2 =>
+    rename_i S₁ S₂ s s' s''
+    -- Exercise 2.21
+    have h_comp_first_part := exercise_2_21 (S₂ := S₂) h1
+    -- Transitivity
+    exact small_step_star_trans h_comp_first_part h2
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [comp$_{\text{ns}}$]: Assume that
+\[
+\langle S_1;\ S_2,\ s \rangle \to s''
+\]
+because
+\[
+\langle S_1,\ s \rangle \to s'\ \mbox{and}\ \langle S_2,\ s' \rangle \to s''
+\]
+The induction hypothesis can be applied to both of the premises
+\(\langle S_1,\ s \rangle \to s'\) and \(\langle S_2,\ s' \rangle \to s''\)
+and gives
+\[
+\langle S_1,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle S_2,\ s' \rangle \Rightarrow^{*} s''
+\]
+From Exercise 2.21, we get
+\[
+\langle S_1;\ S_2,\ s \rangle \Rightarrow^{*} \langle S_2,\ s' \rangle
+\]
+and thereby \(\langle S_1;\ S_2,\ s \rangle \Rightarrow^{*} s''\).
+
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_true h_cond h ih =>
+    -- Text: ⟨if b then S₁ else S₂, s⟩ ⇒ ⟨S₁, s⟩ ⇒* s'
+    -- We decompose into one SOS step followed by multi-step derivation
+    apply small_step_star.step
+    -- Step 1: Apply [if_true_sos] rule with condition B[[b]] = tt
+    · apply small_step.if_true h_cond
+    -- Remaining steps: IH applied to ⟨S₁, s⟩ →ₙₛ s'
+    · exact ih
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s'
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}\ \mbox{and}\ \langle S_1,\ s \rangle \to s'
+\]
+Since \(\mathcal{B}[\![b]\!] = \mathbf{tt}\), we get
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \Rightarrow \langle S_1,\ s \rangle \Rightarrow^{*} s'
+\]
+where the first relationship comes from [if$_{\text{ns}}^{\ \text{tt}}$] and the second
+from the induction hypothesis applied to the premise\\
+\(\langle S_1,\ s \rangle \to s'\).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | if_false h_cond h ih =>
+    -- [if_false_sos]
+    apply small_step_star.step
+    · apply small_step.if_false h_cond
+    · exact ih
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{ns}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_true h_cond h_body h_rest ih_body ih_loop =>
+    rename_i b S s s' s''
+    -- Exercise 2.21
+    have h_after_ex21 := exercise_2_21 (S₂ := Stmt.loop b S) ih_body
+    -- while_sos step
+    apply small_step_star.step
+    · exact small_step.while_unroll
+    -- if_sos^tt step
+    apply small_step_star.step
+    · exact small_step.if_true h_cond
+    -- Transitivity
+    exact small_step_star_trans h_after_ex21 ih_loop
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{tt}}$]: Assume that
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''
+\]
+because
+\[
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''
+\]
+The induction hypothesis can be applied to both of the premises \(\langle S,\ s \rangle \to s'\)
+and \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''\)
+and gives
+\[
+\langle S,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \Rightarrow^{*} s''
+\]
+Using Exercise 2.21, we get
+\[
+\langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \Rightarrow^{*} s''
+\]
+Using [while$_{\text{sos}}$] and [if$_{\text{sos}}^{\ \text{tt}}$] (with \(\mathcal{B}[\![b]\!] = \mathbf{tt}\)),
+we get the first two steps of
+\begin{align*}
+    &\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ & \Rightarrow
+    \langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \\ & \Rightarrow
+    \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ &\Rightarrow^{*}
+    s''
+\end{align*}
+and we have already argued for the last part.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+  | while_false h_cond =>
+    -- while_sos step
+    apply small_step_star.step
+    · exact small_step.while_unroll
+    -- if_sos^ff step
+    apply small_step_star.step
+    · exact small_step.if_false h_cond
+    -- skip_sos step + reflexivity
+    apply small_step_star.step
+    · exact small_step.skip
+    · exact small_step_star.refl
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{ns}}^{\ \text{ff}}$]: Straightforward.
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+This completes the proof of Lemma 2.27. The second part of the theorem
+follows from Lemma 2.28.
+
+\subsubsection*{Comparison and Result (Lemma 2.27)}
+The mechanized proof of \texttt{ns\_to\_sos} mirrors the textbook's inductive structure but requires explicit handling of Lean-specific machinery:
+\begin{itemize}
+    \item \textbf{Constructor-Based Induction}: The textbook performs induction on ``the shape of the derivation tree'' informally. Lean explicitly matches on constructors (\texttt{ass}, \texttt{skip}, \texttt{comp}, \texttt{if\_true}, \texttt{if\_false}, \texttt{while\_true}, \texttt{while\_false}) using \texttt{induction h with}.
+    \item \textbf{Applying Lemmas Conditionally}: The textbook references Exercise 2.21 as a ``helper fact'' and applies it where needed. In Lean, this becomes an explicit call to \texttt{exercise\_2\_21} with the relevant statement \texttt{S2} specified as a named argument.
+    \item \textbf{Transitivity}: The textbook's logical chaining (``we have already argued for the last part'') is formalized via \texttt{small\_step\_star\_trans}, which explicitly composes the multi-step derivations.
+    \item \textbf{Variable Renaming}: The \texttt{rename\_i} tactic is used to introduce shadow variables introduced by induction (e.g., \(S_1, S_2, s, s', s''\)) into the local context when the inductive constructors do not bind them explicitly.
+    \item \textbf{Decomposition vs. Composition}: While the textbook focuses on decomposing a complex case (composition) into simpler parts, the Lean proof must explicitly apply multiple inference rules (\texttt{small\_step.ass}, \texttt{small\_step.skip}, etc.) and use \texttt{apply small\_step\_star.step} to build up the derivation.
+\end{itemize}
+
+\subsubsection*{Lemma 2.28}
+For every statement \(S\) of While, states \(s\) and \(s'\) and natural number \(k\), we
+have that
+\[
+\langle S, s \rangle \Rightarrow^{k} s'\ \mbox{implies}\ \langle S, s \rangle \to s'
+\]
+So if the execution of \(S\) from \(s\) terminates in the structural operational semantics,
+then it will terminate in the same state in the natural semantics.
+
+
+
+\vspace{1em}
+\begin{paracol}{2}
+\begin{leftcolumn}
+\centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+\centering \textbf{Pen-and-Paper (Textbook)}
+\end{rightcolumn}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
+  (⟨S, s⟩ →ₛₒₛ[k] s') → (⟨S, s⟩ →ₙₛ s') := by
+  -- Use strong induction on k to allow for arbitrary k1, k2 < k
+  induction k using Nat.strongRecOn generalizing S s s'
+  rename_i n ih
+  intro h_k_step
+  match n with
+    | 0 =>
+      -- Case k = 0: Vacuous as per text
+      cases h_k_step
+    | k₀ + 1 =>
+      -- Case k = k0 + 1: This is where we "inspect the first step"
+      cases h_k_step with
+      | step h_first h_rest =>
+        -- h_first: ⟨S, s⟩ →ₛₒₛ next_cfg
+        -- h_rest : next_cfg →ₛₒₛ[k0] s'
+
+        -- Now you can perform `cases h_first` to inspect the SOS rule tree
+        cases h_first
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn} \noindent
+Proof: The proof proceeds by induction on the length of of the derivation sequence 
+\(\langle S, s \rangle \Rightarrow^{k} s'\); that is, by induction on \(k\)
+
+If \(k = 0\), then the result holds vacuously. \\
+
+
+To prove the the induction step we assume that the lemma holds for \(k \leq k_0\),
+and we shall then prove that it holds for \(k_0 + 1\).
+We proceed by cases on how the first step of \(\langle S, s \rangle \Rightarrow^{k_+1} s'\)
+is obtained; that is, by inspecting the derivation tree for the first step of computation in structural operational semantics.
+\end{rightcolumn}
+\vspace{2em}
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case ass x a =>
+          -- Text: "The case [ass_sos]: Straightforward (and k0 = 0)"
+          cases h_rest -- This must be refl because assignment terminates in 1 step
+          apply big_step.ass
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [ass$_{\text{sos}}$]: Straightforward (and \(k_0 = 0\)).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case skip =>
+          -- Text: "The case [skip_sos]: Straightforward (and k0 = 0)"
+          cases h_rest
+          apply big_step.skip
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [skip$_{\text{sos}}$]: Straightforward (and \(k_0 = 0\)).
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case comp1 S1 S1' S2 s_next h_step_S1 =>
+          -- [Step 1: Apply Lemma 2.19 to split the sequence]
+          obtain ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := seq_split h_rest
+
+          -- [Step 4: Use the [comp_ns] rule to combine results]
+          apply big_step.comp (s' := s_mid)
+          case h_left =>
+            -- [Step 2: Establish the derivation for S1]
+            have h_s1_full : ⟨S1, s⟩ →ₛₒₛ[k₁ + 1] s_mid := small_step_k.step h_step_S1 hk1
+            -- [Step 3a: Justify that k₁ + 1 is strictly smaller than the total]
+            have h_k2_pos : k₂ > 0 := by
+              cases k₂
+              case zero => cases hk2
+              case succ => linarith
+            -- [Step 3b: Apply the Induction Hypothesis (IH)]
+            apply ih (k₁ + 1) (by linarith) S1 s s_mid h_s1_full
+            
+          case h_right =>
+            -- [Step 3: Apply the Induction Hypothesis (IH) for S2]
+            apply ih k₂ (by linarith) S2 s_mid s' hk2
+
+        case comp2 S1 S2 s_next h_step_s1 =>
+          apply big_step.comp (s' := s_next)
+          case h_left =>
+            -- Unlike comp1, S1 terminates fully in this first step (S1' is skip)
+            -- We apply the IH to a 1-step derivation instead of (k₁ + 1)
+            have h_lt_one : 1 < k₀ + 1 := by
+              cases k₀
+              case zero => cases h_rest
+              case succ => linarith
+
+            apply ih 1 h_lt_one S1 s s_next
+            exact small_step_k.step h_step_s1 small_step_k.refl
+
+          case h_right =>
+            -- In comp1, the second part takes k₂ steps; here, it takes the full remaining k₀ steps
+            apply ih k₀ (by linarith) S2 s_next s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [comp$_{\text{sos}}^{\text{1}}$] and [comp$_{\text{sos}}^{\text{2}}$]:
+In both cases we assume that
+\[
+\langle S_1;\ S_2,\ s \rangle \Rightarrow^{k_0 + 1} s''
+\]
+We can now apply Lemma 2.19 and get that there exist a state \(s'\) and natural numbers
+\(k_1\) and \(k_2\) such that
+\[
+\langle S_1,\ s \rangle \Rightarrow^{k_1} s'\ \mbox{and}\ \langle S_2,\ s' \rangle \Rightarrow^{k_2} s''
+\]
+where \(k_1 + k_2 = k_0 + 1\). The induction hypothesis can now be applied to each of these
+derivation sequences because \(k_1 \leq k_0\) and \(k_2 \leq k_0\). So we get
+\[
+\langle S_1,\ s \rangle \to s'\ \mbox{and}\ \langle S_2,\ s' \rangle \to s''
+\]
+Using [comp$_{\text{ns}}$], we now get required \(\langle S_1;\ S_2,\ s \rangle \to s''\)
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case if_true
+            b S1 S2 h_cond =>
+          apply big_step.if_true
+            h_cond
+          -- apply induction hypothesis
+          apply ih k₀
+            (by linarith) S1
+            s s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{sos}}^{\ \text{tt}}$]: Assume that
+\(\mathcal{B}[\![b]\!] = \mathbf{tt}\) and that
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \Rightarrow \langle S_1,\ s \rangle \Rightarrow^{k_0} s'
+\]
+The induction hypothesis can be applied to the derivation \(\langle S_1,\ s \rangle \Rightarrow^{k_0} s'\) and
+give
+\[
+\langle S_1,\ s \rangle \to s'
+\]
+The result now follows using [if$_{\text{ns}}^{\ \text{tt}}$].
+
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case if_false
+            b S1 S2 h_cond =>
+          apply big_step.if_false
+            h_cond
+          apply ih k₀
+            (by linarith) S2
+            s s' h_rest
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [if$_{\text{sos}}^{\ \text{ff}}$]: Analogous.
+\end{rightcolumn}
+\vspace{2em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+        case while_unroll b S_body =>
+          -- First step: ⟨while...⟩ → ⟨if b then (S; while...) else skip, s⟩
+          -- We apply the IH to the resulting k0 steps starting from the 'if'
+          have h_ns_if := ih k₀ (by linarith) _ _ _ h_rest
+          -- Then use the bridge: if_ns → while_ns (via lemma_2_5.mp)
+          apply (lemma_2_5 b S_body s s').mp
+          exact h_ns_if
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\textbf{The case} [while$_{\text{sos}}$]: We have
+
+\begin{align*}
+    &\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ & \Rightarrow
+    \langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \\ & \Rightarrow
+    \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \\ &\Rightarrow^{k_0}
+    s''
+\end{align*}
+The induction hypothesis can be applied to the \(k_0\) last steps of the derivation sequence and gives
+\[
+\langle \mathtt{if}\ b\ \mathtt{then}\ \left( S;\ \mathtt{while}\ b\ \mathtt{do}\ S \right)\ \mathtt{else}\ \mathtt{skip},\ s \rangle \to s''
+\]
+and from Lemma 2.5 we get the required
+\[
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''
+\]
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result (Lemma 2.28)}
+The mechanized proof of \texttt{sos\_k\_to\_ns} demonstrates how to formalize a proof by induction on the ``length'' of a derivation:
+\begin{itemize}
+    \item \textbf{Strong Induction}: The textbook states ``by induction on the length \(k\) of the derivation sequence''; Lean uses \texttt{Nat.strongRecOn} to enable strong induction, allowing the induction hypothesis to apply to any \(m < k_0\), not just \(m = k_0 - 1\). This is essential for reasoning about decomposed sub-derivations with unknown step counts.
+    \item \textbf{Pattern Matching on Inductive Families}: The textbook separates the base case (\(k = 0\)) and inductive step (\(k = k_0 + 1\)) informally. In Lean, this is done with \texttt{match n with} to branch on the natural number, then \texttt{cases h\_k\_step} to decompose the derivation proof.
+    \item \textbf{Composition Rule Handling}: The textbook treats [comp\(_{sos}^1\)] and [comp\(_{sos}^2\)] as two cases, and uses Lemma 2.19 to split the sequence. Lean calls \texttt{seq\_split} to obtain witnesses (\(s\_mid\), \(k_1\), \(k_2\)) and then applies the induction hypothesis to each piece. The two cases are \texttt{case comp1} and \texttt{case comp2}.
+    \item \textbf{Justifying Step Counts}: The textbook glosses over arithmetic details like ``\(k_1 + k_2 = k_0 + 1\)'' or ``\(k_2 > 0\)''. In Lean, these must be explicitly verified: checking that \(k_2 > 0\) via \texttt{cases k₂}, and using \texttt{linarith} to discharge arithmetic goals.
+    \item \textbf{Bridging Lemmas}: The while case uses a helper lemma \texttt{lemma\_2\_5} to convert between the natural semantics and structural operational semantics for while loops. This formalizes the informal statement ``from Lemma 2.5 we get the required''.
+\end{itemize}
+
+\subsubsection*{Completion of the Theorem}
+\begin{paracol}{2}
+\begin{leftcolumn}
+    \begin{Lean_Code}
+theorem sos_to_ns (S : Stmt) (s s' : State) :
+  (⟨S, s⟩ →ₛₒₛ* s') → (⟨S, s⟩ →ₙₛ s') := by
+  intro h
+  -- 1. Convert star to a k-step relation
+  obtain ⟨k, hk⟩ := star_to_small_step_k h
+  -- 2. Call a helper lemma that works via induction on k
+  exact sos_k_to_ns S s s' k hk
+
+theorem ns_equivalent_sos (S : Stmt) (s s' : State) :
+  (⟨S, s⟩ →ₙₛ s') ↔ (⟨ S, s⟩ →ₛₒₛ* s') := by
+  apply Iff.intro
+  case mp => exact ns_to_sos S s s'
+  case mpr => exact sos_to_ns S s s'
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\begin{quotation}
+\noindent
+Proof of Theorem 2.26:
+For an arbitrary statement \(S\) and state \(s\), it follows from
+Lemmas 2.27 and 2.28 that if \(\mathcal{S}_{ns}[\![S]\!]s = s'\) then \(\mathcal{S}_{sos}[\![S]\!]s = s'\) and vice versa.
+This suﬃces for showing that the functions \(\mathcal{S}_{ns}[\![S]\!]\) and \(\mathcal{S}_{sos}[\![S]\!]\) must be equal:
+if one is defined on a state s, then so is the other, and therefore if one is not
+defined on a state s, then neither is the other.
+\end{quotation}
+\end{rightcolumn}
+\end{paracol}
+\vspace{1em}
+
+\subsubsection*{Comparison and Result (Complete Proof)}
+The proof of Theorem 2.26 (\texttt{ns\_equvivlent\_sos}) is concise in both the textbook and mechanized versions, but reveals important differences in how mechanized proofs handle logical equivalences:
+\begin{itemize}
+    \item \textbf{Biconditional Construction}: The textbook simply states ``\(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\)'' and argues both directions. Lean must explicitly construct a biconditional (\(\leftrightarrow\)) using \texttt{Iff.intro}, which takes the forward direction (\texttt{mp}, ``modus ponens'') and backward direction (\texttt{mpr}, ``modus ponens reverse'').
+    \item \textbf{Delegating to Sub-Lemmas}: The proof of Theorem 2.26 in Lean does not repeat the inductive arguments; instead, it applies \texttt{ns\_to\_sos} for the forward direction and \texttt{sos\_to\_ns} for the backward direction. This mirrors the textbook's informal reference to Lemmas 2.27 and 2.28, but makes the logical dependencies explicit.
+    \item \textbf{Reduction to Relations}: Both Lemma 2.27 (\texttt{ns\_to\_sos}) and Lemma 2.28 (\texttt{sos\_k\_to\_ns}) are formulated as implications on the evaluation relations (\(\to_{ns}\) and \(\to_{sos}\)) rather than on the semantic functions \(\mathcal{S}_{ns}\) and \(\mathcal{S}_{sos}\). This is a key difference: the textbook informal statement about ``functions'' is given a relational interpretation in Lean, which is more amenable to formal proof.
+    \item \textbf{Semantic Function as Partial}: As noted in the TODO comments at the beginning of the section, the semantic function cannot be used directly in Lean 4 proofs (it is partial), so the proofs work with the underlying relations. This is a practical constraint of mechanized mathematics that the textbook omits.
+\end{itemize}
+

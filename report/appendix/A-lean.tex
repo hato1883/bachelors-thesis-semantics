@@ -1,7 +1,7 @@
 
 \chapter{Lean Source Code}
 \section{Auxiliary Lean Proofs}
-This section contains all proofs needed to mechanize the definitions and thier sourounding semnatic functions.
+This section contains all proofs needed to mechanize the definitions and their surrounding semantic functions.
 
 
 \subsection*{State}
@@ -37,7 +37,7 @@ This is provided by the two theorems:
 \begin{Lean_Code}
 theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
   s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by @\dots@
-  apply funext @\todo{Move to appendix}@
+  apply funext
   intro v
   repeat rw [assign]
   split_ifs
@@ -48,7 +48,7 @@ and
 \begin{Lean_Code}
 theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
   s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by @\dots@
-  apply funext @\todo{Move to appendix}@
+  apply funext
   intro v
   repeat rw [assign]
   split_ifs with h1 h2
@@ -93,14 +93,14 @@ lemma seq_exec_preserve_right {S₁ S₂ : Stmt} {s s' : State} {k : Nat}
     -- ⟨S₁, s⟩ →ₛₒₛ[0] s' is impossible because Step ≠ Final
     cases h
   | succ k ih =>
-    -- We have ⟨S₁, s⟩ →ₛₒₛ γ' →ₛₒₛ[k] s'
+    -- We have ⟨S₁, s⟩ →ₛₒₛ @\gamma@' →ₛₒₛ[k] s'
     cases h with
     | step h_step h_rest =>
-      rename_i γ'
-      -- Now we branch on whether γ' is a final state or a continuing step
-      cases γ' with
+      rename_i @\gamma@'
+      -- Now we branch on whether @\gamma@' is a final state or a continuing step
+      cases @\gamma@' with
       | final s_next =>
-        -- Case 1: S₁ finishes in one step (γ' = s_next)
+        -- Case 1: S₁ finishes in one step (@\gamma@' = s_next)
         -- This matches the [comp2] rule: ⟨S₁; S₂, s⟩ →ₛₒₛ ⟨S₂, s_next⟩
         -- Since h_rest is ⟨s_next, ...⟩ →ₛₒₛ[k] s', and s_next is final,
         -- k must be 0 and s_next = s'.
@@ -117,15 +117,15 @@ lemma seq_exec_preserve_right {S₁ S₂ : Stmt} {s s' : State} {k : Nat}
 
 end exercise_2_21
 
-lemma small_step_k_to_star {γ₁ γ₂ : Config} {k : Nat}
-  (h : small_step_k γ₁ k γ₂) : small_step_star γ₁ γ₂ := by
+lemma small_step_k_to_star {@\gamma@₁ @\gamma@₂ : Config} {k : Nat}
+  (h : small_step_k @\gamma@₁ k @\gamma@₂) : small_step_star @\gamma@₁ @\gamma@₂ := by
   induction h with
   | refl => exact small_step_star.refl
   | step s h_rest ih => exact small_step_star.step s ih
 
 
-lemma star_to_small_step_k {γ₁ γ₂ : Config}
-  (h : small_step_star γ₁ γ₂) : ∃ k, small_step_k γ₁ k γ₂ := by
+lemma star_to_small_step_k {@\gamma@₁ @\gamma@₂ : Config}
+  (h : small_step_star @\gamma@₁ @\gamma@₂) : @\exists@ k, small_step_k @\gamma@₁ k @\gamma@₂ := by
   induction h with
   | refl =>
     exists 0
@@ -135,9 +135,9 @@ lemma star_to_small_step_k {γ₁ γ₂ : Config}
     exists k + 1
     exact small_step_k.step s hk
 
-lemma small_step_star_trans {γ₁ γ₂ γ₃ : Config}
-  (h_left : small_step_star γ₁ γ₂) (h_right : small_step_star γ₂ γ₃) :
-  small_step_star γ₁ γ₃ := by
+lemma small_step_star_trans {@\gamma@₁ @\gamma@₂ @\gamma@₃ : Config}
+  (h_left : small_step_star @\gamma@₁ @\gamma@₂) (h_right : small_step_star @\gamma@₂ @\gamma@₃) :
+  small_step_star @\gamma@₁ @\gamma@₃ := by
   induction h_left with
   | refl => exact h_right
   | step s h_rest ih => exact small_step_star.step s (ih h_right)

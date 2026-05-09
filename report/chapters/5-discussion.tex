@@ -1,0 +1,236 @@
+
+%
+%
+%
+%
+%
+%
+% Alternative Chapter: "Discussion"
+\chapter{Discussion: Mechanizing Semantic Proofs — Findings and Insights}
+
+This chapter evaluates the mechanization of semantic proofs in Lean 4 by synthesizing the case-specific insights from the method chapter. The thesis examines how pen-and-paper proofs must be transformed when formalized, with particular attention to implicit assumptions that become explicit, additional machinery required, and lessons learned throughout the mechanization process.
+
+%
+%
+%
+\section{From Informal to Formal: The Transformation of Semantic Definitions}
+\label{discussion:sec:transformation}
+
+A primary theme emerging from the formalization of syntactic and semantic
+definitions is the systematic conversion of implicit conventions to explicit
+requirements.
+
+\subsection*{Syntactic Categories: From BNF to Inductive Types}
+
+The translation of BNF notation to Lean's inductive types is largely
+mechanical but reveals several implicit assumptions in textbook presentations:
+
+\begin{itemize}
+    \item \textbf{Constructive Numerals}:
+    The literature defines numerals as binary numbers via inductive definition;
+    however, this mechanization choice was not strictly necessary, as we could have
+    used Lean 4's built-in \texttt{Nat} type instead. We chose the inductive
+    definition to match the textbook presentation and to enable structural induction
+    over the binary representation.
+
+    \item \textbf{Naming and Scoping}:
+    Informal notation permits clash-free
+    use of keywords like \texttt{if} and \texttt{while}. Mechanization
+    requires renaming (\texttt{cond}, \texttt{loop}) to avoid collisions
+    with the host language.
+
+    \item \textbf{Boolean Realism}:
+    Choosing between symbolic notation and
+    computational booleans (using Lean's native \texttt{true}/\texttt{false})
+    affects how theorems about boolean logic can be leveraged, reducing
+    proof effort.
+\end{itemize}
+
+\subsection*{Semantic Functions: Totality and Exhaustiveness}
+
+Formalizing evaluation functions \(\mathcal{N}\), \(\mathcal{A}\), and
+\(\mathcal{B}\) reveals a key design choice: Lean enforces total function definitions
+via exhaustive pattern matching, whereas textbooks define these as inductive relations
+and prove totality separately. We chose to define them directly as total functions,
+avoiding redundant complexity and enabling direct computation. This requires explicitly
+handling all constructor cases—including those ruled out by side conditions, which
+must be shown to lead to contradictions.
+
+%
+%
+%
+\section{The Explicit Nature of Inductive Proofs}
+\label{discussion:sec:inductive_proofs}
+
+In textbook arguments, appeals to structure (``the shape of the derivation tree'')
+must be formalized as explicit case analysis on inductive constructors via Lean's
+\texttt{induction} tactic, with automatically generated cases corresponding to rule labels.
+
+\subsection*{Exhaustive Case Analysis and Contradiction Handling}
+
+When conditions narrow which rules apply, mechanization requires explicitly deriving
+contradictions. For instance, if \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\) holds,
+attempting to apply \texttt{if\_false} (which requires the condition false) immediately
+generates a contradiction (e.g., \texttt{rw [h\_cond\_true] at h\_cond\_false; contradiction}).
+This explicit handling of ruled-out cases is invisible in textbook proofs but mandatory in mechanization.
+
+\subsection*{Modularity Through Lemmatization}
+
+The while-loop unrolling proof demonstrates that splitting a biconditional
+proof into two directed implications (\texttt{while\_expand} and
+\texttt{if\_compact}) mirrors good mathematical practice. In mechanization:
+
+\begin{itemize}
+    \item \textbf{Independent Lemmas}:
+    Proving $A \implies B$ and $B \implies A$ separately, then combining via
+    \texttt{Iff.intro}, mirrors the textbook's two-part structure.
+    \item \textbf{Constructive Proof Objects}:
+    Building derivation trees explicitly (via \texttt{have} statements) enables reorganizing
+    the proof steps to match the textbook's narrative structure. Rather than purely a clarity tool,
+    \texttt{have} allows proof steps to be introduced earlier than their logical dependencies
+    would naturally suggest, facilitating a presentation that mirrors the textbook's order.
+    This can also aid reader comprehension by making the proof intent explicit.
+\end{itemize}
+
+%
+%
+%
+\section{Multi-Step Reasoning and the Abstraction Layers}
+\label{discussion:sec:multistep}
+
+A subtle but pervasive difference emerges when formalizing proofs involving
+multi-step derivations in structural operational semantics.
+
+\subsection*{From Implicit to Explicit Multi-Step Relations}
+
+The textbook introduces shorthand notation for multiple steps
+($\Rightarrow^k$ for $k$ steps, $\Rightarrow^*$ for arbitrary steps).
+Mechanization requires:
+
+\begin{itemize}
+    \item \textbf{Inductive Types for Relations}:
+    The notation $\Rightarrow^k$ must be formalized as an inductive type
+    \texttt{small\_step\_k} that counts steps explicitly.
+    
+    \item \textbf{Strong Induction on Length}:
+    Proofs by ``induction on the length of the derivation sequence'' become
+    \texttt{Nat.strongRecOn} in Lean, enabling strong induction where the hypothesis
+    applies to any smaller step count.
+    
+    \item \textbf{Composition of Derivations}:
+    Informal chaining becomes explicit calls to transitivity lemmas like
+    \texttt{small\_step\_star\_trans}.
+\end{itemize}
+
+\subsection*{Case Study: Composition Decomposition (Lemma 2.19)}
+
+The proof that a composition can be split into two independent executions
+illustrates how mechanization requires explicit generalization, arithmetic
+justification via \texttt{linarith}, and careful unpacking of existential witnesses
+from induction hypotheses.
+
+%
+%
+%
+\section{Equivalence Proofs: Bridging Two Semantic Styles}
+\label{discussion:sec:equivalence}
+
+The two-lemma proof of equivalence between natural semantics and
+structural operational semantics demonstrates how mechanization handles the relationship
+between partial and total representations.
+
+\subsection*{Lemma 2.27: Natural Semantics to Structural Semantics}
+
+This proof constructs multi-step SOS derivations from big-step NS derivations via
+induction on the shape of the NS derivation tree (pattern matching on constructors like
+\texttt{ass}, \texttt{skip}, \texttt{comp}, \texttt{if\_true}, \texttt{while\_true}, etc.).
+Textbook appeals to ``Exercise 2.21'' become explicit function calls; building multi-step
+derivations explicitly requires knowing when to use \texttt{small\_step\_star.step} versus
+\texttt{small\_step\_star\_trans}.
+
+\subsection*{Lemma 2.28: Structural Semantics to Natural Semantics}
+
+This proof uses strong induction on step count, requiring careful handling of
+composition rules (splitting [comp$_{\text{sos}}^1$] and [comp$_{\text{sos}}^2$] into separate cases)
+and explicit decomposition via Lemma 2.19. Arithmetic facts require \texttt{linarith};
+the while loop unrolls into a conditional-composition structure via explicit calls to \texttt{lemma\_2\_5}.
+
+\subsection*{Relational vs. Functional Interpretation}
+
+While the textbook frames equivalence as ``the semantic functions are equal'',
+mechanization works with evaluation relations. Lean can represent partial functions via dependent types,
+but reasoning about them introduces an extra layer of proof obligation. Since equivalence proofs
+must establish relational correspondence anyway, working directly with relations as primitives
+is both simpler and sufficient.
+
+%
+%
+%
+\section{Synthesis: Core Mechanization Transformations}
+\label{discussion:sec:synthesis}
+
+The preceding sections demonstrate that mechanization is not merely a formal restatement
+of textbook arguments, but a systematic transformation. The core differences fall into
+several recurring patterns:
+
+\begin{itemize}
+    \item \textbf{Totality Enforcement}: Functions must be total (\autoref{discussion:sec:transformation}), requiring exhaustive pattern matching that textbooks elide.
+    
+    \item \textbf{Explicit Case Analysis}: Appeals to ``the shape of the derivation tree'' become explicit \texttt{induction} and \texttt{cases} tactics (\autoref{discussion:sec:inductive_proofs}), automatically generating cases for each constructor.
+    
+    \item \textbf{Contradiction Handling}: Cases ruled out by side conditions must be explicitly shown to lead to contradictions (\autoref{discussion:sec:inductive_proofs}).
+    
+    \item \textbf{Multi-Step Composition}: Informal chaining in SOS proofs becomes explicit transitivity lemmas (\autoref{discussion:sec:multistep}).
+    
+    \item \textbf{Generalization Strategy}: Variables that should not be fixed during induction must be explicitly generalized (\autoref{discussion:sec:multistep}), a concern invisible in informal mathematics.
+    
+    \item \textbf{Relational vs. Functional Reasoning}: While partial functions can be modeled in Lean via dependent types, working directly with evaluation relations as primitives is both simpler and sufficient (\autoref{discussion:sec:equivalence}).
+    
+    \item \textbf{Automation Over Arithmetic}: Facts dismissed as ``obvious'' in textbooks require explicit \texttt{linarith}, \texttt{simp}, or manual case analysis (\autoref{discussion:sec:multistep}).
+\end{itemize}
+
+Across all these transformations, a unifying theme emerges: pen-and-paper proofs rely on
+informal conventions and reader understanding that mechanization must make explicit and verifiable.
+
+
+%
+%
+%
+\section{Lessons for Future Mechanization}
+\label{discussion:sec:lessons}
+
+Based on the mechanization experience, several lessons emerge for future work on semantic formalization.
+
+\subsection*{Planning and Structuring Proofs}
+
+\begin{itemize}
+    \item \textbf{Identify Proof Patterns Early}:
+    Recognize whether the proof is structural (shape of derivations via \texttt{induction})
+    or arithmetic (length of sequences via \texttt{Nat.strongRecOn}).
+    
+    \item \textbf{Lemmatize Aggressively}:
+    Break large proofs into smaller, reusable lemmas. What appears as
+    informal appeal in textbooks should become explicit lemma calls.
+    
+    \item \textbf{Generalization and Witnesses}:
+    When setting up induction, explicitly generalize variables that should not be
+    fixed. Plan how to unpack and specialize existential witnesses via pattern matching.
+\end{itemize}
+
+\subsection*{Handling Side Conditions and Automation}
+
+\begin{itemize}
+    \item \textbf{Enumerate Side Conditions}:
+    Cases ruled out by side conditions must be shown to lead to contradictions
+    via explicit \texttt{rw} and \texttt{contradiction} tactics.
+    
+    \item \textbf{Rely on Automation Where Possible}:
+    Use \texttt{simp} and \texttt{linarith} liberally for routine bookkeeping,
+    but separate non-arithmetic reasoning from arithmetic reasoning for clarity.
+\end{itemize}
+
+\subsection*{Relations Over Partial Functions}
+
+Work with evaluation relations as the primary object rather than partial functions.
+Partial functions cannot be directly formalized in dependent type theory; relations
+are more tractable and sufficient for equivalence proofs.

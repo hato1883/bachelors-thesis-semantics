@@ -51,19 +51,19 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     -- Transitivity
     exact small_step_star_trans h_comp_first_part h2
 
-  | if_true hcond h ih =>
+  | if_true h_cond h ih =>
     -- [if_true_sos]
     apply small_step_star.step
-    · apply small_step.if_true hcond
+    · apply small_step.if_true h_cond
     · exact ih
 
-  | if_false hcond h ih =>
+  | if_false h_cond h ih =>
     -- [if_false_sos]
     apply small_step_star.step
-    · apply small_step.if_false hcond
+    · apply small_step.if_false h_cond
     · exact ih
 
-  | while_true hcond h_body h_rest ih_body ih_loop =>
+  | while_true h_cond h_body h_rest ih_body ih_loop =>
     rename_i b S s s' s''
     -- Exercise 2.21
     have h_after_ex21 := exercise_2_21 (S₂ := Stmt.loop b S) ih_body
@@ -72,7 +72,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     · exact small_step.while_unroll
     -- if_sos^tt step
     apply small_step_star.step
-    · exact small_step.if_true hcond
+    · exact small_step.if_true h_cond
     -- Transitivity
     exact small_step_star_trans h_after_ex21 ih_loop
 
@@ -134,7 +134,7 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
               case succ => linarith
             -- [Step 3b: Apply the Induction Hypothesis (IH)]
             apply ih (k₁ + 1) (by linarith) S1 s s_mid h_s1_full
-            
+
           case h_right =>
             -- [Step 3: Apply the Induction Hypothesis (IH) for S2]
             apply ih k₂ (by linarith) S2 s_mid s' hk2
@@ -187,7 +187,7 @@ theorem sos_to_ns (S : Stmt) (s s' : State) :
   -- 2. Call a helper lemma that works via induction on k
   exact sos_k_to_ns S s s' k hk
 
-theorem ns_equvivlent_sos (S : Stmt) (s s' : State) :
+theorem ns_equivalent_sos (S : Stmt) (s s' : State) :
   (⟨S, s⟩ →ₙₛ s') ↔ (⟨ S, s⟩ →ₛₒₛ* s') := by
   apply Iff.intro
   case mp => exact ns_to_sos S s s'
