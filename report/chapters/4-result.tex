@@ -8,7 +8,7 @@
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
 First steps before reasoning whether Natural Semantics and Structural Operational Semantics are equivalent is to create them.
-To create them we also need a language to apply them to, in our case this will be \While \missingcitation \todo{Reference the source where this version of the While language is defined (e.g., Nielson & Nielson)}.
+To create them we also need a language to apply them to, in our case this will be \While \missingcitation \todo{Reference the source where this version of the While language is defined (e.g., Nielson \& Nielson))}.
 
 
 %
@@ -369,7 +369,7 @@ followed by Structural Operational Semantics (small-step), and finally establish
 \section{Formalizing Natural Semantics (Big-Step)}
 \label{formal_ns_sos_equiv:sec:ns:formalization}
 Now that we have a mechanized definition of the \While language we can proceed by defining the actual semantics of running a \While language program. 
-We will start by defining the natural operational semantics often referred to as "big step semantics" \missingcitation \todo{Cite Gilles Kahn (1987) or Nielson & Nielson for the introduction of Natural Semantics}.
+We will start by defining the natural operational semantics often referred to as "big step semantics" \missingcitation \todo{Cite Gilles Kahn (1987) or Nielson \& Nielson) for the introduction of Natural Semantics}.
 When it comes to operational semantics we use deduction tree syntax to provide rules and axioms.
 
 \begin{paracol}{2}
@@ -527,7 +527,7 @@ inductive big_step : Stmt @\to@ State @\to@ State @\to@ Prop @\leanbreak@ where
     (h_cond : @\(\mathcal{B}[\![b]\!]\)@ s = false) :
       big_step (Stmt.loop b S') s s
 
--- Define the standard Nielson & Nielson notation
+-- Define the standard Nielson \& Nielson) notation
 notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{ns}$\ @" s' => @\leanbreak@ big_step S s s'
         \end{Lean_Code}
     \end{leftcolumn}
@@ -1407,7 +1407,7 @@ inductive small_step : Stmt @\to@ State @\to@ Config @\to@ Prop @\leanbreak@ whe
     (h_rest : big_step (Stmt.loop b S) s' s'') :
       big_step (Stmt.loop b S) s s''
 
--- Define the standard Nielson & Nielson notation
+-- Define the standard Nielson \& Nielson) notation
 -- Non terminal configuration
 notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step S s (Config.step S' s')
 
@@ -1465,7 +1465,7 @@ inductive small_step_k : Config @\to@ Nat @\to@ Config @\to@ Prop where
     (rest : small_step_k @\gamma@' k @\gamma@'') :
       small_step_k (Config.step S s) (k + 1) @\gamma@''
 
--- Define the standard Nielson & Nielson notation
+-- Define the standard Nielson \& Nielson) notation
 -- Non terminal configuration
 notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}[$\ @" k "@\ \color{purple}$]$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_k (Config.step S s) k (Config.step S' s')
 
@@ -1483,7 +1483,7 @@ inductive small_step_star : Config @\to@ Nat @\to@ Config @\to@ Prop where
     (rest : small_step_star @\gamma@' @\gamma@'') :
       small_step_star (Config.step S s) @\gamma@''
 
--- Define the standard Nielson & Nielson notation
+-- Define the standard Nielson \& Nielson) notation
 -- Non terminal configuration
 notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\leanbreak@ "@\ \color{purple}\to$_{sos}*$\ @" "@\color{purple}$\langle$@" S' "," s':40 "@\color{purple}$\rangle$@" => @\leanbreak@ small_step_star (Config.step S s) (Config.step S' s')
 
@@ -1772,7 +1772,7 @@ proofs using partial functions in lean 4}
 
 \begin{quotation}
 \noindent
-For every statement S of \While, we have \(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\). \missingcitation \todo{This is a formal theorem statement quoted or adapted from a source; cite the source (e.g., Nielson and Nielson).}
+For every statement S of \While, we have \(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\). \missingcitation \todo{This is a formal theorem statement quoted or adapted from a source; cite the source (e.g., Nielson \& Nielson)).}
 This result expresses two properties:
 \begin{itemize}
     \item If the execution of \(S\) from some state terminates in of of the semantics,

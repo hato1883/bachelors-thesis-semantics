@@ -22,14 +22,14 @@ to translate these textbook definitions into machine-checked proofs \missingcita
 %
 \section{Formal Semantics of Programming Languages}
 \label{background:sec:formal_semantics_pl}
-\todo{What?}
+\
 The formal semantics of a programming language is a rigorous mathematical
 framework used to describe the behavior of programs \missingcitation \todo{Standard definition of formal semantics}. While a language's syntax
 defines the rules for constructing valid programs (the "grammar"), its semantics
 provides the "meaning"—specifying exactly how a computer should execute those
 instructions \missingcitation \todo{Source for the syntax-vs-semantics distinction}.
 
-\todo{Why?}
+\
 In many industrial settings, the semantics of a language are described using
 natural language manuals \missingcitation \todo{Provide example or source discussing the use of manuals/standards like C99 or Java Spec}. However, natural language is often prone to ambiguity,
 leading to inconsistent implementations across different compilers or interpreters \missingcitation \todo{Cite a known study or famous example of ambiguity-related bugs (e.g., C undefined behavior)}.
@@ -45,7 +45,7 @@ create a deeper and more detailed understanding \hampus{this statement has no ba
 and thereby the programs written.
 
 
-\todo{How?}
+\
 Formal semantics are typically expressed through three main approaches:
 Denotational (modeling programs as mathematical functions),
 Axiomatic (using logic to define preconditions and postconditions),
@@ -102,15 +102,15 @@ this occurs as a result from picking which approach to use, and what the main fo
 %
 \section{The \While language}
 \label{background:sec:while}
-\todo{What?} Programming language semantics needs a language to study, and commonly used
+\ Programming language semantics needs a language to study, and commonly used
 programming languages are often a bad fit due to the constant
-evolution of languages, operating systems, and hardware \missingcitation \todo{A source arguing for the use of "toy" languages for formal analysis (e.g., Nielson)}. \todo{Why?}
+evolution of languages, operating systems, and hardware \missingcitation \todo{A source arguing for the use of "toy" languages for formal analysis (e.g., Nielson)}. \
 To address this, a common 
 praxis is to invent a "toy" programming language that lacks a physical implementation 
 but possesses rigorous rules \missingcitation \todo{Source on the educational/formal value of toy languages}. In this case, we use \While, a simplified imperative language 
 defined in the literature of our case study \missingcitation \todo{Directly cite the book from which this specific version of WHILE is taken (likely Nielson, Nielson, and Hankin)}.
 
-Like most programming languages, \While is built using statements and expressions. \todo{How?}
+Like most programming languages, \While is built using statements and expressions. \
 Informally, the language supports the following statements:
 \begin{itemize}
     \item assignment,
@@ -319,11 +319,11 @@ In this work, we examine two primary styles of operational semantics:
 
 \subsection*{Natural Operational Semantics (Big-Step)}
 \label{background:os:ns}
-\todo{What?}
+\
 \RED{\lipsum[1]}
-\todo{Why?}
+\
 \RED{\lipsum[1]}
-\todo{How?}
+\
 \hampus{Show NS rules for \While describing them}
 \RED{\lipsum[1]}
 
@@ -332,11 +332,11 @@ In this work, we examine two primary styles of operational semantics:
 %
 \subsection*{Structural Operational Semantics (Small-Step)}
 \label{background:os:sos}
-\todo{What?}
+\
 \RED{\lipsum[1]}
-\todo{Why?}
+\
 \RED{\lipsum[1]}
-\todo{How?}
+\
 \hampus{Show SOS rules for \While describing them}
 \RED{\lipsum[1]}
 
@@ -348,9 +348,9 @@ In this work, we examine two primary styles of operational semantics:
 \section{The Lean 4 Proof Assistant}
 \label{background:sec:lean_4}
 \hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
-\todo{What?}
+\
 \RED{\lipsum[1]}
-\todo{Why?}
+\
 \RED{\lipsum[1]}
-\todo{How?}
+\
 \RED{\lipsum[1]}
