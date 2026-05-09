@@ -1,4 +1,3 @@
-
 %
 %
 %
@@ -23,11 +22,11 @@ requirements.
 \subsection*{Syntactic Categories: From BNF to Inductive Types}
 
 The translation of BNF notation to Lean's inductive types is largely
-mechanical but reveals several implicit assumptions in textbook presentations:
+mechanical but reveals several implicit assumptions in textbook presentations\missingcitation \todo{Reference a standard semantics textbook, e.g., Nielson & Nielson or Winskel, to establish what 'textbook presentation' refers to.}:
 
 \begin{itemize}
     \item \textbf{Constructive Numerals}:
-    The literature defines numerals as binary numbers via inductive definition;
+    The literature defines numerals as binary numbers via inductive definition\missingcitation \todo{Cite specific literature that uses this binary inductive definition.};
     however, this mechanization choice was not strictly necessary, as we could have
     used Lean 4's built-in \texttt{Nat} type instead. We chose the inductive
     definition to match the textbook presentation and to enable structural induction
@@ -50,7 +49,7 @@ mechanical but reveals several implicit assumptions in textbook presentations:
 
 Formalizing evaluation functions \(\mathcal{N}\), \(\mathcal{A}\), and
 \(\mathcal{B}\) reveals a key design choice: Lean enforces total function definitions
-via exhaustive pattern matching, whereas textbooks define these as inductive relations
+via exhaustive pattern matching\missingcitation \todo{Cite the Lean 4 manual or a paper on Dependent Type Theory regarding totality requirements in functional languages.}, whereas textbooks define these as inductive relations
 and prove totality separately. We chose to define them directly as total functions,
 avoiding redundant complexity and enabling direct computation. This requires explicitly
 handling all constructor cases—including those ruled out by side conditions, which
@@ -104,7 +103,7 @@ multi-step derivations in structural operational semantics.
 \subsection*{From Implicit to Explicit Multi-Step Relations}
 
 The textbook introduces shorthand notation for multiple steps
-($\Rightarrow^k$ for $k$ steps, $\Rightarrow^*$ for arbitrary steps).
+($\Rightarrow^k$ for $k$ steps, $\Rightarrow^*$ for arbitrary steps)\missingcitation \todo{Reference the specific textbook/page where this notation is introduced.}.
 Mechanization requires:
 
 \begin{itemize}
@@ -124,7 +123,7 @@ Mechanization requires:
 
 \subsection*{Case Study: Composition Decomposition (Lemma 2.19)}
 
-The proof that a composition can be split into two independent executions
+The proof that a composition can be split into two independent executions\missingcitation \todo{If Lemma 2.19 is from a specific textbook (e.g. Nielson), cite it here.}
 illustrates how mechanization requires explicit generalization, arithmetic
 justification via \texttt{linarith}, and careful unpacking of existential witnesses
 from induction hypotheses.
@@ -144,7 +143,7 @@ between partial and total representations.
 This proof constructs multi-step SOS derivations from big-step NS derivations via
 induction on the shape of the NS derivation tree (pattern matching on constructors like
 \texttt{ass}, \texttt{skip}, \texttt{comp}, \texttt{if\_true}, \texttt{while\_true}, etc.).
-Textbook appeals to ``Exercise 2.21'' become explicit function calls; building multi-step
+Textbook appeals to ``Exercise 2.21''\missingcitation \todo{Cite the textbook containing Exercise 2.21.} become explicit function calls; building multi-step
 derivations explicitly requires knowing when to use \texttt{small\_step\_star.step} versus
 \texttt{small\_step\_star\_trans}.
 
@@ -153,12 +152,12 @@ derivations explicitly requires knowing when to use \texttt{small\_step\_star.st
 This proof uses strong induction on step count, requiring careful handling of
 composition rules (splitting [comp$_{\text{sos}}^1$] and [comp$_{\text{sos}}^2$] into separate cases)
 and explicit decomposition via Lemma 2.19. Arithmetic facts require \texttt{linarith};
-the while loop unrolls into a conditional-composition structure via explicit calls to \texttt{lemma\_2\_5}.
+the while loop unrolls into a conditional-composition structure via explicit calls to \texttt{lemma\_2\_5}\missingcitation \todo{Cite the source for Lemma 2.5.}.
 
 \subsection*{Relational vs. Functional Interpretation}
 
 While the textbook frames equivalence as ``the semantic functions are equal'',
-mechanization works with evaluation relations. Lean can represent partial functions via dependent types,
+mechanization works with evaluation relations. Lean can represent partial functions via dependent types\missingcitation \todo{Cite a source on modeling partiality in Coq/Lean/Agda, such as 'Software Foundations' or a paper on the Option/Part monad.},
 but reasoning about them introduces an extra layer of proof obligation. Since equivalence proofs
 must establish relational correspondence anyway, working directly with relations as primitives
 is both simpler and sufficient.
@@ -182,7 +181,7 @@ several recurring patterns:
     
     \item \textbf{Multi-Step Composition}: Informal chaining in SOS proofs becomes explicit transitivity lemmas (\autoref{discussion:sec:multistep}).
     
-    \item \textbf{Generalization Strategy}: Variables that should not be fixed during induction must be explicitly generalized (\autoref{discussion:sec:multistep}), a concern invisible in informal mathematics.
+    \item \textbf{Generalization Strategy}: Variables that should not be fixed during induction must be explicitly generalized (\autoref{discussion:sec:multistep}), a concern invisible in informal mathematics\missingcitation \todo{Optional: Cite a paper on the 'De Bruijn factor' or general formalization overhead to support the claim that generalization is a specific 'formal' burden.}.
     
     \item \textbf{Relational vs. Functional Reasoning}: While partial functions can be modeled in Lean via dependent types, working directly with evaluation relations as primitives is both simpler and sufficient (\autoref{discussion:sec:equivalence}).
     
@@ -232,5 +231,5 @@ Based on the mechanization experience, several lessons emerge for future work on
 \subsection*{Relations Over Partial Functions}
 
 Work with evaluation relations as the primary object rather than partial functions.
-Partial functions cannot be directly formalized in dependent type theory; relations
+Partial functions cannot be directly formalized in dependent type theory\missingcitation \todo{Cite the 'halting problem' context or specific constraints of the Calculus of Inductive Constructions regarding non-termination/partiality.}; relations
 are more tractable and sufficient for equivalence proofs.

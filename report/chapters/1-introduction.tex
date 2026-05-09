@@ -1,32 +1,31 @@
-
 \chapter{Introduction}
 \label{cha:introduction}
 As software becomes more critical,
-and the amount of programming languages increases, the need to ensure
-an instruction in a program does what the programmer think it does becomes essential \missingcitation. \elias{En lite krånglig första mening}
+and the amount of programming languages increases \missingcitation \todo{Provide a source or statistic for the proliferation of programming languages}, the need to ensure
+an instruction in a program does what the programmer think it does becomes essential \missingcitation \todo{Cite a source discussing the 'software crisis' or the importance of software reliability}. \elias{En lite krånglig första mening}
 This is especially important when compilers and interpreters translate code into
-lower level representations such as machine code or bytecode \hampus{true, but} \missingcitation. \elias{Eftersom du inte gör det kanske det inte är något du ska trycka på precis i början}
+lower level representations such as machine code or bytecode \hampus{true, but} \missingcitation \todo{Cite a source on compiler correctness or the risks of translation errors, e.g., CompCert}. \elias{Eftersom du inte gör det kanske det inte är något du ska trycka på precis i början}
 
 To bridge this gap of syntax and semantics, the field of programming language \todo{is the term "gap" applicable here} \elias{Lite oklart vad som avses här}
 semantics was developed, formalizing the behavior of instructions
-in a rigorous mathematical representation \hampus{was it developed for this reason?} \missingcitation \elias{Jag tror att du ska prata om det som något som finns, snarare än något som har uppfunnits. Kanske ha vinkeln att alla programspråk har någon semantik och att programmerare har en informell uppfattning om den, men att formell semantik möjliggör formella bevis på korrekthet av program och analyser}.
+in a rigorous mathematical representation \missingcitation \todo{Cite a foundational text on formal semantics, e.g., Plotkin, Kahn, or Winskel}. \hampus{was it developed for this reason?} \elias{Jag tror att du ska prata om det som något som finns, snarare än något som har uppfunnits. Kanske ha vinkeln att alla programspråk har någon semantik och att programmerare har en informell uppfattning om den, men att formell semantik möjliggör formella bevis på korrekthet av program och analyser}.
 By defining these meanings, we can reason about a program's behavior and
-validate that it works as intended regardless of input \missingcitation.
+validate that it works as intended regardless of input \missingcitation \todo{Cite the benefits of formal methods in verification}.
 
 In academic settings, such as the course
 "Semantics of Programming Languages (1DL311)" provided by Uppsala University, \todo{Course or the literature itself}
 these definitions and proofs are often presented "on paper" using
-techniques such as induction over the structure \hampus{Add Citation to the course instance} \missingcitation \elias{Känns inte som att det behövs ett exempel här}.
+techniques such as induction over the structure \hampus{Add Citation to the course instance} \missingcitation \todo{Cite the specific course syllabus or the primary textbook used in the course}. \elias{Känns inte som att det behövs ett exempel här}.
 These paper-based proofs frequently omit inductive steps that share
 similarities with previous ones \hampus{maybe give a example / page number in the book}.
 While these proofs are useful for
 teaching, it is also susceptible to human error, implicit assumptions and
-gaps in logical reasoning. By mechanizing \elias{Inte definierat!} the proof we introduce a layer of
+gaps in logical reasoning \missingcitation \todo{Cite research on the fallibility of hand-written proofs vs. machine-checked proofs, e.g., De Millo et al. or Wiedijk}. By mechanizing \elias{Inte definierat!} the proof we introduce a layer of
 automatic validation, thereby ensuring logical soundness and verify
-formal correctness \hampus{Maybe cite Lean / Coq / general proof assistant for this statement} \elias{…men man kan inte heller säga ”liknar föregående fall” eller ”inses lätt”!}.
+formal correctness \hampus{Maybe cite Lean / Coq / general proof assistant for this statement} \missingcitation \todo{Cite the general utility of Proof Assistants/LCF-style kernels}. \elias{…men man kan inte heller säga ”liknar föregående fall” eller ”inses lätt”!}.
 
 This thesis investigates the process of translating these pen-and-paper proofs
-into mechanized proofs using the proof assistant Lean. The goal is to
+into mechanized proofs using the proof assistant Lean \missingcitation \todo{Cite the Lean 4 theorem prover (moura et al.)}. The goal is to
 evaluate whether the techniques used in Semantics literature \hampus{maybe add course cite again} correspond
 directly to Lean's mechanisms or if they require any reformulation to achieve
 machine-level precision.
@@ -57,7 +56,7 @@ Specifically, this thesis seeks to answer the following research questions:
 \todo{Why does it matter? (Informal proofs hide complexity)} \noindent
 Informal proofs are designed for human consumption and often prioritize
 intuition over exhaustive detail \hampus{this statement feels weired especially "humna consumption"}.
-However, these omissions can hide underlying complexities or logical leaps \hampus{no proof of this}.
+However, these omissions can hide underlying complexities or logical leaps \hampus{no proof of this} \missingcitation \todo{Cite a source discussing 'social processes' in proofs or the 'De Bruijn factor'}.
 By identifying these points of divergence,
 this research provides a roadmap for how educators can
 structure pen-and-paper proofs to decrease ambiguity and better prepare students
@@ -70,7 +69,7 @@ for formal verification tasks.
 \label{intro:scope}
 \todo{Scope: \While language, Big-Step and Small-Step semantics, equivalence proof} \noindent
 This thesis will evaluate proofs from the course "Semantics of Programming Languages
-(1DL311)" which uses the literature "Semantics with Applications: An Appetizer" \hampus{cite book}.
+(1DL311)" which uses the literature "Semantics with Applications: An Appetizer" \hampus{cite book} \missingcitation \todo{Add citation for Nielson and Nielson (2007)}.
 In addition to only focusing material presented in the course, this analysis
 will be limited to the evaluation to a few proofs from the chapters
 "2. Operational Semantics \hampus{cite chapter page number}" and
