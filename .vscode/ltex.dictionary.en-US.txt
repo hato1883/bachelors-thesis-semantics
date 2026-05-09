@@ -3,3 +3,6 @@ Denotational
 denotational
 Backus-Naur
 subst
+rfl
+funext
+rw
