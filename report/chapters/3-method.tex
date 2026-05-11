@@ -9,8 +9,9 @@
 \chapter{Method}
 
 This chapter outlines the methodology used to mechanize the semantic proofs
-from the literature\missingcitation\todo{Cite the specific literature/textbooks you are mechanizing, e.g., Winskel or Pierce.}, ensuring a systematic and traceable translation from
-pen-and-paper arguments to formal verification in Lean 4\missingcitation\todo{Cite the Lean 4 theorem prover (Froelich et al. or the official documentation).}. The core of this
+from the textbook~\citep{nielson_semantics_2007}, ensuring a systematic and traceable translation from
+pen-and-paper arguments to formal verification in Lean 4~\citep{theorem_proving_2026}.
+The core of this
 thesis lies in not just proving the theorems, but in analyzing the transformation
 process itself. The method is designed to expose the implicit assumptions and
 reasoning patterns that must be made explicit during formalization.
@@ -20,7 +21,8 @@ The methodology can be broken down into four main stages:
 \begin{enumerate}
     \item \textbf{Mechanization of Proofs:} The first step involves translating the proofs
     from the literature into Lean 4. A key principle here is to mirror the original proof
-    strategy as closely as possible\missingcitation\todo{Optional: Mention if this "alignment" approach follows a specific formalization philosophy, like De Bruijn’s or similar comparative studies.}. When the textbook specifies "induction on the shape
+    strategy as closely as possible\missingcitation\todo{Optional: Mention if this "alignment" approach follows a specific formalization philosophy, like De Bruijn’s or similar comparative studies.}.
+    When the textbook specifies "induction on the shape
     of the derivation tree," the \texttt{induction} tactic is used. Similarly, when a proof
     proceeds by "case analysis," the \texttt{cases} tactic is employed. This ensures that
     the resulting formal proof maintains a clear correspondence with the original argument.

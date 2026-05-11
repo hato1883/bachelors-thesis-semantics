@@ -12,10 +12,10 @@ We begin by specifying the \While language, which serves as the primary object
 of study throughout this work. This provides the concrete syntax required to
 explore the formal semantics of programming languages—the mathematical bridge
 between a program's notation and its behavior. We then delve into Operational
-Semantics, detailing both the Natural (big-step) and Structural (small-step)
-approaches \missingcitation \todo{Reference the primary text establishing these specific terms (e.g., Nielson \& Nielson or Plotkin)}, followed by the primary proof techniques used in their analysis.
+Semantics, detailing both the Natural (big-step)~\citep[p.~20]{nielson_semantics_2007} and Structural (small-step)~\citep[p.~33]{nielson_semantics_2007}
+approaches, followed by the primary proof techniques used in their analysis.
 Finally, we introduce the Lean 4 proof assistant, detailing the mechanisms used
-to translate these textbook definitions into machine-checked proofs \missingcitation \todo{Reference the Lean 4 documentation or "Theorem Proving in Lean 4"}.
+to translate these textbook definitions into machine-checked proofs~\citep{theorem_proving_2026}.
 
 %
 %
@@ -108,7 +108,7 @@ evolution of languages, operating systems, and hardware \missingcitation \todo{A
 To address this, a common 
 praxis is to invent a "toy" programming language that lacks a physical implementation 
 but possesses rigorous rules \missingcitation \todo{Source on the educational/formal value of toy languages}. In this case, we use \While, a simplified imperative language 
-defined in the literature of our case study \missingcitation \todo{Directly cite the book from which this specific version of WHILE is taken (likely Nielson, Nielson, and Hankin)}.
+defined in the literature of our case study ~\citep[p.~7]{nielson_semantics_2007}.
 
 Like most programming languages, \While is built using statements and expressions. \
 Informally, the language supports the following statements:
@@ -293,9 +293,14 @@ s[x \mapsto v]y = \left\{
 \right.
 \]
 This "substitution" notation is fundamental to describing the execution of 
-imperative commands in \While \missingcitation \todo{Reference for state-update/substitution notation (e.g., Gunter or Winskel)}.
+imperative commands in \While~\citep[p.~13]{nielson_semantics_2007}.
 
-The syntactic categories and semantic functions defined above provide the necessary vocabulary for our toy language. Yet, the question remains: how do we formally describe the step-by-step transition of a program from one configuration to another? To answer this, we move from the definition of the language itself to the study of Formal Semantics of Programming Languages, comparing the operational, denotational, and axiomatic approaches to defining program behavior \missingcitation \todo{Reference for the comparison of these three approaches}.
+The syntactic categories and semantic functions defined above provide the necessary
+vocabulary for our toy language. Yet, the question remains: how do we formally
+describe the step-by-step transition of a program from one configuration to another?
+To answer this, we move from the definition of the language itself to the study
+of Formal Semantics of Programming Languages, which in this case
+will take focus on Operational Semantics.
 
 
 %
@@ -319,12 +324,11 @@ In this work, we examine two primary styles of operational semantics:
 
 \subsection*{Natural Operational Semantics (Big-Step)}
 \label{background:os:ns}
-\
-\RED{\lipsum[1]}
-\
-\RED{\lipsum[1]}
-\
-\hampus{Show NS rules for \While describing them}
+\todo{Breif introduction to NS, reader will have read a course on semantics,
+this section is here as a reminader to the reader.}
+\RED{\lipsum[1]}}
+
+\hampus{Show Comp NS rules for \While describing them}
 \RED{\lipsum[1]}
 
 %
@@ -332,12 +336,11 @@ In this work, we examine two primary styles of operational semantics:
 %
 \subsection*{Structural Operational Semantics (Small-Step)}
 \label{background:os:sos}
-\
+\todo{Breif introduction to SOS, reader will have read a course on semantics,
+this section is here as a reminader to the reader.}
 \RED{\lipsum[1]}
-\
-\RED{\lipsum[1]}
-\
-\hampus{Show SOS rules for \While describing them}
+
+\hampus{Show Comp1 and Comp2 SOS rules for \While describing them}
 \RED{\lipsum[1]}
 
 
@@ -348,9 +351,13 @@ In this work, we examine two primary styles of operational semantics:
 \section{The Lean 4 Proof Assistant}
 \label{background:sec:lean_4}
 \hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
-\
+
+\todo{Definie syntax  such as inductive etc}
 \RED{\lipsum[1]}
-\
+
+\todo{Describe proof proceeses in lean (Bottom up)}
 \RED{\lipsum[1]}
-\
+
+\todo{Describe "difficulty" of proving numbers etc which otherwise as seen as trivial, 
+as well as usage of tactics such as linarith, simp, grind etc to reduce this burden.}
 \RED{\lipsum[1]}

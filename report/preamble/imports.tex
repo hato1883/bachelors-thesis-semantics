@@ -34,7 +34,7 @@
 
 % --- Graphics & Colors ---
 \usepackage{graphicx}
-\usepackage[dvipsnames]{xcolor}
+\usepackage[dvipsnames, table]{xcolor}
 \usepackage{float}
 \usepackage{caption} % Customization below
 
@@ -52,7 +52,22 @@
 
 % --- Referencing & Utilities ---
 \usepackage[hidelinks]{hyperref} % Load before cleveref
-\usepackage[square,sort,colon,authoryear]{natbib}
+\usepackage[
+    style=authoryear, 
+    backend=biber,    % Recommended backend over bibtex
+    natbib=true,      % Supports \citet and~\citep
+]{biblatex}
+
+% 1. Replace the error-causing line with these:
+\DeclareFieldFormat{citebackslash}{#1}
+\renewcommand{\bibopenparen}{\addthinspace[}
+\renewcommand{\bibcloseparen}{]}
+
+% 2. Ensure the delimiter between name and year is correct:
+\renewcommand*{\nameyeardelim}{\addcomma\space}
+
+\addbibresource{sources.bib}
+
 \usepackage[capitalise]{cleveref}
 \usepackage{url}
 \usepackage{xspace}
@@ -67,6 +82,12 @@
 \usepackage{changepage}
 \usepackage{enumitem}
 \usepackage[sf]{titlesec}
+
+\usepackage[most]{tcolorbox}
+\usepackage{tabularx}
+\usepackage{ltablex}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta} % Allows tabularx to span multiple pages
 
 % --- Post-Package Setup ---
 \captionsetup{twoside,labelfont=sf}

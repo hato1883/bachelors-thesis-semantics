@@ -22,11 +22,11 @@ requirements.
 \subsection*{Syntactic Categories: From BNF to Inductive Types}
 
 The translation of BNF notation to Lean's inductive types is largely
-mechanical but reveals several implicit assumptions in textbook presentations\missingcitation \todo{Reference a standard semantics textbook, e.g., Nielson \& Nielson) or Winskel, to establish what 'textbook presentation' refers to.}:
+mechanical but reveals several implicit assumptions in textbook presentations:
 
 \begin{itemize}
     \item \textbf{Constructive Numerals}:
-    The literature defines numerals as binary numbers via inductive definition\missingcitation \todo{Cite specific literature that uses this binary inductive definition.};
+    The textbook defines numerals as binary numbers via inductive definition;
     however, this mechanization choice was not strictly necessary, as we could have
     used Lean 4's built-in \texttt{Nat} type instead. We chose the inductive
     definition to match the textbook presentation and to enable structural induction
@@ -103,7 +103,7 @@ multi-step derivations in structural operational semantics.
 \subsection*{From Implicit to Explicit Multi-Step Relations}
 
 The textbook introduces shorthand notation for multiple steps
-($\Rightarrow^k$ for $k$ steps, $\Rightarrow^*$ for arbitrary steps)\missingcitation \todo{Reference the specific textbook/page where this notation is introduced.}.
+($\Rightarrow^k$ for $k$ steps, $\Rightarrow^*$ for arbitrary steps).
 Mechanization requires:
 
 \begin{itemize}
@@ -123,7 +123,7 @@ Mechanization requires:
 
 \subsection*{Case Study: Composition Decomposition (Lemma 2.19)}
 
-The proof that a composition can be split into two independent executions\missingcitation \todo{If Lemma 2.19 is from a specific textbook (e.g. Nielson), cite it here.}
+The proof that a composition can be split into two independent executions
 illustrates how mechanization requires explicit generalization, arithmetic
 justification via \texttt{linarith}, and careful unpacking of existential witnesses
 from induction hypotheses.
@@ -143,7 +143,7 @@ between partial and total representations.
 This proof constructs multi-step SOS derivations from big-step NS derivations via
 induction on the shape of the NS derivation tree (pattern matching on constructors like
 \texttt{ass}, \texttt{skip}, \texttt{comp}, \texttt{if\_true}, \texttt{while\_true}, etc.).
-Textbook appeals to ``Exercise 2.21''\missingcitation \todo{Cite the textbook containing Exercise 2.21.} become explicit function calls; building multi-step
+Textbook appeals to ``Exercise 2.21'' become explicit function calls; building multi-step
 derivations explicitly requires knowing when to use \texttt{small\_step\_star.step} versus
 \texttt{small\_step\_star\_trans}.
 
@@ -152,7 +152,7 @@ derivations explicitly requires knowing when to use \texttt{small\_step\_star.st
 This proof uses strong induction on step count, requiring careful handling of
 composition rules (splitting [comp$_{\text{sos}}^1$] and [comp$_{\text{sos}}^2$] into separate cases)
 and explicit decomposition via Lemma 2.19. Arithmetic facts require \texttt{linarith};
-the while loop unrolls into a conditional-composition structure via explicit calls to \texttt{lemma\_2\_5}\missingcitation \todo{Cite the source for Lemma 2.5.}.
+the while loop unrolls into a conditional-composition structure via explicit calls to \texttt{lemma\_2\_5}.
 
 \subsection*{Relational vs. Functional Interpretation}
 
@@ -173,19 +173,33 @@ of textbook arguments, but a systematic transformation. The core differences fal
 several recurring patterns:
 
 \begin{itemize}
-    \item \textbf{Totality Enforcement}: Functions must be total (\autoref{discussion:sec:transformation}), requiring exhaustive pattern matching that textbooks elide.
+    \item \textbf{Totality Enforcement}: Functions must be total
+    (\autoref{discussion:sec:transformation}), requiring exhaustive pattern matching
+    that textbooks elide.
     
-    \item \textbf{Explicit Case Analysis}: Appeals to ``the shape of the derivation tree'' become explicit \texttt{induction} and \texttt{cases} tactics (\autoref{discussion:sec:inductive_proofs}), automatically generating cases for each constructor.
+    \item \textbf{Explicit Case Analysis}: Appeals to ``the shape of the derivation
+    tree'' become explicit \texttt{induction} and \texttt{cases} tactics
+    (\autoref{discussion:sec:inductive_proofs}), automatically generating cases for
+    each constructor.
     
-    \item \textbf{Contradiction Handling}: Cases ruled out by side conditions must be explicitly shown to lead to contradictions (\autoref{discussion:sec:inductive_proofs}).
+    \item \textbf{Contradiction Handling}: Cases ruled out by side conditions must be
+    explicitly shown to lead to contradictions
+    (\autoref{discussion:sec:inductive_proofs}).
     
-    \item \textbf{Multi-Step Composition}: Informal chaining in SOS proofs becomes explicit transitivity lemmas (\autoref{discussion:sec:multistep}).
+    \item \textbf{Multi-Step Composition}: Informal chaining in SOS proofs becomes
+    explicit transitivity lemmas (\autoref{discussion:sec:multistep}).
     
-    \item \textbf{Generalization Strategy}: Variables that should not be fixed during induction must be explicitly generalized (\autoref{discussion:sec:multistep}), a concern invisible in informal mathematics\missingcitation \todo{Optional: Cite a paper on the 'De Bruijn factor' or general formalization overhead to support the claim that generalization is a specific 'formal' burden.}.
+    \item \textbf{Generalization Strategy}: Variables that should not be fixed during
+    induction must be explicitly generalized (\autoref{discussion:sec:multistep}),
+    a concern invisible in informal mathematics\missingcitation \todo{Optional: Cite a paper on the 'De Bruijn factor' or general formalization overhead to support the claim that generalization is a specific 'formal' burden.}.
     
-    \item \textbf{Relational vs. Functional Reasoning}: While partial functions can be modeled in Lean via dependent types, working directly with evaluation relations as primitives is both simpler and sufficient (\autoref{discussion:sec:equivalence}).
+    \item \textbf{Relational vs. Functional Reasoning}: While partial functions can
+    be modeled in Lean via dependent types, working directly with evaluation relations
+    as primitives is both simpler and sufficient (\autoref{discussion:sec:equivalence}).
     
-    \item \textbf{Automation Over Arithmetic}: Facts dismissed as ``obvious'' in textbooks require explicit \texttt{linarith}, \texttt{simp}, or manual case analysis (\autoref{discussion:sec:multistep}).
+    \item \textbf{Automation Over Arithmetic}: Facts dismissed as ``obvious'' in the
+    textbook require explicit \texttt{linarith}, \texttt{simp}, or manual case
+    analysis (\autoref{discussion:sec:multistep}).
 \end{itemize}
 
 Across all these transformations, a unifying theme emerges: pen-and-paper proofs rely on

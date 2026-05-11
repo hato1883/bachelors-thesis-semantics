@@ -7,8 +7,8 @@
 %
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
-First steps before reasoning whether Natural Semantics and Structural Operational Semantics are equivalent is to create them.
-To create them we also need a language to apply them to, in our case this will be \While \missingcitation \todo{Reference the source where this version of the While language is defined (e.g., Nielson \& Nielson))}.
+First steps before reasoning whether Natural Semantics formalization and the Structural Operational Semantics formalization are equivalent is to create them.
+In order to create them we also need a language to apply them to, in our case this will be \While \citep[p.~7]{nielson_semantics_2007}.
 
 
 %
@@ -17,12 +17,15 @@ To create them we also need a language to apply them to, in our case this will b
 \section{Formalizing \While}
 \label{formal_ns_sos_equiv:sec:while:formalization}
 
-The first step in formalizing the equivalence between semantics is to mechanize the language itself.
-Due to Lean 4 \missingcitation \todo{Cite the Lean 4 programming language/theorem prover official paper or manual} being a programming language, terms must be defined before they are used, which occasionally forces a different order than traditional textbook presentations.
+The first step in formalizing the equivalence between semantics is to
+mechanize the language itself.
+Due to Lean 4 \citep{theorem_proving_2026} being a programming language,
+terms must be defined before they are used, which occasionally forces a
+different order than traditional textbook presentations.
 
 \subsection*{Syntactic Categories}
 
-We begin by mechanizing the syntactic categories defined in chapter 1.2 of the literature \missingcitation \todo{Add the specific citation for the 'literature' mentioned here}. 
+We begin by mechanizing the syntactic categories defined in chapter 1.2 of the textbook~\citep[p.~7]{nielson_semantics_2007}. 
 The categories for \While are defined using BNF notation, mapping numerals ($n$), variables ($x$), and expressions ($a, b$) to inductive sets.
 Using Lean 4's \texttt{inductive} keyword, we translate each BNF rule directly into a constructor:
 \begin{paracol}{2}
@@ -81,8 +84,8 @@ inductive Aexp where
 \end{paracol}
 \vspace{1em}
 \begin{paracol}{2}
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\begin{leftcolumn}
+    \begin{Lean_Code}
 inductive Bexp where
   | true
   | false
@@ -90,20 +93,21 @@ inductive Bexp where
   | le  (a1 a2 : Aexp)
   | not (b1 : Bexp)
   | and (b1 b2 : Bexp)
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
         \(\displaystyle
-        \begin{array}{lcl}
-            b &::=& \mathbf{true} \\ 
-              &\mid& \mathbf{false} \\ 
-              &\mid& a_1 = a_2 \\ 
-              &\mid& a_1 \leq a_2 \\ 
-              &\mid& \neg b_1 \\ 
-              &\mid& b_1 \land b_2
-        \end{array}
-        \)
-    \end{rightcolumn}
+    \begin{array}{lcl}
+        b &::=& \\
+            &\mid& \mathbf{true} \\ 
+            &\mid& \mathbf{false} \\ 
+            &\mid& a_1 = a_2 \\ 
+            &\mid& a_1 \leq a_2 \\ 
+            &\mid& \neg b_1 \\ 
+            &\mid& b_1 \land b_2
+    \end{array}
+    \)
+\end{rightcolumn}
 \end{paracol}
 \vspace{1em}
 
@@ -136,7 +140,6 @@ inductive Stmt where
 The translation of BNF to Lean's inductive types is largely direct, with several key differences:
 \begin{itemize}
     \item \textbf{Constructive Numerals}: While the textbook assumes numerals as given, Lean requires explicit inductive definition to ensure type safety and enable structural induction over binary representations.
-    \item \textbf{Boolean Realism}: Using built-in \texttt{true} and \texttt{false} rather than symbolic $\mathbf{tt}$ and $\mathbf{ff}$ enables us to leverage Lean's internal boolean logic theorems, reducing proof effort.
     \item \textbf{Namespace Constraints}: To avoid collisions with Lean keywords, we rename \texttt{if} to \texttt{cond} and \texttt{while} to \texttt{loop}---a practical constraint absent in informal notation.
     \item \textbf{Explicit Typing}: Each constructor explicitly specifies its type, providing immediate feedback on well-formedness, unlike the meta-level assumptions in pen-and-paper BNF \missingcitation \todo{Optional: cite a source discussing the differences between informal meta-theory and formal mechanization, e.g., 'Software Foundations' or similar}.
 \end{itemize}
@@ -148,44 +151,46 @@ the domains and evaluation functions that give meaning to these syntactic terms.
 
 With syntax formalized, we now specify the semantic domains and evaluation functions that interpret programs. These include the state representation and the functions that evaluate numerals, arithmetic expressions, and boolean expressions.
 
-The \textbf{State} represents memory as a total function from variables to integers \missingcitation \todo{Cite the standard definition of State in operational semantics}:
+The \textbf{State} represents memory as a total function from variables to integers~\citep[p.~13]{nielson_semantics_2007}:
 \begin{paracol}{2}
-    % --- SECTION: SEMANTIC DOMAINS ---
-    \begin{leftcolumn}
-        \centering \textbf{Mechanized (Lean 4)}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
-    \end{rightcolumn}
+% --- SECTION: SEMANTIC DOMAINS ---
+\begin{leftcolumn}
+    \centering \textbf{Mechanized (Lean 4)}
+\end{leftcolumn}
+\begin{rightcolumn}
+    \centering \textbf{Pen-and-Paper (Textbook)} \\\noindent
+\end{rightcolumn}
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
 def State := Var @\to@ @ \(\mathbb{Z}\)@
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \(\displaystyle s : \mathbf{Var} \to \mathbb{Z} \)
-    \end{rightcolumn}
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\(\displaystyle
+s : \mathbf{Var} \to \mathbb{Z}
+\)
+\end{rightcolumn}
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
 def assign (s : State) (x : Var) (z : @\(\mathbb{Z}\)@) : State :=
   fun (v: Var) => 
     if v = x then z else s v
 
 notation s "[" x " @\color{purple}\mapsto@ " z "]" @\leanbreak@=> assign s x z
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \(\displaystyle
-        s[x \mapsto v]y = \begin{cases} 
-        v & \text{if } y = x \\ 
-        s\,y & \text{if } y \neq x 
-        \end{cases}
-        \)
-    \end{rightcolumn}
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+    \(\displaystyle
+    s[x \mapsto v]y = \begin{cases} 
+    v & \text{if } y = x \\ 
+    s\,y & \text{if } y \neq x 
+    \end{cases}
+    \)
+\end{rightcolumn}
 \end{paracol}
 \vspace{1em}
 
@@ -313,6 +318,7 @@ notation "@\color{purple}\(\mathcal{B}[\![\)@" b "@\color{purple}\(]\!]\)@" @\le
 \subsubsection*{Comparison of Semantic Functions}
 Formalizing evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$ reveals key differences between mechanized and pen-and-paper approaches:
 \begin{itemize}
+    \item \textbf{Boolean Realism}: Using built-in \texttt{true} and \texttt{false} rather than symbolic $\mathbf{tt}$ and $\mathbf{ff}$ enables us to leverage Lean's internal boolean logic theorems, reducing proof effort.
     \item \textbf{Explicit Totality}: Lean enforces that every function be total by requiring coverage of all constructors. The textbook leaves certain cases (e.g., syntax errors) implicit.
     \item \textbf{Constructor Coverage}: In Lean, each inductive case must be explicitly handled with a case-by-case pattern match, whereas textbooks often omit obvious or degenerate cases.
     \item \textbf{Type Consistency}: Lean's type system forces consistent return types (e.g., $\mathbb{Z}$ for $\mathcal{A}$), whereas pen-and-paper notation sometimes glosses over type-checking details.
@@ -551,7 +557,12 @@ notation:40 "@\color{purple}$\langle$@" S "," s "@\color{purple}$\rangle$@" @\le
 
 \subsubsection*{Comparison and Result}
 
-The transition system for Natural Semantics is formalized as an inductive relation \texttt{big\_step} that captures the complete execution of a \While program from initial state to final state. This big-step approach mirrors the pen-and-paper formulation: each rule represents either an axiom (for atomic statements like assignment and skip) or a deductive rule (for composite constructs). The relation mechanizes the textbook's informal rules \missingcitation \todo{Cite the specific textbook these rules are mirrored from} by encoding:
+The transition system for Natural Semantics is formalized as an inductive relation
+\texttt{big\_step} that captures the complete execution of a \While program from
+initial state to final state. This big-step approach mirrors the pen-and-paper
+formulation: each rule represents either an axiom (for atomic statements like
+assignment and skip) or a deductive rule (for composite constructs).
+The relation mechanizes the textbook's informal rules \missingcitation \todo{Cite the specific textbook these rules are mirrored from} by encoding:
 \begin{itemize}
     \item \textbf{Axioms}: Atomic rules with no premises (assignment and skip) become inductive cases with no dependencies.
     \item \textbf{Deductive Rules}: Composite rules with premises (composition, conditionals, loops) become inductive cases where the conclusions depend on recursive applications of \texttt{big\_step}.
@@ -587,7 +598,7 @@ Let's start with an easier proof without any induction.
 %
 \subsection{While-loop Unrolling (Lemma 2.5)}
 \label{formal_ns_sos_equiv:sec:ns:while_unroll}
-In the textbook \missingcitation \todo{Cite the specific textbook where Lemma 2.5 is found (e.g., Nielson \& Nielson)} they provide a lemma stating the following:
+In the textbook~\citep[p.~26]{nielson_semantics_2007} they provide a lemma stating the following:
 \begin{quote}
 The statement
 \[\mathtt{while}\ b\ \mathtt{do}\ S\]
@@ -598,7 +609,7 @@ This would be equivalent with stating the following:
 \[
     \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \iff  \langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
 \]
-Making sure to label them the same way they do in the textbook \missingcitation \todo{Cite the source to justify the consistency of these labels (* and **)} we get the following:
+Making sure to label them the same way they do in the textbook, we get the following:
 \[
 \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \tag{*}
 \]
@@ -606,10 +617,10 @@ Making sure to label them the same way they do in the textbook \missingcitation 
 \langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s'' \tag{**}
 \]
 In the textbook they divide the proof into to two parts, first part is to prove that given (*) that (**) holds,
-the second part proves the reverse, namely proving that given (**) that (*) holds. Which is the normal way to prove equivalence of two statements \missingcitation \todo{Optional: Cite a reference on basic proof techniques or logic if this is a pedagogical thesis}.
+the second part proves the reverse, namely proving that given (**) that (*) holds. Which is the normal way to prove equivalence of two statements.
 
 \subsubsection*{Forward Direction: $(*) \implies (**)$}
-Let us now compare the textbook proof \missingcitation \todo{Reference the specific page or section in the textbook for this proof direction} with the mechanized equivalent for the case where we show that (*) holds, implies that (**) holds.
+Let us now compare the textbook proof with the mechanized equivalent for the case where we show that (*) holds, implies that (**) holds.
 \begin{paracol}{2}
 \begin{leftcolumn}
     \centering \textbf{Mechanized (Lean 4)}
@@ -801,7 +812,7 @@ but a more common approach is to build bottom up; it is entirely up to the
 writer which approach to use.
 
 \subsubsection*{Backward Direction: $(**) \implies (*)$}
-Now we will show that (**) holds, implies that (*) holds \missingcitation \todo{Reference the specific section in the textbook for the reverse proof direction}.
+Now we will show that (**) holds, implies that (*) holds.
 \begin{paracol}{2}
 \begin{leftcolumn}
     \centering \textbf{Mechanized (Lean 4)}
@@ -975,19 +986,32 @@ lemma while_unroll (b : Bexp) (S : Stmt) (s s' : State) :
 \end{Lean_Code}
 
 \subsubsection*{Comparison and Result}
-This proof demonstrates the modular nature of both formal and informal proofs. By splitting the equivalence (\(\iff\)) into two implications (\(\implies\) and \(\impliedby\)), we can prove each direction independently. This modularity is mirrored in Lean through separate theorems (\texttt{while\_expand} and \texttt{if\_compact}) which are then combined using \texttt{Iff.intro} \missingcitation \todo{Cite the Lean 4 documentation or Core library regarding the Iff.intro tactic/constructor}. Key observations include:
+This proof demonstrates the modular nature of both formal and informal proofs.
+By splitting the equivalence (\(\iff\)) into two implications (\(\implies\) and
+\(\impliedby\)), we can prove each direction independently.
+This modularity is mirrored in Lean through separate theorems
+(\texttt{while\_expand} and \texttt{if\_compact}) which are then combined using
+\texttt{Iff.intro}. Key observations include:
+
 \begin{itemize}
-    \item \textbf{Syntactic Correspondence}: The mechanized proof maps nearly 1:1 to the textbook's structure. Each "case" in Lean corresponds to a branch in the manual proof, and each rule application (e.g., \texttt{big\_step.comp}) matches the "construction of a new tree" in the text.
-    \item \textbf{Explicit vs. Implicit Construction}: In Lean, we use the \texttt{have} tactic to explicitly name intermediate derivation trees (like \texttt{comp\_stmt}). The textbook does this narratively ("we can construct the derivation tree...").
-    \item \textbf{Exhaustive Matching}: Lean's \texttt{cases} tactic on the \texttt{if} statement automatically identifies that only \texttt{if\_true} and \texttt{if\_false} are possible, mirroring the textbook's "Only two rules could give rise to...".
+    \item \textbf{Syntactic Correspondence}: The mechanized proof maps nearly 1:1
+    to the textbook's structure. Each "case" in Lean corresponds to a branch
+    in the manual proof, and each rule application (e.g., \texttt{big\_step.comp})
+    matches the "construction of a new tree" in the text.
+    \item \textbf{Explicit vs. Implicit Construction}: In Lean, we use the \texttt{have}
+    tactic to explicitly name intermediate derivation trees (like \texttt{comp\_stmt}).
+    The textbook does this narratively ("we can construct the derivation tree...").
+    \item \textbf{Exhaustive Matching}: Lean's \texttt{cases} tactic on the \texttt{if}
+    statement automatically identifies that only \texttt{if\_true} and \texttt{if\_false}
+    are possible, mirroring the textbook's "Only two rules could give rise to...".
 \end{itemize}
 
 
 %
 %
-\subsection{Determinism (Lemma 2.9)}
+\subsection{Determinism (Theorem 2.9)}
 \label{formal_ns_sos_equiv:sec:ns:determinism}
-The next proof made in the textbook\missingcitation\todo{Cite the specific textbook being referred to here (presumably Nielson \& Nielson).} refers to determinism, where the definition of determinism is given
+The next proof made in the textbook~\citep[p.~29]{nielson_semantics_2007} refers to determinism, where the definition of determinism is given
 \begin{quotation}
 \dots semantics is called deterministic if for all choices of
 \(S\), \(s\), \(s'\) and \(s''\) we have that
@@ -1441,18 +1465,27 @@ The transition system for Structural Operational Semantics is formalized as an i
 
 The rules themselves closely mirror the textbook\missingcitation\todo{Cite textbook for the origin of these specific rules.}:
 \begin{itemize}
-    \item \textbf{Atomic Rules}: Assignment and skip both reduce to final configurations in a single step.
-    \item \textbf{Decomposition Rules}: Composition rules split the execution: the first rule continues stepping the left component, and the second rule activates the right component once the left completes.
-    \item \textbf{Conditional Rules}: The two conditional branches are explicitly separated, with the condition determining which rule applies.
-    \item \textbf{While Loop Rule}: Rather than recursive application, the while loop is unrolled into an equivalent conditional-composition structure, which then proceeds by small steps.
+    \item \textbf{Atomic Rules}: Assignment and skip both reduce to final
+    configurations in a single step.
+
+    \item \textbf{Decomposition Rules}: Composition rules split the execution:
+    the first rule continues stepping the left component, and the second rule
+    activates the right component once the left completes.
+
+    \item \textbf{Conditional Rules}: The two conditional branches are explicitly
+    separated, with the condition determining which rule applies.
+
+    \item \textbf{While Loop Rule}: Rather than recursive application, the while
+    loop is unrolled into an equivalent conditional-composition structure, which
+    then proceeds by small steps.
 \end{itemize}
 
 While the single-step relation \texttt{small\_step} captures individual
 program transitions, practical reasoning about complete program execution
 requires multi-step relations. The textbook introduces convenient shorthand
-notation for these\missingcitation\todo{Cite textbook for $\Rightarrow^{k}$ and $\Rightarrow^{*}$ notations.} ($\langle S, s\rangle \Rightarrow^{k} s'$ for exactly
+notation for these ($\langle S, s\rangle \Rightarrow^{k} s'$ for exactly
 $k$ steps and $\langle S, s\rangle \Rightarrow^{*}$ s' for any finite number
-of steps). The mechanized version must explicitly formalize these as inductive
+of steps)~\citep[p.~34 --- 35]{nielson_semantics_2007}. The mechanized version must explicitly formalize these as inductive
 types to enable rigorous proof construction. To use the same ideas in Lean 4,
 we introduce two new inductive types as follows:
 
@@ -1751,11 +1784,28 @@ The result now follows by choosing \(k_1 = 1\) and \(k_2 = k_0\).
 \subsubsection*{Comparison and Result}
 While the pen-and-paper proof follows a high-level logical flow, the mechanized proof requires explicit handling of Lean-specific concepts:
 \begin{itemize}
-    \item \textbf{Formalization of the Relation}: The textbook \missingcitation \todo{Reference the specific textbook being compared.} uses a somewhat informal "where \(k = k_1 + k_2\)" clause. In Lean, this must be part of the explicit existential bundle (\(\land k = k_1 + k_2\)), requiring the use of \texttt{constructor} to split the logical conjunctions.
-    \item \textbf{Generalization}: The \texttt{generalizing} keyword is used in the induction to ensure that the induction hypothesis remains applicable to different states and statements as the execution progresses.
-    \item \textbf{Specialization}: Tactics like \texttt{specialize} are used to "fix" a generalized induction hypothesis to a specific derivation (\texttt{h\_tail}), allowing for direct application to the sub-problem.
-    \item \textbf{Existential Unpacking}: The mechanized proof uses \texttt{let} with pattern matching (the angle brackets) to "unpack" the witnesses from the induction hypothesis, whereas the textbook \missingcitation \todo{Cite the source providing the pen-and-paper version of this step.} simply states "this means there is a state \(s_0\)".
-    \item \textbf{Automation}: The proof relies on automation tactics like \texttt{simp} and \texttt{linarith} (or \texttt{linarity}) to handle the arithmetic bookkeeping regarding the step counts, which is often dismissed as "trivial" or "obvious" in manual proofs.
+    \item \textbf{Formalization of the Relation}: The textbook uses a somewhat
+    informal "where \(k = k_1 + k_2\)" clause. In Lean, this must be part of
+    the explicit existential bundle (\(\land k = k_1 + k_2\)),
+    requiring the use of \texttt{constructor} to split the logical conjunctions.
+
+    \item \textbf{Generalization}: The \texttt{generalizing} keyword is used in
+    the induction to ensure that the induction hypothesis remains applicable to
+    different states and statements as the execution progresses.
+
+    \item \textbf{Specialization}: Tactics like \texttt{specialize} are used to "fix"
+    a generalized induction hypothesis to a specific derivation (\texttt{h\_tail}),
+    allowing for direct application to the sub-problem.
+
+    \item \textbf{Existential Unpacking}: The mechanized proof uses \texttt{let} with
+    pattern matching (the angle brackets) to "unpack" the witnesses from the
+    induction hypothesis, whereas the textbook simply states "this means there
+    is a state \(s_0\)".
+
+    \item \textbf{Automation}: The proof relies on automation tactics like
+    \texttt{simp} and \texttt{linarith} (or \texttt{linarity}) to handle the
+    arithmetic bookkeeping regarding the step counts, which is often dismissed
+    as "trivial" or "obvious" in manual proofs.
 \end{itemize}
 
 
@@ -1772,7 +1822,8 @@ proofs using partial functions in lean 4}
 
 \begin{quotation}
 \noindent
-For every statement S of \While, we have \(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\). \missingcitation \todo{This is a formal theorem statement quoted or adapted from a source; cite the source (e.g., Nielson \& Nielson)).}
+For every statement S of \While, we have
+\(\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]\).
 This result expresses two properties:
 \begin{itemize}
     \item If the execution of \(S\) from some state terminates in of of the semantics,
@@ -1788,7 +1839,7 @@ because both semantics are deterministic (Theorem 2.9 and Exercise 2.22). \missi
 Hence \(S\) will have to loop on state \(s\) also in the other semantics.
 
 The theorem is proved in two stages, as expressed by Lemma 2.27 and Lemma 2.28. \missingcitation \todo{Cite the source for Lemma 2.27 and 2.28.}
-We shall first prove Lemma 2.27.
+We shall first prove Lemma 2.27.~\citep[p.~41 --- 42]{nielson_semantics_2007}
 \end{quotation}
 
 \subsubsection*{Lemma 2.27}
