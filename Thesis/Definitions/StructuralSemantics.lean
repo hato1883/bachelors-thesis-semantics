@@ -6,54 +6,6 @@ namespace StructuralSemantics
 
 open While
 
-/--
-  Structural Operational Semantics (Big-Step)
-  Notation: " ⟨S, s⟩ →ₙₛ s' " and  " ⟨S, s⟩ ⇓ₙₛ s' "
-  means executing S in state s results in state s'
---/
-
-inductive Config where
-  | step : Stmt → State → Config
-  | final : State → Config
-
-inductive small_step : Stmt → State → Config → Prop where
-  -- [assₛₒₛ]
-  | ass {s x a} :
-      small_step (Stmt.ass x a) s (Config.final (s[x ↦ 𝓐⟦a⟧ s]))
-
-  -- [skipₛₒₛ]
-  | skip {s} :
-      small_step Stmt.skip s (Config.final s)
-
-  -- [comp1ₛₒₛ]
-  | comp1 {S₁ S₁' S₂ s s'}
-    (progress : small_step S₁ s (Config.step S₁' s')) :
-      small_step (Stmt.composition S₁ S₂) s (Config.step (Stmt.composition S₁' S₂) s')
-
-  -- [comp2ₛₒₛ]
-  | comp2 {S₁ S₂ s s'}
-    (terminates : small_step S₁ s (Config.final s')) :
-      small_step (Stmt.composition S₁ S₂) s (Config.step S₂ s')
-
-  -- [ifᵗᵗₛₒₛ]
-  | if_true {b S₁ S₂ s}
-    (h_cond_true : 𝓑⟦b⟧ s = true) :
-      small_step (Stmt.cond b S₁ S₂) s (Config.step S₁ s)
-
-  -- [ifᶠᶠₛₒₛ]
-  | if_false {b S₁ S₂ s}
-    (h_cond_false : 𝓑⟦b⟧ s = false) :
-      small_step (Stmt.cond b S₁ S₂) s (Config.step S₂ s)
-
-  -- [whileₛₒₛ]
-  | while_unroll {b S s} :
-      small_step (Stmt.loop b S) s (Config.step (Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip) s)
-
-
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " "⟨" S' "," s':40 "⟩" => small_step S s (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " s':40 => small_step S s (Config.final s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " "⟨" S' "," s':40 "⟩" => small_step S s (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " s':40 => small_step S s (Config.final s')
 
 /-
   small_step_k S s k γ :
@@ -61,6 +13,98 @@ notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " s':40 => small_step S s (Config
   small_step_star S s γ :
   "⟨S, s⟩ →ₛₒₛ* γ" means S in state s reaches γ in finitely many (possibly zero) small steps.
 -/
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " "⟨" S' "," s':40 "⟩" => small_step S s (Config.step S' s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " s':40                => small_step S s (Config.final s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " γ:40 "⟩"             => small_step S s γ
+
+-- k-step
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " "⟨" S' "," s':40 "⟩" => small_step_k (Config.step S s) k (Config.step S' s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " s':40                => small_step_k (Config.step S s) k (Config.final s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " γ:40                 => small_step_k (Config.step S s) k γ
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 γ:40 " →ₛₒₛ[" k "] " γ':40                           => small_step_k γ k γ'
+
+-- star
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " "⟨" S' "," s':40 "⟩" => small_step_star (Config.step S s) (Config.step S' s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " s':40                => small_step_star (Config.step S s) (Config.final s')
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " γ:40                 => small_step_star (Config.step S s) γ
+set_option quotPrecheck false in
+set_option hygiene false in
+notation:40 γ:40 " →ₛₒₛ* " γ':40                           => small_step_star γ γ'
+
+
+/--
+  Structural Operational Semantics (Big-Step)
+  Notation: " ⟨S, s⟩ →ₙₛ s' " and  " ⟨S, s⟩ ⇓ₙₛ s' "
+  means executing S in state s results in state s'
+--/
+inductive Config where
+  | step : Stmt → State → Config
+  | final : State → Config
+
+/-
+  Coercions to allow using `State` or `(Stmt × State)` where `Config` is expected.
+  This makes Lean automatically convert `s : State` to `Config.final s` and
+  `(S, s) : Stmt × State` to `Config.step S s`, avoiding annotation/casting issues
+  when using the `→ₛₒₛ`, `→ₛₒₛ[k]`, and `→ₛₒₛ*` notations.
+-/
+instance : Coe State Config where
+  coe s := Config.final s
+
+instance : Coe (Stmt × State) Config where
+  coe p := Config.step p.1 p.2
+
+inductive small_step : Stmt → State → Config → Prop where
+  -- [assₛₒₛ]
+  | ass {s x a} :
+      ⟨(Stmt.ass x a), s⟩ →ₛₒₛ (s[x ↦ 𝓐⟦a⟧ s])
+
+  -- [skipₛₒₛ]
+  | skip {s} :
+      ⟨Stmt.skip, s⟩ →ₛₒₛ s
+
+  -- [comp1ₛₒₛ]
+  | comp1 {S₁ S₁' S₂ s s'}
+    (progress : ⟨S₁, s⟩ →ₛₒₛ  ⟨S₁', s'⟩) :
+      ⟨(Stmt.composition S₁ S₂), s⟩ →ₛₒₛ  ⟨Stmt.composition S₁' S₂, s'⟩
+
+  -- [comp2ₛₒₛ]
+  | comp2 {S₁ S₂ s s'}
+    (terminates : ⟨S₁, s⟩ →ₛₒₛ s') :
+      ⟨(Stmt.composition S₁ S₂), s⟩ →ₛₒₛ ⟨S₂, s'⟩
+
+  -- [ifᵗᵗₛₒₛ]
+  | if_true {b S₁ S₂ s}
+    (h_cond_true : 𝓑⟦b⟧ s = true) :
+      ⟨(Stmt.cond b S₁ S₂), s⟩ →ₛₒₛ ⟨S₁, s⟩
+
+  -- [ifᶠᶠₛₒₛ]
+  | if_false {b S₁ S₂ s}
+    (h_cond_false : 𝓑⟦b⟧ s = false) :
+      ⟨(Stmt.cond b S₁ S₂), s⟩ →ₛₒₛ ⟨S₂, s⟩
+
+  -- [whileₛₒₛ]
+  | while_unroll {b S s} :
+      ⟨(Stmt.loop b S), s⟩ →ₛₒₛ ⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩
 
 
 /-
@@ -72,31 +116,19 @@ notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ " s':40 => small_step S s (Config
 inductive small_step_k : Config → Nat → Config → Prop where
   | refl {γ} :
       small_step_k γ 0 γ
-  | step {S s γ' γ'' k}
-    (step : small_step S s γ')
-    (rest : small_step_k γ' k γ'') :
-      small_step_k (Config.step S s) (k + 1) γ''
+  | step (S S' : Stmt) (s s' : State) (γ'' : Config) (k : Nat)
+    (step : ⟨S, s⟩ →ₛₒₛ ⟨S', s'⟩)
+    (rest : ⟨S', s'⟩ →ₛₒₛ[k] γ'') :
+      ⟨S, s⟩ →ₛₒₛ[k+1] γ''
 
 /-- Reflexive-transitive closure -/
 inductive small_step_star : Config → Config → Prop where
   | refl {γ} :
       small_step_star γ γ
-  | step {S s γ' γ''}
-    (step : small_step S s γ')
-    (rest : small_step_star γ' γ'') :
-      small_step_star (Config.step S s) γ''
-
--- k-step
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " "⟨" S' "," s':40 "⟩" => small_step_k (Config.step S s) k (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " s':40               => small_step_k (Config.step S s) k (Config.final s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ[" k "] " "⟨" S' "," s':40 "⟩" => small_step_k (Config.step S s) k (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ[" k "] " s':40               => small_step_k (Config.step S s) k (Config.final s')
-
--- star
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " "⟨" S' "," s':40 "⟩" => small_step_star (Config.step S s) (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " s':40               => small_step_star (Config.step S s) (Config.final s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ* " "⟨" S' "," s':40 "⟩" => small_step_star (Config.step S s) (Config.step S' s')
-notation:40 "⟨" S "," s "⟩" " ⇓ₛₒₛ* " s':40               => small_step_star (Config.step S s) (Config.final s')
+  | step (S S' : Stmt) (s s' : State) (γ'' : Config)
+    (step : ⟨S, s⟩ →ₛₒₛ ⟨S', s'⟩)
+    (rest : ⟨S', s'⟩ →ₛₒₛ* γ'') :
+      ⟨S, s⟩ →ₛₒₛ* γ''
 
 @[app_unexpander Config.final]
 def unexpandConfigFinal : Lean.PrettyPrinter.Unexpander

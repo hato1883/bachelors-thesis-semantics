@@ -96,35 +96,45 @@ instance : Coe Bool Bexp where
 -- Semantic Equations         --
 /-=============================-/
 
--- TODO: change to inductive instead of def so that proof 1.5 is needed
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "𝒩⟦" n "⟧" => Num_to_Z  n
+
 def Num_to_Z : Num → ℤ
   | Num.zero    => 0
   | Num.one     => 1
-  | Num.succ0 n => 2 * (Num_to_Z n)
-  | Num.succ1 n => 2 * (Num_to_Z n) + 1
+  | Num.succ0 n => 2 * 𝒩⟦n⟧
+  | Num.succ1 n => 2 * 𝒩⟦n⟧ + 1
 
-notation "𝒩⟦" n "⟧" => Num_to_Z  n
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "𝓐⟦" a "⟧" => Aexp_eval a
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "𝓐⟦" a "⟧" s:max => Aexp_eval a s
 
--- TODO: change to inductive instead of def so that proof 1.8 is needed
 def Aexp_eval : Aexp → (State → ℤ)
   | Aexp.num n, _ => 𝒩⟦n⟧
   | Aexp.var x, s => s x
-  | Aexp.add a₁ a₂, s => Aexp_eval a₁ s + Aexp_eval a₂ s
-  | Aexp.mul a₁ a₂, s => Aexp_eval a₁ s * Aexp_eval a₂ s
-  | Aexp.sub a₁ a₂, s => Aexp_eval a₁ s - Aexp_eval a₂ s
+  | Aexp.add a₁ a₂, s => 𝓐⟦a₁⟧s + 𝓐⟦a₂⟧s
+  | Aexp.mul a₁ a₂, s => 𝓐⟦a₁⟧s * 𝓐⟦a₂⟧s
+  | Aexp.sub a₁ a₂, s => 𝓐⟦a₁⟧s - 𝓐⟦a₂⟧s
 
-notation "𝓐⟦" a "⟧" => Aexp_eval a
 
--- TODO: change to inductive instead of def so that proof 1.8 is needed
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "𝓑⟦" b "⟧" => Bexp_eval b
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "𝓑⟦" b "⟧" s:max => Bexp_eval b s
+
 def Bexp_eval : Bexp → (State → Bool)
   | Bexp.true,      _ => true
   | Bexp.false,     _ => false
-  | Bexp.eq  a₁ a₂, s => (Aexp_eval a₁ s) == (Aexp_eval a₂ s)
-  | Bexp.le  a₁ a₂, s => (Aexp_eval a₁ s) ≤  (Aexp_eval a₂ s)
-  | Bexp.not b₁,    s => ¬ (Bexp_eval b₁ s)
-  | Bexp.and b₁ b₂, s => (Bexp_eval b₁ s) ∧  (Bexp_eval b₂ s)
-
-notation "𝓑⟦" b "⟧" => Bexp_eval b
+  | Bexp.eq  a₁ a₂, s =>   𝓐⟦a₁⟧s == 𝓐⟦a₂⟧s
+  | Bexp.le  a₁ a₂, s =>   𝓐⟦a₁⟧s ≤  𝓐⟦a₂⟧s
+  | Bexp.not b₁,    s => ¬ 𝓑⟦b₁⟧s
+  | Bexp.and b₁ b₂, s =>   𝓑⟦b₁⟧s ∧  𝓑⟦b₂⟧s
 
 def assign (s : State) (x : Var) (z : ℤ) : State :=
   fun (v: Var) => if v = x then z else s v
