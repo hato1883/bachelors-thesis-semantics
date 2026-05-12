@@ -24,7 +24,7 @@ cycle:
 	pdflatex --synctex=1 -interaction=nonstopmode -halt-on-error -outdir=$(BUILD) $(MAIN)
 
 clean:
-	rm -f *.aux *.lof *.log *.lot *.pdf *.synctex.gz *.toc *.fdb_latexmk *.bbl *.blg *.out *.bcf
+	rm -f *.aux *.lof *.log *.lot *.synctex.gz *.toc *.fdb_latexmk *.bbl *.blg *.out *.bcf
 
 diff.tex:
 	@echo "This command assumes you have checked out the previous version"

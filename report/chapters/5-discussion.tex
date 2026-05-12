@@ -25,24 +25,11 @@ The translation of BNF notation to Lean's inductive types is largely
 mechanical but reveals several implicit assumptions in textbook presentations:
 
 \begin{itemize}
-    \item \textbf{Constructive Numerals}:
-    The textbook defines numerals as binary numbers via inductive definition;
-    however, this mechanization choice was not strictly necessary, as we could have
-    used Lean 4's built-in \texttt{Nat} type instead. We chose the inductive
-    definition to match the textbook presentation and to enable structural induction
-    over the binary representation.
-
     \item \textbf{Naming and Scoping}:
     Informal notation permits clash-free
     use of keywords like \texttt{if} and \texttt{while}. Mechanization
     requires renaming (\texttt{cond}, \texttt{loop}) to avoid collisions
     with the host language.
-
-    \item \textbf{Boolean Realism}:
-    Choosing between symbolic notation and
-    computational booleans (using Lean's native \texttt{true}/\texttt{false})
-    affects how theorems about boolean logic can be leveraged, reducing
-    proof effort.
 \end{itemize}
 
 \subsection*{Semantic Functions: Totality and Exhaustiveness}
@@ -175,7 +162,7 @@ several recurring patterns:
 \begin{itemize}
     \item \textbf{Totality Enforcement}: Functions must be total
     (\autoref{discussion:sec:transformation}), requiring exhaustive pattern matching
-    that textbooks elide.
+    on all the cases.
     
     \item \textbf{Explicit Case Analysis}: Appeals to ``the shape of the derivation
     tree'' become explicit \texttt{induction} and \texttt{cases} tactics
@@ -218,7 +205,8 @@ Based on the mechanization experience, several lessons emerge for future work on
 
 \begin{itemize}
     \item \textbf{Identify Proof Patterns Early}:
-    Recognize whether the proof is structural (shape of derivations via \texttt{induction})
+    Recognize whether the proof has a reocuring layout such as
+    structural (shape of derivations via \texttt{induction})
     or arithmetic (length of sequences via \texttt{Nat.strongRecOn}).
     
     \item \textbf{Lemmatize Aggressively}:
