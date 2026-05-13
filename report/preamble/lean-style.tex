@@ -6,9 +6,9 @@
 % Define the lean4 style
 \lstdefinestyle{lean4}{
   language=bash, % Fallback
-  basicstyle=\small\ttfamily\color{black},
-  keywordstyle=\small\ttfamily\bfseries\color{blue!70!black},
-  commentstyle=\small\itshape\color{green!40!black},
+  basicstyle=\normalsize\ttfamily\color{black},
+  keywordstyle=\normalsize\ttfamily\bfseries\color{blue!70!black},
+  commentstyle=\normalsize\itshape\color{green!40!black},
   showstringspaces=false,
   stringstyle=\color{purple},
   % Clear all default strings and only allow double quotes
@@ -33,7 +33,8 @@
     let, have, show, by, match, with, infix, notation, namespace, end,
     apply, intro, simp, grind, exact, split_ifs, repeat, rw,  rfl, subst,
     contradiction, where, Prop, constructor, exists, specialize, linarity,
-    cases, induction, generalizing, rename_i, linarith
+    cases, induction, generalizing, rename_i, linarith, prefix, infix,
+    infixl, infixr, trivial, obtain
   },
   % Line breaks
   breaklines=true,                % Enables wrapping

@@ -82,73 +82,73 @@ which together allows us to know that the following is true:
 \begin{Lean_Code}
 /-!
 Exercise 2.21 (Essential)
-Prove that if `⟨S₁, s⟩ →ₛₒₛ[k] s'` then `⟨S₁; S₂, s⟩ →ₛₒₛ[k] ⟨S₂, s'⟩`.
-The execution of `S₁` is not influenced by the statement following it.
+Prove that if `@\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] s'` then `@\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@`.
+The execution of `S@\(_1\)@` is not influenced by the statement following it.
 -/
-lemma seq_exec_preserve_right {S₁ S₂ : Stmt} {s s' : State} {k : Nat}
-  (h : ⟨S₁, s⟩ →ₛₒₛ[k] s') :
-  ⟨S₁ ; S₂, s⟩ →ₛₒₛ[k] ⟨S₂, s'⟩ := by
-  induction k generalizing s S₁ with
+lemma seq_exec_preserve_right {S@\(_1\)@ S@\(_2\)@ : Stmt} {s s' : State} {k : Nat}
+  (h : @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] s') :
+  @\(\langle\)@S@\(_1\)@ ; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@ := by
+  induction k generalizing s S@\(_1\)@ with
   | zero =>
-    -- ⟨S₁, s⟩ →ₛₒₛ[0] s' is impossible because Step ≠ Final
+    -- @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[0] s' is impossible because Step ≠ Final
     cases h
   | succ k ih =>
-    -- We have ⟨S₁, s⟩ →ₛₒₛ @\gamma@' →ₛₒₛ[k] s'
+    -- We have @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\gamma@' @\(\to_{sos}\)@[k] s'
     cases h with
     | step h_step h_rest =>
       rename_i @\gamma@'
       -- Now we branch on whether @\gamma@' is a final state or a continuing step
       cases @\gamma@' with
       | final s_next =>
-        -- Case 1: S₁ finishes in one step (@\gamma@' = s_next)
-        -- This matches the [comp2] rule: ⟨S₁; S₂, s⟩ →ₛₒₛ ⟨S₂, s_next⟩
-        -- Since h_rest is ⟨s_next, ...⟩ →ₛₒₛ[k] s', and s_next is final,
+        -- Case 1: S@\(_1\)@ finishes in one step (@\gamma@' = s_next)
+        -- This matches the [comp2] rule: @\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\(\langle\)@S@\(_2\)@, s_next@\(\rangle\)@
+        -- Since h_rest is @\(\langle\)@s_next, ...@\(\rangle\)@ @\(\to_{sos}\)@[k] s', and s_next is final,
         -- k must be 0 and s_next = s'.
         cases h_rest
         exact small_step_k.step (small_step.comp2 h_step) small_step_k.refl
       | step S_next s_next =>
-        -- Case 2: S₁ takes one step to a new configuration ⟨S_next, s_next⟩
-        -- This matches the [comp1] rule: ⟨S₁; S₂, s⟩ →ₛₒₛ ⟨S_next; S₂, s_next⟩
+        -- Case 2: S@\(_1\)@ takes one step to a new configuration @\(\langle\)@S_next, s_next@\(\rangle\)@
+        -- This matches the [comp1] rule: @\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\(\langle\)@S_next; S@\(_2\)@, s_next@\(\rangle\)@
         apply small_step_k.step
         · exact small_step.comp1 h_step
-        · -- Now we need: ⟨S_next; S₂, s_next⟩ →ₛₒₛ[k] ⟨S₂, s'⟩
+        · -- Now we need: @\(\langle\)@S_next; S@\(_2\)@, s_next@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@
           -- This is exactly our IH applied to the remaining steps h_rest
           exact ih h_rest
 
 end exercise_2_21
 
-lemma small_step_k_to_star {@\gamma@₁ @\gamma@₂ : Config} {k : Nat}
-  (h : small_step_k @\gamma@₁ k @\gamma@₂) : small_step_star @\gamma@₁ @\gamma@₂ := by
+lemma small_step_k_to_star {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ : Config} {k : Nat}
+  (h : small_step_k @\gamma@@\(_1\)@ k @\gamma@@\(_2\)@) : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@ := by
   induction h with
   | refl => exact small_step_star.refl
   | step s h_rest ih => exact small_step_star.step s ih
 
 
-lemma star_to_small_step_k {@\gamma@₁ @\gamma@₂ : Config}
-  (h : small_step_star @\gamma@₁ @\gamma@₂) : @\exists@ k, small_step_k @\gamma@₁ k @\gamma@₂ := by
+lemma star_to_small_step_k {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ : Config}
+  (h : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@) : @\exists@ k, small_step_k @\gamma@@\(_1\)@ k @\gamma@@\(_2\)@ := by
   induction h with
   | refl =>
     exists 0
     exact small_step_k.refl
   | step s h_rest ih =>
-    let ⟨k, hk⟩ := ih
+    let @\(\langle\)@k, hk@\(\rangle\)@ := ih
     exists k + 1
     exact small_step_k.step s hk
 
-lemma small_step_star_trans {@\gamma@₁ @\gamma@₂ @\gamma@₃ : Config}
-  (h_left : small_step_star @\gamma@₁ @\gamma@₂) (h_right : small_step_star @\gamma@₂ @\gamma@₃) :
-  small_step_star @\gamma@₁ @\gamma@₃ := by
+lemma small_step_star_trans {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ @\gamma@@\(_3\)@ : Config}
+  (h_left : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@) (h_right : small_step_star @\gamma@@\(_2\)@ @\gamma@@\(_3\)@) :
+  small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_3\)@ := by
   induction h_left with
   | refl => exact h_right
   | step s h_rest ih => exact small_step_star.step s (ih h_right)
 
-lemma exercise_2_21 {S₁ S₂ : Stmt} {s s' : State}
-  (h : ⟨S₁, s⟩ →ₛₒₛ* s') : ⟨S₁ ; S₂, s⟩ →ₛₒₛ* ⟨S₂, s'⟩ := by
+lemma exercise_2_21 {S@\(_1\)@ S@\(_2\)@ : Stmt} {s s' : State}
+  (h : @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@* s') : @\(\langle\)@S@\(_1\)@ ; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@* @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@ := by
   -- 1. Convert star to k-step
-  let ⟨k, hk⟩ := star_to_small_step_k h
-  -- 2. Explicitly tell Lean to use S₂ from the goal
-  -- We use (S₂ := S₂) to map the lemma's parameter to our local variable
-  let h_k := seq_exec_preserve_right (S₂ := S₂) hk
+  let @\(\langle\)@k, hk@\(\rangle\)@ := star_to_small_step_k h
+  -- 2. Explicitly tell Lean to use S@\(_2\)@ from the goal
+  -- We use (S@\(_2\)@ := S@\(_2\)@) to map the lemma's parameter to our local variable
+  let h_k := seq_exec_preserve_right (S@\(_2\)@ := S@\(_2\)@) hk
   -- 3. Convert back to star
   exact small_step_k_to_star h_k
 \end{Lean_Code}
