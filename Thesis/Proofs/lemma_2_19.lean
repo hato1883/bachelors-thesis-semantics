@@ -32,31 +32,31 @@ lemma seq_split {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
     -- The derivation can be written as a first small-step to some configuration γ,
     -- followed by k₀ further steps to s''.
     cases h with
-    | step gamma_step h_tail =>
-      -- gamma_step : small_step (composition S₁ S₂) s γ  (the first step)
-      -- h_tail     : small_step_k γ k₀ (Config.final s'')
-      -- Now inspect which rule produced that first step: [comp1] or [comp2].
-      cases gamma_step with
+    | step h_step h_rest =>
+      -- Decompose the first step
+      cases h_step with
       | comp1 progress =>
-        -- [comp1]: γ = ⟨S₁'; S₂, s'⟩ because
+        -- [comp1]
+        -- γ = ⟨S₁'; S₂, s'⟩ because
         -- progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩.
         -- We therefore have ⟨S₁'; S₂, s'⟩ →ₛₒₛ[k₀] s'', so apply IH to that shorter derivation.
-        specialize ih h_tail
-        let ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
+
+        specialize ih h_rest
+        obtain ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
 
         -- From progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩ and hk₁ : ⟨S₁', s'⟩ →ₛₒₛ[k₁] s₀
         -- we obtain ⟨S₁, s⟩ →ₛₒₛ[k₁ + 1] s₀.
         exists s₀, k₁ + 1, k₂
         constructor
         case left =>
-          exact small_step_k.step progress hk₁
+          apply small_step_k.step
+          case step => exact progress
+          case rest => exact hk₁
+
         case right =>
           constructor
           case left => exact hk₂
-          case right =>
-            -- arithmetic: (k₁ + 1) + k₂ = k₀ + 1
-            simp [h_sum]
-            linarith
+          case right => linarith [h_sum]
 
       | comp2 terminates =>
         -- [comp2]: the first step returns γ = ⟨S₂, s'⟩ because
@@ -66,8 +66,16 @@ lemma seq_split {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
         exists s', 1, k₀
         constructor
         case left =>
-          exact small_step_k.step terminates small_step_k.refl
+          -- Goal: ⟨S₁, s⟩ →ₛₒₛ[1] s'
+          -- Use the constructor for single-step termination
+          -- If your inductive has a 'final' rule:
+          apply small_step_k.step
+          case step => exact terminates
+          case rest => apply small_step_k.refl
         case right =>
+          -- Goal: ⟨S₂, s'⟩ →ₛₒₛ[k₀] s'' ∧ k₀ + 1 = 1 + k₀
+          -- Use the constructor for to
+          -- split into left and right
           constructor
-          case left => exact h_tail
+          case left => exact h_rest
           case right => linarith

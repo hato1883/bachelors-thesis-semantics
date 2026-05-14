@@ -21,15 +21,15 @@ open NaturalSemantics
   - `s...`  : states (e.g. `s`, `s'`, `s_mid`).
 -/
 theorem while_expand (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨Stmt.loop b S, s⟩ →ₙₛ s') →
-  (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') := by
+  (⟨while b then S, s⟩ →ₙₛ s') →
+  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s') := by
   intro h_while
   cases h_while with
 
   | while_true
     h_cond_true h_deriv_seq_left h_while_rest =>
     have h_comp :
-      (⟨Stmt.composition S (Stmt.loop b S), s⟩ →ₙₛ s') :=
+      (⟨S; while b then S, s⟩ →ₙₛ s') :=
       big_step.comp h_deriv_seq_left h_while_rest
     exact big_step.if_true
       h_cond_true -- Condition
@@ -51,9 +51,12 @@ theorem while_expand (b : Bexp) (S : Stmt) (s s' : State) :
       comp_stmt -- Else case
 
 theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨Stmt.cond b (Stmt.composition S (Stmt.loop b S)) Stmt.skip, s⟩ →ₙₛ s') →
-  (⟨Stmt.loop b S, s⟩ →ₙₛ s') := by
+  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s') →
+  (⟨while b then S, s⟩ →ₙₛ s') := by
   intro h_if
+  show ⟨while b then S,s⟩ →ₙₛ s'
+
+
   cases h_if with
 
   | if_true
@@ -78,11 +81,8 @@ theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
     exact big_step.while_false h_cond_false
 
 lemma lemma_2_5 (b : Bexp) (S : Stmt) (s s' : State) :
-(⟨Stmt.cond
-  b
-  (Stmt.composition S (Stmt.loop b S))
-  Stmt.skip, s⟩ →ₙₛ s')  ↔
-(⟨Stmt.loop b S, s⟩ →ₙₛ s') := by
+(⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s')  ↔
+(⟨while b then S, s⟩ →ₙₛ s') := by
   -- equivalence introduction
   apply Iff.intro
 

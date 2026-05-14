@@ -98,17 +98,14 @@ instance : Coe Bool Bexp where
 
 set_option quotPrecheck false in
 set_option hygiene false in
-notation "𝒩⟦" n "⟧" => Num_to_Z  n
+notation "𝒩⟦" n "⟧" => Num_eval  n
 
-def Num_to_Z : Num → ℤ
+def Num_eval : Num → ℤ
   | Num.zero    => 0
   | Num.one     => 1
   | Num.succ0 n => 2 * 𝒩⟦n⟧
   | Num.succ1 n => 2 * 𝒩⟦n⟧ + 1
 
-set_option quotPrecheck false in
-set_option hygiene false in
-notation "𝓐⟦" a "⟧" => Aexp_eval a
 set_option quotPrecheck false in
 set_option hygiene false in
 notation "𝓐⟦" a "⟧" s:max => Aexp_eval a s
@@ -121,9 +118,6 @@ def Aexp_eval : Aexp → (State → ℤ)
   | Aexp.sub a₁ a₂, s => 𝓐⟦a₁⟧s - 𝓐⟦a₂⟧s
 
 
-set_option quotPrecheck false in
-set_option hygiene false in
-notation "𝓑⟦" b "⟧" => Bexp_eval b
 set_option quotPrecheck false in
 set_option hygiene false in
 notation "𝓑⟦" b "⟧" s:max => Bexp_eval b s
@@ -177,7 +171,7 @@ theorem assign_comm (s : State) (x y : Var) (z1 z2 : ℤ) (h : x ≠ y) :
   · show s v = s v
     rfl
 
-attribute [simp, reducible] Num_to_Z Aexp_eval Bexp_eval assign
+attribute [simp, reducible] Num_eval Aexp_eval Bexp_eval assign
 
 
 /-=============================-/
@@ -196,7 +190,7 @@ infixr:90 " :≡ " => While.Stmt.ass
 notation "if " b:40 " then " S₁:40 " else " S₂:40 => While.Stmt.cond b S₁ S₂
 
 -- While loop: while b do S
-notation "while " b:40 " do " S:40 => While.Stmt.loop b S
+notation "while " b:40 " then " S:40 => While.Stmt.loop b S
 
 -- === Arithmetic Expression Notation ===
 
@@ -211,7 +205,7 @@ infixl:65 " − " => While.Aexp.sub
 
 -- === Boolean Expression Notation ===
 
--- Equality: a₁ ⩵ a₂ (equals with two dots U+2A75)
+-- Equality: a₁ ⩵ a₂ (equals with two dots \eqeq)
 notation:50 a₁:51 " ⩵ " a₂:50 => While.Bexp.eq a₁ a₂
 
 -- Less or equal: a₁ ⩽ a₂ (less or slanted equal U+2A7D)
@@ -253,6 +247,18 @@ open Lean PrettyPrinter
 
 @[app_unexpander Stmt.skip] def unexpandSkip : Unexpander
   | `($_) => `(skip)
+
+@[app_unexpander Stmt.composition] def unexpandSeq : Lean.PrettyPrinter.Unexpander
+  | `($_ $S1 $S2) => `($S1; $S2)
+  | _ => throw ()
+
+@[app_unexpander Stmt.cond] def unexpandCond : Lean.PrettyPrinter.Unexpander
+  | `($_ $b $S1 $S2) => `(ifₛ $b thenₛ $S1 elseₛ $S2)
+  | _ => throw ()
+
+@[app_unexpander Stmt.loop] def unexpandLoop : Lean.PrettyPrinter.Unexpander
+  | `($_ $b $S1) => `(whileₛ $b doₛ $S1)
+  | _ => throw ()
 
 @[app_unexpander Aexp.num] def unexpandAexpNum : Unexpander
   | `($_ $n) => `($n)
@@ -304,18 +310,6 @@ open Lean PrettyPrinter
 
 @[app_unexpander Num.one] def unexpandNumOne : Unexpander
   | `(_) => `(1)
-  | _ => throw ()
-
-@[app_unexpander Stmt.composition] def unexpandSeq : Lean.PrettyPrinter.Unexpander
-  | `($_ $S1 $S2) => `($S1 ; $S2)
-  | _ => throw ()
-
-@[app_unexpander Stmt.cond] def unexpandCond : Lean.PrettyPrinter.Unexpander
-  | `($_ $b $S1 $S2) => `(ifₛ $b thenₛ $S1 elseₛ $S2)
-  | _ => throw ()
-
-@[app_unexpander Stmt.loop] def unexpandLoop : Lean.PrettyPrinter.Unexpander
-  | `($_ $b $S1) => `(whileₛ $b doₛ $S1)
   | _ => throw ()
 end tmp
 

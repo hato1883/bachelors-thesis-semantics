@@ -10,24 +10,22 @@ open NaturalSemantics
 section example_2_1
 
 example (s : State) :
-  let S := Stmt.composition
-    (Stmt.composition (Stmt.ass "x" 1) (Stmt.ass "y" 2))
-    (Stmt.ass "z" 3)
+  let S := ((x :≡ 1); (y :≡ 2)); (z :≡ 3)
   let s'   := s["x" ↦ 1]
   let s''  := s'["y" ↦ 2]
   let s''' := s''["z" ↦ 3]
   ⟨ S, s ⟩ →ₙₛ s''' := by
   -- 1. Breakdown the first sequence
-  apply big_step.seq
+  apply big_step.comp
   · -- Left side: (x := 1; y = 2)
-    apply big_step.seq
+    apply big_step.comp
     · -- x := 1
       apply big_step.ass
     · -- y := 2
       apply big_step.ass
   · -- Right side: z := 3
     -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
-    simp [Aexp_eval, Num_to_Z]
+    simp [Aexp_eval, Num_eval]
     apply big_step.ass
 
 end example_2_1
@@ -49,17 +47,17 @@ example :
   let s''  := s'["x" ↦ 1]
   ⟨ S, s ⟩ →ₙₛ s'' := by
   -- 1. Breakdown the first sequence
-  apply big_step.seq
+  apply big_step.comp
   · -- Left side: y := 1
     apply big_step.ass
   · -- Right side: while ¬ (x = 1) do (y := y*x; x := x-1)
     -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
-    simp [Bexp_eval, Aexp_eval, Num_to_Z]
+    simp [Bexp_eval, Aexp_eval, Num_eval]
     apply big_step.while_true
     · -- 𝓑⟦¬(x=1)⟧ s[y↦1] = true
       simp [Bexp_eval]
     · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[y↦1]⟩ →ₙₛ s'
-      apply big_step.seq
+      apply big_step.comp
       · -- ⟨y ":=" y ⋆ x, s⟩ →ₙₛ s₁'
         apply big_step.ass
       · -- ⟨x ":=" x - 1, s₁'⟩ →ₙₛ s'
@@ -69,7 +67,7 @@ example :
       · -- 𝓑⟦¬(x=1)⟧ s[x↦2][y↦3] = true
         simp [Bexp_eval]
       · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[x↦2][y↦3]⟩ →ₙₛ s'
-        apply big_step.seq
+        apply big_step.comp
         · -- ⟨y ":=" y ⋆ x, s⟩ →ₙₛ s₁'
           apply big_step.ass
         · -- ⟨x ":=" x - 1, s₁'⟩ →ₙₛ s'
@@ -100,17 +98,17 @@ example :
   let s''  := s'["x" ↦ 1]
   ⟨ S, s ⟩ →ₙₛ s'' := by
   -- 1. Breakdown the first sequence
-  apply big_step.seq
+  apply big_step.comp
   · -- Left side: y := 1
     apply big_step.ass
   · -- Right side: z := 3
     -- simplify [x↦𝓐⟦1⟧ s][y↦𝓐⟦2⟧ s[x↦𝓐⟦1⟧ s] to [x↦1][y↦2]
-    simp [Bexp_eval, Aexp_eval, Num_to_Z]
+    simp [Bexp_eval, Aexp_eval, Num_eval]
     apply big_step.while_true
     · -- 𝓑⟦¬(x=1)⟧ s[y↦1] = true
       simp [Bexp_eval]
     · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[y↦1]⟩ →ₙₛ s'
-      apply big_step.seq
+      apply big_step.comp
       · -- ⟨y ":=" y ⋆ x, s⟩ →ₙₛ s₁'
         apply big_step.ass
       · -- ⟨x ":=" x - 1, s₁'⟩ →ₙₛ s'
@@ -120,7 +118,7 @@ example :
       · -- 𝓑⟦¬(x=1)⟧ s[x↦2][y↦3] = true
         simp [Bexp_eval]
       · -- ⟨y ":=" y ⋆ x ";" x ":=" x - 1, s[x↦2][y↦3]⟩ →ₙₛ s'
-        apply big_step.seq
+        apply big_step.comp
         · -- ⟨y ":=" y ⋆ x, s⟩ →ₙₛ s₁'
           apply big_step.ass
         · -- ⟨x ":=" x - 1, s₁'⟩ →ₙₛ s'

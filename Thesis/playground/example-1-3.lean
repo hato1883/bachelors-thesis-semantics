@@ -6,7 +6,7 @@ section part_1_3
 theorem n_total_mapping_z (n : While.Num) : ∃! (z : ℤ), 𝒩⟦n⟧ = z := by
   induction n with
   | zero =>
-    rw [While.Num_to_Z]
+    rw [While.Num_eval]
     refine ⟨0, ?existence, ?uniqueness⟩
     case existence =>
       show 0 = 0
@@ -16,7 +16,7 @@ theorem n_total_mapping_z (n : While.Num) : ∃! (z : ℤ), 𝒩⟦n⟧ = z := b
       symm
       exact hy
   | one =>
-    rw [While.Num_to_Z]
+    rw [While.Num_eval]
     refine ⟨1, ?existence, ?uniqueness⟩
     case existence =>
       show 1 = 1
@@ -26,7 +26,7 @@ theorem n_total_mapping_z (n : While.Num) : ∃! (z : ℤ), 𝒩⟦n⟧ = z := b
       symm
       exact hy
   | succ0 d hd =>
-    rw [While.Num_to_Z]
+    rw [While.Num_eval]
     obtain ⟨z_d, h_prop, h_unique⟩ := hd
     refine ⟨2 * z_d, ?existence, ?uniqueness⟩
     case existence =>
@@ -39,7 +39,7 @@ theorem n_total_mapping_z (n : While.Num) : ∃! (z : ℤ), 𝒩⟦n⟧ = z := b
       rw [h_prop] at hy
       exact hy
   | succ1 d hd =>
-    rw [While.Num_to_Z]
+    rw [While.Num_eval]
     obtain ⟨z_d, h_prop, h_unique⟩ := hd
     refine ⟨2 * z_d + 1, ?existence, ?uniqueness⟩
     case existence =>
