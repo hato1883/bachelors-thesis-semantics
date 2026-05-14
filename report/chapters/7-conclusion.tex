@@ -7,10 +7,97 @@
 %
 %
 \chapter{Conclusions}
-\RED{\lipsum}
+This thesis investigated the feasibility of mechanizing the chapters 1 and 2 of
+textbook~\citep{nielson_semantics_2007} using the Lean 4 interactive theorem prover.
+By evaluating the transition from textbook prose to a formal kernel,
+the research identified the specific structural requirements and pedagogical
+costs associated with a "verbatim" formalization approach.
 
-%
-%
-%
-\section{TODO}
-\RED{\lipsum[1]}
+\section{Summary of Findings}
+The results for RQ1 (Mapping vs. Reformulation) suggest that while
+the logical hierarchy of the textbook by~\cite{nielson_semantics_2007} translates effectively into Lean,
+the implementation requires a deliberate layer of "scaffolding"
+to bridge the gap between human intuition and machine rigor.
+
+In Natural Semantics, the mapping is highly direct.
+However, the introduction of Structural Operational Semantics (SOS)
+requires more administrative overhead.
+While the mechanization remains faithful to the textbook's use of
+configurations ($\gamma$), Lean requires an explicit and exhaustive
+management of the transition system.
+
+The "notation gap" identified in the discussion highlights that while
+a human reader can fluidly interpret overloaded symbols,
+the Lean elaborator requires a rigorous definition of operational
+priority and type-safe configuration constructors to maintain the
+verbatim structure of the rules.
+
+Regarding RQ2 (Pedagogical Shortcuts),
+the mechanization surfaced several implicit assumptions that must be
+made explicit for the Lean kernel:
+\begin{itemize}
+    \item \textbf{Computational Identity:}
+    The "simple string" assumption for variables must be
+    supported by DecidableEq to allow for computable state updates.
+
+    \item \textbf{The Myth of the "Trivial" Step:}
+    Perhaps the most significant finding is that no step in a
+    formal proof can be dismissed as "straightforward" or "analogous."
+    Where a textbook might rely on the reader's intuition to bridge
+    small logical gaps, Lean requires every intermediate state and every
+    application of transitivity to be explicitly constructed and verified.
+
+    \item \textbf{Exhaustive Reasoning:}
+    Lean forces the formal closure of "impossible" cases
+    (such as the false branch of a verified true condition) which are typically
+    ignored in classroom derivations.
+\end{itemize}
+
+
+\section{Relation to Existing Work}
+By utilizing Lean 4 rather than a specialized educational
+tool like SASyLF~\citep{SASyLF}, this research exposed the "proof engineering"
+burden often hidden from students.
+
+This aligns with the findings in QED at Large~\citep{ringer_qed_2019}, suggesting that the
+creation of scaffolding lemmas, such as those managing state
+extensionality, is a fundamental part of the transition from paper
+to machine.
+
+Furthermore, by focusing on a language with global scope,
+we bypassed the complexities of the POPLMark Challenge~\citep{aydemir_mechanized_2005},
+allowing for a focused study on the "verbatim" translation of transition systems.
+The use of the \texttt{linarith} tactic to handle arithmetic side-conditions demonstrates
+the Poincaré Principle in practice: allowing the machine to
+handle computational trivialities, so the researcher can
+focus on the core semantic mapping.
+
+
+
+\section{Limitations and Future Work}
+This thesis focused on the foundational chapters of textbook by \cite{nielson_semantics_2007}.
+To further this research, the following areas are proposed:
+\begin{itemize}
+    \item \textbf{Tactic Scaffolding:}
+    Developing custom Lean tactics to automate the "scaffolding"
+    required for SOS configurations, potentially allowing students
+    to interact with Lean using the same level of abstraction found
+    in the textbook.
+
+    \item \textbf{Advanced Language Features:}
+    Extending the verbatim mechanization to include variable binding
+    and local scoping to determine if the "scaffolding" approach remains
+    viable as the language complexity increases.
+
+    \item \textbf{Pedagogical Impact:}
+    Investigating whether the requirement to prove "trivial" steps
+    helps students develop a deeper understanding of semantic rigor
+    or if the technical overhead acts as a barrier to learning.
+\end{itemize}
+
+\noindent
+In conclusion, while the structures of the foundational chapter in \cite{nielson_semantics_2007} textbook are a
+natural fit for Lean's inductive logic, the transition reveals that
+"textbook simplicity" often rests on a foundation of implicit assumptions.
+Mechanization does not change the logic, but it demands a total accounting
+of the steps that humans usually leave unsaid.

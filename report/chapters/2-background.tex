@@ -308,7 +308,6 @@ will take focus on Operational Semantics.
 %
 \section{Operational Semantics}
 \todo{Brief What?} \noindent
-\hampus{AI SLOP bellow!}
 Operational semantics describes the meaning of a program by specifying how it
 executes on an abstract machine \missingcitation \todo{Reference for the abstract machine definition of OS}. Unlike other semantic approaches, it is
 "execution-oriented," focusing on the transitions between program states.
@@ -320,16 +319,124 @@ state or a subsequent configuration \missingcitation \todo{Reference for transit
 In this work, we examine two primary styles of operational semantics:
 \emph{Natural Semantics} (Big-Step) and
 \emph{Structural Operational Semantics} (Small-Step).
-\hampus{END OF AI SLOP}
 
 \subsection*{Natural Operational Semantics (Big-Step)}
 \label{background:os:ns}
 \todo{Breif introduction to NS, reader will have read a course on semantics,
 this section is here as a reminader to the reader.}
-\RED{\lipsum[1]}
+Natural Operational Semantics, often shortened to just Natural Semantics (NS), or even big-step semantics
+is the view that a given Statement \(S\) and a starting state \(s\) can evaluate into a finalized state \(s'\).
+This view is that each operation runs to completion.
+
+As with most semantics we define deduction rules to formulate how the statements are evaluated.
+In the textbook we are given the following table of rules
 
 \hampus{Show Comp NS rules for \While describing them}
-\RED{\lipsum[1]}
+\begin{table}[ht]
+    \[
+    \begin{array}{ll}
+        \mbox{[ass}_{ns}\mbox{]} &
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer1{
+    \langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[skip}_{ns}\mbox{]} &
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer1{
+    \langle \mathtt{skip}, s \rangle \to s
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[comp}_{ns}\mbox{]} &
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \hypo{\langle S_2, s \rangle \to s''}
+  \infer2{
+    \langle S_1;\ S_2, s \rangle \to s''
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[if}_{ns}^{tt}\mbox{]} &
+\begin{prooftree}
+  \hypo{\langle S_1, s \rangle \to s'}
+  \infer1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[if}_{ns}^{ff}\mbox{]} &
+\begin{prooftree}
+  \hypo{\langle S_2, s \rangle \to s'}
+  \infer1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[while}_{ns}^{tt}\mbox{]} &
+\begin{prooftree}
+  \hypo{\langle S, s \rangle \to s'}
+  \hypo{\langle \mathtt{while}\ b\ \mathtt{do}\ S, s' \rangle \to s''}
+  \infer2[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \to s''
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[while}_{ns}^{ff}\mbox{]} &
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \to s
+    }
+\end{prooftree}
+
+    \end{array}
+    \]
+\end{table}
+
+The first rule is an axiom, a rule that can be used regardless of the premises at hand,
+this is a fact which is always true in this language. This should not be confused with the fact
+that you can use it wherever, as an assignment cant be used by itself to prove that we can build a statement from two smaller statements.
+
+An axiom is marked by the empty space above the line where the premises are needed,
+The assignment rule uses the state update syntax defined for the while language to show that the Statement \(x := a\) in the state \(s\)
+will result in the final state \(s[x \mapsto \mathcal{A}[\![a]\!]s]\).
+
+In that same regard we can see that skip is also an axiom, but in this case the evaluation of the \(\mathtt{skip}\) statement does not modify the state \(s\)
+
+The next rule in the table is the composition rule, which states that given two statement \(S_1\) and \(S_2\) of some shape, that terminates into the final states
+\(s'\) from the initial state \(s\) and \(s''\) from the initial state \(s'\) respectively, this means we can take the output \(s'\) from \(S_1\),
+and feed it into \(S_2\) to get \(s''\).
+Compared to the assignment and the skip rules, we must prove that \(\langle S_1, s \rangle \to s'\) and \(\langle S_2, s \rangle \to s''\) before we can use it.
+
+The next rule is the [if$_{ns}^{tt}$] rule, where the concept of side-condition is used.
+A side condition is much like a premise in that we need to prove that the side condition is true before we use the rule, but compared to the premises, we do not
+need to create this proof directly in the deduction tree we are building, but instead can provide an external proof for why the condition is true.
+This removes this proof tree from the whole allowing the textbook to focus on the important parts, whilst leaving the more trivial proofs outside the deduction trees.
+
+The remaining rules are straight forward combination of premises and side conditions to formulate how to build
+conditional statements when the condition is false, as well as while-loops for both when condition is true and when it is false.
+
+Yet again notice that we can only formulate deduction trees, or so-called transitions given these rules, this means that things that never terminates into a final state,
+can not be proven using these rules, an example would be the statement
+\[
+    \mathtt{while}\ \mathbf{true}\ \mathtt{do}\ \mathtt{skip}
+\]
+which would
+create an infinite growing deduction tree due to the second premise \(\langle \mathtt{while}\ b\ \mathtt{do}\ S, s' \rangle \to s''\) is exactly the same thing we need to prove
+for the final conclusion, meaning that the proof becomes infinitely recursive. This can also occur for statements that always modifies the state, but never reaches a final state.
+
 
 %
 %
@@ -338,10 +445,111 @@ this section is here as a reminader to the reader.}
 \label{background:os:sos}
 \todo{Breif introduction to SOS, reader will have read a course on semantics,
 this section is here as a reminader to the reader.}
-\RED{\lipsum[1]}
+While Natural Semantics describes the overall result of execution, Structural Operational Semantics (SOS), or "Small-Step" semantics,
+describes the individual steps of the computation.
+This approach is particularly useful for reasoning about interleaved execution,
+non-termination, and program intermediate states.In SOS, we distinguish between
+two types of configurations:
+\begin{itemize}
+    \item Intermediate configurations: $\langle S, s \rangle$,
+representing that the statement $S$ is to be executed from state $s$.
 
-\hampus{Show Comp1 and Comp2 SOS rules for \While describing them}
-\RED{\lipsum[1]}
+    \item Terminal configurations: $s$, representing that the program has terminated in state $s$.
+\end{itemize}
+The transition relation is denoted by $\Rightarrow$. 
+A transition can either lead to a new intermediate configuration,
+$\langle S, s \rangle \Rightarrow \langle S', s' \rangle$ (representing one step of execution),
+or directly to a terminal state, $\langle S, s \rangle \Rightarrow s'$.
+
+Comparison of Transition Styles
+Unlike Natural Semantics,
+where the derivation tree for a complex statement is constructed all at once,
+an SOS derivation represents a single "pulse" of the abstract machine. This can be shown in the rules
+\begin{table}[ht]
+    \[
+    \begin{array}{ll}
+        \mbox{[ass}_{sos}\mbox{]} &
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer1{
+    \langle x := a, s \rangle \Rightarrow s[x \mapsto \mathcal{A}[\![a]\!] s]
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[skip}_{sos}\mbox{]} &
+\begin{prooftree}
+  \hypo{} % Empty hypothesis for an axiom
+  \infer1{
+    \langle \mathtt{skip}, s \rangle \Rightarrow s
+    }
+\end{prooftree} \\ \\
+        \mbox{[comp}_{sos}^1\mbox{]} &
+\begin{prooftree}
+\hypo{\langle S_1, s \rangle \Rightarrow \langle S_1', s' \rangle}
+\infer1{
+    \langle S_1; S_2, s \rangle \Rightarrow \langle S_1'; S_2, s' \rangle
+    }
+\end{prooftree} \\ \\
+
+\mbox{[comp}_{sos}^2\mbox{]} &
+\begin{prooftree}
+    \hypo{\langle S_1, s \rangle \Rightarrow s'}
+    \infer1{
+        \langle S_1; S_2, s \rangle \Rightarrow \langle S_2, s' \rangle}
+\end{prooftree} \\ \\
+
+        \mbox{[if}_{sos}^{tt}\mbox{]} &
+\begin{prooftree}
+  \hypo{}
+  \infer1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \Rightarrow \langle S_1, s \rangle
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[if}_{sos}^{ff}\mbox{]} &
+\begin{prooftree}
+  \hypo{}
+  \infer1[
+    if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
+    ]{
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \Rightarrow \langle S_2, s \rangle
+    }
+\end{prooftree} \\ \\
+
+        \mbox{[while}_{sos}\mbox{]} &
+\begin{prooftree}
+  \hypo{}
+  \infer1{
+    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \Rightarrow \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip}, s \rangle
+    }
+\end{prooftree}
+\end{array}
+    \]
+\end{table}
+Here we can see that almost all rules except for the compositional rules of which there is now two of, are axioms.
+Where assign, and skip both still terminates after a single pulse/operation, the other rules such as the if conditions and the singular while rule
+simply unwraps the conditional part and loop.
+A true conditional is simply just the true branch, and vice versa for the false case.
+A while-loop is either a single execution of the statement followed by the loop again, or nothing depending on the condition.
+
+
+To find the final state of a program,
+one must look at the transitive closure of the transition relation, denoted $\Rightarrow^*$.
+The rules for SOS are structured to "reduce" the statement piece by piece.
+For example, the composition rule $[comp_{sos}^1]$ allows us to execute the first step of
+$S_1$ while keeping $S_2$ "on the stack":
+
+Handling Non-termination
+In Natural Semantics, a looping program like \\
+$\mathtt{while}\ \mathbf{true}\ \mathtt{do}\ \mathtt{skip}$ simply
+has no valid derivation tree. In SOS, this same program produces an infinite sequence of configurations:
+$$
+\langle \mathtt{while}\ \mathbf{true}\ \mathtt{do}\ \mathtt{skip}, s \rangle \Rightarrow \dots \Rightarrow \langle \mathtt{while}\ \mathbf{true}\ \mathtt{do}\ \mathtt{skip}, s \rangle \Rightarrow \dots
+$$
+This is still not a valid program in SOS, but it allows us to distinguish between a program that is "stuck" (no transition possible)
+and one that is "diverging" (infinite transitions possible).
 
 
 
@@ -351,13 +559,97 @@ this section is here as a reminader to the reader.}
 \section{The Lean 4 Proof Assistant}
 \label{background:sec:lean_4}
 \hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
+Lean 4 is a functional programming language and an interactive theorem prover
+based on \textit{Dependent Type Theory} \citep{theorem_proving_2026}.
+For the readers familiar with first- and second-order logic,
+Lean can be viewed as a rigorous environment for defining mathematical objects
+and constructing formal proofs that are mechanically verified by a small logical kernel.
 
-\todo{Definie syntax  such as inductive etc}
-\RED{\lipsum[1]}
+\subsection{Defining Syntax: Inductive Types}
+In the textbook by \cite{nielson_semantics_2007},
+the syntax of a programming language is often defined using Backus-Naur Form (BNF).
+In Lean, we represent these syntactic categories using \texttt{inductive} types.
+An inductive type defines a set by listing its constructors.
+For example, the syntactic category of arithmetic expressions (\textit{Aexp}) is defined as:
 
-\todo{Describe proof proceeses in lean (Bottom up)}
-\RED{\lipsum[1]}
+\begin{Lean_Code}
+inductive Aexp where
+  | num (n : Num)          -- Constants
+  | var (x : Var)          -- Variables
+  | add (a1 a2 : Aexp)     -- Addition
+\end{Lean_Code}
+\noindent
+This maps directly to the mathematical notion of a set defined by structural induction.
+Each constructor (e.g., \texttt{add}) is a function
+that takes existing elements of the set and produces a new one.
 
-\todo{Describe "difficulty" of proving numbers etc which otherwise as seen as trivial, 
-as well as usage of tactics such as linarith, simp, grind etc to reduce this burden.}
-\RED{\lipsum[1]}
+\subsection{Defining Semantics: Relations as Propositions}
+A core challenge in this thesis is mapping the "Big-Step" operational semantics
+found in literature to Lean's internal logic. In a traditional math course,
+the evaluation of a statement is written as a relation: $\langle S, s \rangle \to_{ns} s'$. 
+
+In Lean, this relation is defined as an \texttt{inductive} type that returns
+a \texttt{Prop} (Proposition).
+This is a crucial distinction:
+\begin{itemize}
+    \item \textbf{Data Types} (like \texttt{Aexp}) are used to build programs.
+    \item \textbf{Propositions} (like \texttt{big\_step}) are used to make claims about those programs.
+\end{itemize}
+\noindent
+When we define \texttt{big\_step} inductively, each constructor represents an
+\textbf{inference rule}. For instance, the rule for statement composition (\texttt{comp}) in Lean is:
+
+\begin{Lean_Code}
+| comp (h_left : @\(\langle\)@S1, s@\(\rangle\)@ @\(\to_{ns}\)@ s') (h_right : @\(\langle\)@S2, s'@\(\rangle\)@ @\(\to_{ns}\)@ s'') :
+    @\(\langle\)@S1; S2, s@\(\rangle\)@ @\(\to_{ns}\)@ s''
+\end{Lean_Code}
+This code defines a rule of inference. To a reader familiar with natural deduction,
+this is a direct mapping of the standard horizontal-bar notation:
+\[
+\frac{\langle S_1, s \rangle \to_{ns} s' \quad \langle S_2, s' \rangle \to_{ns} s''}{\langle S_1; S_2, s \rangle \to_{ns} s''}
+\]
+The names \texttt{h1} and \texttt{h2} represent the \textit{hypotheses} or \textit{premises}
+required to reach the conclusion below the colon.
+
+\subsection{The Proof State and Tactics}
+Unlike a prose proof, which is a static piece of text,
+a proof in Lean is constructed using \textbf{tactics}.
+A tactic is a command that transforms a "goal" (the statement to be proven) into simpler sub-goals.
+
+When reading the proofs in this thesis,
+it is helpful to understand the workflow:
+Lean maintains a \textit{proof state} consisting of the current \textbf{context}
+(known facts and variables) and the \textbf{goal}.
+A tactic like \texttt{intro} moves an assumption into the context,
+while \texttt{cases} performs a proof by exhaustion,
+forcing Lean to consider every possible way a specific relation could have been formed.
+
+\subsection{Mapping Lean to Mathematical Logic}
+The following table provides a quick reference for mapping Lean's core keywords
+to their respective functionalities in standard mathematical and logical discourse.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{llp{7cm}}
+\hline
+\textbf{Lean Keyword} & \textbf{Logical Equivalent} & \textbf{Functionality} \\ \hline
+\texttt{inductive}    & Inductive Definition      & Defines a set or a relation via a list of rules/constructors. \\
+\texttt{Prop}         & Proposition               & The type of statements that have truth values. \\
+\texttt{theorem}      & Theorem / Lemma           & A claim that requires a formal proof term. \\
+\texttt{intro}        & Implication Introduction  & "Assume $P$ is true" or "Let $x$ be an arbitrary element." \\
+\texttt{exact}        & Q.E.D.                    & Completes a goal by providing the required evidence directly. \\
+\texttt{cases}        & Proof by Exhaustion       & Deconstructs an object or relation into its possible forms. \\
+\texttt{apply}        & Modus Ponens              & Uses a known rule or theorem to satisfy the current goal. \\
+\texttt{rfl}          & Reflexivity               & Proves an equality of the form $A = A$ by definition. \\ \hline
+\end{tabular}
+\caption{Mapping of Lean 4 keywords to mathematical concepts.}
+\end{table}
+
+\subsection{Notation Conventions}
+To bridge the gap between code and literature, this thesis employs custom notation.
+We use semantic brackets $\mathcal{A}[\![ a ]\!] s$ to denote the evaluation of
+an expression $a$ in state $s$, and the notation $s[x \mapsto z]$ to denote a
+state update where variable $x$ is assigned value $z$. These notations are not
+merely for display; they are mapped directly to Lean functions through the
+\texttt{notation} and \texttt{unexpander} mechanisms, ensuring that the mechanized
+proof code remains readable to a human audience.

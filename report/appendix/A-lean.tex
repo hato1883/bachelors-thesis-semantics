@@ -90,7 +90,7 @@ lemma seq_exec_preserve_right {S@\(_1\)@ S@\(_2\)@ : Stmt} {s s' : State} {k : N
   @\(\langle\)@S@\(_1\)@ ; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@ := by
   induction k generalizing s S@\(_1\)@ with
   | zero =>
-    -- @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[0] s' is impossible because Step ≠ Final
+    -- @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[0] s' is impossible because Step \(\neq\) Final
     cases h
   | succ k ih =>
     -- We have @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\gamma@' @\(\to_{sos}\)@[k] s'
