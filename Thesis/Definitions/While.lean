@@ -313,12 +313,4 @@ open Lean PrettyPrinter
   | _ => throw ()
 end tmp
 
--- Variables for convenience (optional, can be removed if not needed)
-variable (n n₀ n₁ n₂ n₃ n₄ n₅ n₆ n₇ n₈ n₉ : Num)
-variable (x x₀ x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉ : Var)
-variable (a a₀ a₁ a₂ a₃ a₄ a₅ a₆ a₇ a₈ a₉ : Aexp)
-variable (b b₀ b₁ b₂ b₃ b₄ b₅ b₆ b₇ b₈ b₉ : Bexp)
-variable (S S₀ S₁ S₂ S₃ S₄ S₅ S₆ S₇ S₈ S₉ : Stmt)
-variable (s s₀ s₁ s₂ s₃ s₄ s₅ s₆ s₇ s₈ s₉ : State)
-
 end While
