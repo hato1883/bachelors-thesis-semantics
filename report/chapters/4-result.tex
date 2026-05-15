@@ -43,10 +43,8 @@ Using Lean 4's \texttt{inductive} keyword, we translate each BNF rule directly i
     \switchcolumn[1]*[]
     \begin{leftcolumn}
         \begin{Lean_Code}
-structure Var where
-  name : String
-  deriving BEq, Hashable,
-    Repr, DecidableEq
+def Var := String
+deriving instance DecidableEq for Var
         \end{Lean_Code}
     \end{leftcolumn}
     \begin{rightcolumn}

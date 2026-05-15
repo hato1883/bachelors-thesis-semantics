@@ -76,7 +76,7 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     apply small_step_star.step
     · exact small_step.if_true hcond
     -- 3. Use the local S₂ for the suffix of the sequence
-    let h_seq := exercise_2_21 (S₂ := Stmt.loop b S₂) ih_body
+    let h_seq := exercise_2_21 (S₂ := Stmt.while b S₂) ih_body
     -- 4. Transitivity: ⟨S₂; while b do S₂, s⟩ →* ⟨while b do S₂, s'⟩ →* s''
     exact small_step_star_trans h_seq ih_loop
 

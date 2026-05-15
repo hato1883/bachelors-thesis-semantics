@@ -14,9 +14,8 @@ inductive Num where
   | succ1 (n : Num) : Num  -- n 1
 
 /-- Variables are represented as strings of letters and digits -/
-structure Var where
-  name : String
-  deriving BEq, Hashable, Repr, DecidableEq
+def Var := String
+deriving instance DecidableEq for Var
 
 inductive Aexp where
   | num (n : Num)          -- a := n
@@ -37,8 +36,8 @@ inductive Stmt where
   | ass  (x : Var)  (a : Aexp)     -- S = n
   | skip                           -- S = x
   | composition        (S₁ S₂ : Stmt) -- S = S₁; S₂
-  | cond (b : Bexp) (S₁ S₂ : Stmt) -- S = if b then S₁ else S₂
-  | loop (b : Bexp) (S₁ : Stmt)    -- S = while b then S₁
+  | if (b : Bexp) (S₁ S₂ : Stmt) -- S = if b then S₁ else S₂
+  | while (b : Bexp) (S₁ : Stmt)    -- S = while b then S₁
 
 
 /-=============================-/
@@ -70,11 +69,6 @@ instance (n : Nat) : OfNat Num n where
   ofNat := natToNum n
 
 -- 1. Allow Strings to be treated as Aexp (via Var)
-instance : Coe String Var where
-  coe s := ⟨s⟩
-
-instance : Coe String Aexp where
-  coe s := Aexp.var ⟨s⟩
 
 instance (n : Nat) : OfNat Aexp n where
   ofNat := Aexp.num (OfNat.ofNat n)
@@ -187,10 +181,10 @@ infixl:80 "; " => While.Stmt.composition
 infixr:90 " :≡ " => While.Stmt.ass
 
 -- Condition: if b then S₁ else S₂
-notation "if " b:40 " then " S₁:40 " else " S₂:40 => While.Stmt.cond b S₁ S₂
+notation "if " b:40 " then " S₁:40 " else " S₂:40 => While.Stmt.if b S₁ S₂
 
 -- While loop: while b do S
-notation "while " b:40 " then " S:40 => While.Stmt.loop b S
+notation "while " b:40 " then " S:40 => While.Stmt.while b S
 
 -- === Arithmetic Expression Notation ===
 
@@ -227,15 +221,6 @@ notation "𝔽" => While.Bexp.false
 -- Unexpander for Var.mk (Antiquotation style)
 section tmp
 open Lean PrettyPrinter
-@[app_unexpander Var.mk] def unexpandVar : Unexpander
-  | `($_ $name) =>
-    match name.raw.isStrLit? with
-    | some s =>
-      -- This turns the string "x" into the identifier x
-      let id := mkIdent s.toName
-      return id
-    | none => throw ()
-  | _ => throw ()
 
 @[app_unexpander assign] def unexpandAssign : Lean.PrettyPrinter.Unexpander
   | `($_ $s $x $z) => `($s[$x ↦ $z])
@@ -252,11 +237,11 @@ open Lean PrettyPrinter
   | `($_ $S1 $S2) => `($S1; $S2)
   | _ => throw ()
 
-@[app_unexpander Stmt.cond] def unexpandCond : Lean.PrettyPrinter.Unexpander
+@[app_unexpander Stmt.if] def unexpandCond : Lean.PrettyPrinter.Unexpander
   | `($_ $b $S1 $S2) => `(ifₛ $b thenₛ $S1 elseₛ $S2)
   | _ => throw ()
 
-@[app_unexpander Stmt.loop] def unexpandLoop : Lean.PrettyPrinter.Unexpander
+@[app_unexpander Stmt.while] def unexpandLoop : Lean.PrettyPrinter.Unexpander
   | `($_ $b $S1) => `(whileₛ $b doₛ $S1)
   | _ => throw ()
 
