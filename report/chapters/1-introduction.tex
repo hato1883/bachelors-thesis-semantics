@@ -1,33 +1,52 @@
 \chapter{Introduction}
 \label{cha:introduction}
-As software becomes more critical,
-and the amount of programming languages increases \missingcitation \todo{Provide a source or statistic for the proliferation of programming languages}, the need to ensure
-an instruction in a program does what the programmer think it does becomes essential \missingcitation \todo{Cite a source discussing the 'software crisis' or the importance of software reliability}. \elias{En lite krånglig första mening}
-This is especially important when compilers and interpreters translate code into
-lower level representations such as machine code or bytecode \hampus{true, but} \missingcitation \todo{Cite a source on compiler correctness or the risks of translation errors, e.g., CompCert}. \elias{Eftersom du inte gör det kanske det inte är något du ska trycka på precis i början}
 
-To bridge this gap of syntax and semantics, the field of programming language \todo{is the term "gap" applicable here} \elias{Lite oklart vad som avses här}
-semantics was developed, formalizing the behavior of instructions
-in a rigorous mathematical representation \missingcitation \todo{Cite a foundational text on formal semantics, e.g., Plotkin, Kahn, or Winskel}. \hampus{was it developed for this reason?} \elias{Jag tror att du ska prata om det som något som finns, snarare än något som har uppfunnits. Kanske ha vinkeln att alla programspråk har någon semantik och att programmerare har en informell uppfattning om den, men att formell semantik möjliggör formella bevis på korrekthet av program och analyser}.
-By defining these meanings, we can reason about a program's behavior and
-validate that it works as intended regardless of input \missingcitation \todo{Cite the benefits of formal methods in verification}.
+As software becomes increasingly critical to modern infrastructure,
+the proliferation of programming languages \citep{noauthor_tiobe_nodate}
+has heightened the need for rigorous program verification.
+It is essential to ensure that a program's execution aligns precisely
+with the programmer's intent \citep{ringer_qed_2019}.
+While this alignment is particularly vital when compilers translate
+high-level code into machine-level representations,
+the complexity of these translations introduces significant
+risks of subtle behavioral shifts.
 
-In academic settings, such as the course
-"Semantics of Programming Languages (1DL311)" provided by Uppsala University,
-these definitions and proofs are often presented "on paper"~\citep{uppsala_syllabus_2023, uppsala_reading_2023}.
-These paper-based proofs frequently omit inductive steps that share
-similarities with previous ones \hampus{maybe give a example / page number in the book}.
-While these proofs are useful for
-teaching, it is also susceptible to human error, implicit assumptions and
-gaps in logical reasoning \missingcitation \todo{Cite research on the fallibility of hand-written proofs vs. machine-checked proofs, e.g., De Millo et al. or Wiedijk}. By mechanizing \elias{Inte definierat!} the proof we introduce a layer of
-automatic validation, thereby ensuring logical soundness and verify
-formal correctness \hampus{Maybe cite Lean / Coq / general proof assistant for this statement} \missingcitation \todo{Cite the general utility of Proof Assistants/LCF-style kernels}. \elias{…men man kan inte heller säga ”liknar föregående fall” eller ”inses lätt”!}.
+To address these challenges, the field of programming language semantics
+provides the mathematical framework necessary to formalize the behavior of instructions.
+Rather than viewing semantics as a modern invention,
+it is more accurate to say that every programming language possesses
+an underlying semantics, whether defined formally
+or understood informally by developers.
+By moving from an informal understanding to a rigorous mathematical
+representation \citep{winskel_formal_1993},
+we enable the use of formal methods to reason about program behavior
+allowing verification of methods and programs for all valid inputs.
 
-This thesis investigates the process of translating these pen-and-paper proofs
-into mechanized proofs using the proof assistant Lean~\citep{theorem_proving_2026}. The goal is to
-evaluate whether the techniques used in Semantics literature~\citep{uppsala_reading_2023} correspond
-directly to Lean's mechanisms or if they require any reformulation to achieve
-machine-level precision.
+In academic settings, such as the course "Semantics of Programming Languages (1DL311)"
+at Uppsala University, these definitions and proofs are typically presented
+"on paper"~\citep{uppsala_syllabus_2023, uppsala_reading_2023}.
+However, manual proofs are susceptible to human error~\citep{reliability_of_proof},
+implicit assumptions, and logical gaps.
+Furthermore, paper-based proofs frequently omit repetitive inductive steps,
+relying on phrases like "the remaining cases are analogous"
+or "it is easily seen",
+shortcuts that are not permissible in a formal logic system~\citep{andersen_acceptable_2020}.
+
+To achieve total precision, one can utilize \textit{mechanization}:
+the process of implementing a formal system within a computer program,
+such as a proof assistant, to verify every logical step automatically.
+By mechanizing a proof, we introduce a layer of algorithmic validation
+that ensures logical soundness and eliminates the ambiguity inherent in
+hand-written derivations as was seen during the formalization of the Kepler conjecture~\citep{hales_formal_2017}.
+
+This thesis investigates the process of translating pen-and-paper
+semantic proofs into mechanized proofs using the
+Lean proof assistant~\citep{theorem_proving_2026}.
+The goal is to evaluate whether the techniques used in standard semantics
+literature~\citep{uppsala_reading_2023} correspond directly to Lean's mechanisms,
+or if the transition to machine-level precision requires a fundamental
+reformulation of these proofs.
+
 
 %
 %
@@ -87,7 +106,6 @@ assistant that otherwise was implicitly defined in the written counterpart.
 %
 \label{intro:roadmap}
 \section{Thesis Structure Roadmap} 
-\todo{A map of the thesis layout written in plain English to give reader a tour guide through the thesis} \noindent
 The journey of this thesis is organized into seven chapters,
 progressing from theoretical foundations to the nuances of machine-checked proofs.
 Following this introduction, Chapter 2 establishes the necessary background,

@@ -79,12 +79,12 @@ inductive small_step : Stmt → State → Config → Prop where
 
   -- [ifᵗᵗₛₒₛ]
   | if_true {b S₁ S₂ s}
-      (h_cond_true : 𝓑⟦b⟧ s = true) :
+      (h_cond_true : 𝓑⟦b⟧ s = tt) :
     ⟨if b then S₁ else S₂, s⟩ →ₛₒₛ ⟨S₁, s⟩
 
   -- [ifᶠᶠₛₒₛ]
   | if_false {b S₁ S₂ s}
-      (h_cond_false : 𝓑⟦b⟧ s = false) :
+      (h_cond_false : 𝓑⟦b⟧ s = ff) :
     ⟨if b then S₁ else S₂, s⟩ →ₛₒₛ ⟨S₂, s⟩
 
   -- [whileₛₒₛ]

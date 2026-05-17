@@ -32,26 +32,26 @@ inductive big_step : Stmt → State → State → Prop where
 
   -- [ifᵗᵗₙₛ] rule (given ⟨S₁, s⟩ → s' and 𝓑⟦b⟧ s = true we produce ⟨S, s⟩ → s')
   | if_true {b S₁ S₂ s s'} :
-    (h_cond : 𝓑⟦b⟧ s = true) →
+    (h_cond : 𝓑⟦b⟧ s = tt) →
     (h_then : ⟨S₁, s⟩ →ₙₛ s') →
       ⟨if b then S₁ else S₂, s⟩ →ₙₛ s'
 
   -- [ifᶠᶠₙₛ] rule (given ⟨S₂, s⟩ → s' and 𝓑⟦b⟧ s = false we produce ⟨S, s⟩ → s')
   | if_false {b S₁ S₂ s s'}
-    (h_cond : 𝓑⟦b⟧ s = false)
+    (h_cond : 𝓑⟦b⟧ s = ff)
     (h_else : ⟨S₂, s⟩ →ₙₛ s') :
       ⟨if b then S₁ else S₂, s⟩ →ₙₛ s'
 
   -- [whileᵗᵗₙₛ] rule (given ⟨S', s⟩ → s', ⟨while b do S', s'⟩ → s'' and 𝓑⟦b⟧ s = true we produce ⟨S, s⟩ → s'')
   | while_true {b S s s' s''}
-    (h_cond : 𝓑⟦b⟧ s = true)
+    (h_cond : 𝓑⟦b⟧ s = tt)
     (h_step : ⟨S, s⟩ →ₙₛ s')
     (h_rest : ⟨while b then S, s'⟩ →ₙₛ s'') :
       ⟨while b then S, s⟩ →ₙₛ s''
 
   -- [whileᶠᶠₙₛ] rule (given 𝓑⟦b⟧ s = false we produce ⟨S, s⟩ → s)
   | while_false {b S s}
-    (h_cond : 𝓑⟦b⟧ s = false) :
+    (h_cond : 𝓑⟦b⟧ s = ff) :
       ⟨while b then S, s⟩ →ₙₛ s
 
 @[app_unexpander big_step] def unexpandBigStep : Lean.PrettyPrinter.Unexpander

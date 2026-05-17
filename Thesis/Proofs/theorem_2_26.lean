@@ -36,13 +36,17 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
   induction h with
   | ass =>
     apply small_step_star.step
-    apply small_step.ass
-    apply small_step_star.refl
+    case step =>
+      apply small_step.ass
+    case rest =>
+      apply small_step_star.refl
 
   | skip =>
     apply small_step_star.step
-    apply small_step.skip
-    apply small_step_star.refl
+    case step =>
+      apply small_step.skip
+    case rest =>
+      apply small_step_star.refl
 
   | comp ih1 ih2 ih3 ih4 =>
     rename_i S₁ S₂ s s' s''
@@ -57,38 +61,53 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
 
   | if_true hcond h ih =>
     apply small_step_star.step
-    apply small_step.if_true
-    exact hcond
-    exact ih
+    case step =>
+      apply small_step.if_true
+      case h_cond_true =>
+        exact hcond
+    case rest =>
+      exact ih
 
   | if_false hcond h ih =>
     apply small_step_star.step
-    apply small_step.if_false
-    exact hcond
-    exact ih
+    case step =>
+      apply small_step.if_false
+      case h_cond_false =>
+        exact hcond
+    case rest =>
+      exact ih
 
   | while_true hcond h_body h_rest ih_body ih_loop =>
     rename_i b S₂ s s' s''
     -- 1. Unroll: while b do S₂ →ₛₒₛ if b then (S₂; while b do S₂) else skip
     apply small_step_star.step
-    · exact small_step.while_unroll
+    case step =>
+      exact small_step.while_unroll
     -- 2. Condition is true: if b then ... →ₛₒₛ ⟨S₂; while b do S₂, s⟩
     apply small_step_star.step
-    · exact small_step.if_true hcond
+    case step =>
+      exact small_step.if_true hcond
     -- 3. Use the local S₂ for the suffix of the sequence
-    let h_seq := exercise_2_21 (S₂ := Stmt.while b S₂) ih_body
+    have h_seq := exercise_2_21 (S₂ := Stmt.while b S₂) ih_body
     -- 4. Transitivity: ⟨S₂; while b do S₂, s⟩ →* ⟨while b do S₂, s'⟩ →* s''
     exact small_step_star_trans h_seq ih_loop
 
   | while_false h_cond =>
     apply small_step_star.step
-    · apply small_step.while_unroll
-    · apply small_step_star.step
-      · apply small_step.if_false
-        · exact h_cond
-      · apply small_step_star.step
-        apply small_step.skip
-        · apply small_step_star.refl
+    case step =>
+      apply small_step.while_unroll
+    case rest =>
+      apply small_step_star.step
+      case step =>
+        apply small_step.if_false
+        case h_cond_false =>
+          exact h_cond
+      case rest =>
+        apply small_step_star.step
+        case step =>
+          apply small_step.skip
+        case rest =>
+          apply small_step_star.refl
 
 
 lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
@@ -113,17 +132,19 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
         case ass x a =>
           -- Text: "The case [ass_sos]: Straightforward (and k0 = 0)"
           cases h_rest -- This must be refl because assignment terminates in 1 step
-          apply big_step.ass
+          case refl =>
+            apply big_step.ass
 
         case skip =>
           -- Text: "The case [skip_sos]: Straightforward (and k0 = 0)"
           cases h_rest
-          apply big_step.skip
+          case refl =>
+            apply big_step.skip
 
         case comp1 S1 S1' S2 s_next h_step_S1 =>
           -- Text: "The cases [comp1_sos] and [comp2_sos]... apply Lemma 2.19"
-          -- We go back to the original h_k_step and apply seq_split
-          obtain ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := seq_split h_rest
+          -- We go back to the original h_k_step and apply lemma_2_19
+          have ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := lemma_2_19 h_rest
           apply big_step.comp (s' := s_mid)
           case h_left => -- Goal: ⟨S, s⟩ →ₙₛ s_mid
             -- We combine the very first step (h_step_S1) with the rest of S (h_S1'_steps)

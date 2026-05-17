@@ -19,63 +19,52 @@ Naming scheme used in this file:
 - `s...`  : states (examples: ...).
 - `h_deriv_alt` : the second derivation provided after `intro`.
 --/
-lemma seq_split {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
+lemma lemma_2_19 {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
     (h : ⟨S₁; S₂, s⟩ →ₛₒₛ[k] s'') :
     ∃ s' k₁ k₂, ⟨S₁, s⟩ →ₛₒₛ[k₁] s' ∧ ⟨S₂, s'⟩ →ₛₒₛ[k₂] s'' ∧ k = k₁ + k₂ := by
-  -- Proof by induction on the number k (length of the derivation sequence).
-  induction k generalizing s S₁ with
-  | zero =>
-    -- Base case k = 0: impossible for a starting configuration ⟨S₁; S₂, s⟩
-    cases h
-  | succ k₀ ih =>
-    -- Inductive step: assume the statement for k₀, prove for k₀ + 1.
-    -- The derivation can be written as a first small-step to some configuration γ,
-    -- followed by k₀ further steps to s''.
+  -- `generalizing s S₁` ensures `ih` is quantified over ∀ S₁ s.
+  -- This is required because S₁ and s will change (to S₁' and s') in the comp1 step.
+  induction k
+  using Nat.strongRecOn
+  generalizing s S₁ with
+  | ind k₀ ih =>
     cases h with
-    | step h_step h_rest =>
-      -- Decompose the first step
+    | @step _ _ _ _ k₀ h_step h_rest =>
       cases h_step with
       | comp1 progress =>
-        -- [comp1]
-        -- γ = ⟨S₁'; S₂, s'⟩ because
-        -- progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩.
-        -- We therefore have ⟨S₁'; S₂, s'⟩ →ₛₒₛ[k₀] s'', so apply IH to that shorter derivation.
+        have h_lt : k₀ < k₀ + 1 := Nat.lt_succ_self k₀
+        -- `specialize` instantiates the generic `ih` with our specific smaller step count (k₀),
+        -- the strict inequality proof (h_lt), and the remaining derivation (h_rest).
+        specialize ih k₀ h_lt h_rest
+        have ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
 
-        specialize ih h_rest
-        obtain ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
-
-        -- From progress : ⟨S₁, s⟩ →ₛₒₛ ⟨S₁', s'⟩ and hk₁ : ⟨S₁', s'⟩ →ₛₒₛ[k₁] s₀
-        -- we obtain ⟨S₁, s⟩ →ₛₒₛ[k₁ + 1] s₀.
+        -- `exists` instantiates the existential goal (∃ s' k₁ k₂).
+        -- It changes the goal's placeholders to: s₀ (the midpoint from the IH),
+        -- k₁ + 1 (the IH steps plus our first progress step), and k₂ (the remaining IH steps).
         exists s₀, k₁ + 1, k₂
-        constructor
+
+        apply And.intro
         case left =>
           apply small_step_k.step
           case step => exact progress
           case rest => exact hk₁
-
         case right =>
-          constructor
+          apply And.intro
           case left => exact hk₂
           case right => linarith [h_sum]
+      | @comp2 _ _ _ s' terminates =>
 
-      | comp2 terminates =>
-        -- [comp2]: the first step returns γ = ⟨S₂, s'⟩ because
-        -- terminates : ⟨S₁, s⟩ →ₛₒₛ s'. We have ⟨S₂, s'⟩ →ₛₒₛ[k₀] s''.
-        -- Choose k₁ = 1 and k₂ = k₀.
-        rename_i s'
+        -- `exists` instantiates the existential goal (∃ s' k₁ k₂).
+        -- It changes placeholders to: s' (the state right after S₁ finishes),
+        -- 1 (since S₁ took exactly 1 step to terminate), and k₀ (the remaining steps for S₂).
         exists s', 1, k₀
-        constructor
+
+        apply And.intro
         case left =>
-          -- Goal: ⟨S₁, s⟩ →ₛₒₛ[1] s'
-          -- Use the constructor for single-step termination
-          -- If your inductive has a 'final' rule:
           apply small_step_k.step
           case step => exact terminates
           case rest => apply small_step_k.refl
         case right =>
-          -- Goal: ⟨S₂, s'⟩ →ₛₒₛ[k₀] s'' ∧ k₀ + 1 = 1 + k₀
-          -- Use the constructor for to
-          -- split into left and right
-          constructor
+          apply And.intro
           case left => exact h_rest
           case right => linarith

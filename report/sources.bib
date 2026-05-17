@@ -74,21 +74,21 @@
 }
 
 @inproceedings{mechanizedCSpecification,
-author = {Krebbers, Robbert and Wiedijk, Freek},
-title = {A Typed C11 Semantics for Interactive Theorem Proving},
-year = {2015},
-isbn = {9781450332965},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-url = {https://doi.org/10.1145/2676724.2693571},
-doi = {10.1145/2676724.2693571},
-abstract = {We present a semantics of a significant fragment of the C programming language as described by the C11 standard. It consists of a small step semantics of a core language, which uses a structured memory model to capture subtleties of C11, such as strict-aliasing restrictions related to unions, that have not yet been addressed by others. The semantics of actual C programs is defined by translation into this core language. We have an explicit type system for the core language, and prove type preservation and progress, as well as type correctness of the translation.Due to unspecified order of evaluation, our operational semantics is non-deterministic. To explore all defined and undefined behaviors, we present an executable semantics that computes a stream of finite sets of reachable states. It is proved sound and complete with respect to the operational semantics.Both the translation into the core language and the executable semantics are defined as Coq programs. Extraction to OCaml is used to obtain a C interpreter to run and test the semantics on actual C programs. All proofs are fully formalized in Coq.},
-booktitle = {Proceedings of the 2015 Conference on Certified Programs and Proofs},
-pages = {15–27},
-numpages = {13},
-keywords = {coq, executable semantics, interactive theorem proving, iso c11 standard, operational semantics},
-location = {Mumbai, India},
-series = {CPP '15}
+    author = {Krebbers, Robbert and Wiedijk, Freek},
+    title = {A Typed C11 Semantics for Interactive Theorem Proving},
+    year = {2015},
+    isbn = {9781450332965},
+    publisher = {Association for Computing Machinery},
+    address = {New York, NY, USA},
+    url = {https://doi.org/10.1145/2676724.2693571},
+    doi = {10.1145/2676724.2693571},
+    abstract = {We present a semantics of a significant fragment of the C programming language as described by the C11 standard. It consists of a small step semantics of a core language, which uses a structured memory model to capture subtleties of C11, such as strict-aliasing restrictions related to unions, that have not yet been addressed by others. The semantics of actual C programs is defined by translation into this core language. We have an explicit type system for the core language, and prove type preservation and progress, as well as type correctness of the translation.Due to unspecified order of evaluation, our operational semantics is non-deterministic. To explore all defined and undefined behaviors, we present an executable semantics that computes a stream of finite sets of reachable states. It is proved sound and complete with respect to the operational semantics.Both the translation into the core language and the executable semantics are defined as Coq programs. Extraction to OCaml is used to obtain a C interpreter to run and test the semantics on actual C programs. All proofs are fully formalized in Coq.},
+    booktitle = {Proceedings of the 2015 Conference on Certified Programs and Proofs},
+    pages = {15–27},
+    numpages = {13},
+    keywords = {coq, executable semantics, interactive theorem proving, iso c11 standard, operational semantics},
+    location = {Mumbai, India},
+    series = {CPP '15}
 }
 
 @misc{ramos2025modularLean4framework,
@@ -188,4 +188,56 @@ series = {CPP '15}
     year = {2002},
     keywords = {autarkic cmputation, computer algebra, formal proof, proof development},
     pages = {321--336},
+}
+
+@misc{noauthor_tiobe_nodate,
+    title = {{TIOBE} {Index}},
+    url = {https://www.tiobe.com/tiobe-index/},
+    language = {en-US},
+    urldate = {2026-05-15},
+    journal = {TIOBE},
+    file = {Snapshot:/home/hampus/Zotero/storage/R992GID5/tiobe-index.html:text/html},
+}
+
+@article{reliability_of_proof,
+    ISSN = {04954548, 2171679X},
+    URL = {http://www.jstor.org/stable/43612982},
+    abstract = {Mathematics seems to have a special status when compared to other areas of human knowledge. This special status is linked with the role of proof. Mathematicians often believe that this type of argumentation leaves no room for errors and unclarity. Philosophers of mathematics have differentiated between absolutist and fallibilist views on mathematical knowledge, and argued that these views are related to whether one looks at mathematics-in-the-making or finished mathematics. In this paper we take a closer look at mathematical practice, more precisely at the publication process in mathematics. We argue that the apparent view that mathematical literature, given the special status of mathematics, is highly reliable is too naive. We will discuss several problems in the publication process that threaten this view, and give several suggestions on how this could be countered. Las matemáticas parecen tener un estatuto especial cuando se las compara con otras áreas del conocimiento humano. Este estatuto especial está conectado con el papel de la demostración. Los matemáticos creen con frecuencia que este tipo de argumentos no deja margen para el error o la falta de claridad. Los filósofos de la matemática han distinguido entre una concepción absolutista y una falibilista del conocimiento matemático, argumentando que estas concepciones están relacionadas con una consideración de las matemáticas-en-proceso o en tanto que matemáticas ya hechas. En este artículo examinamos más de cerca la práctica matemática, más en concreto el proceso de publicación en matemáticas. Argumentaremos que la idea preconcebida de que la literatura matemática, dado el estatuto especial de las matemáticas, es altamente fiable, es demasiado ingenua. Discutiremos algunos problemas del proceso de edición que amenazan esta visión y haremos algunas sugerencias sobre cómo enfrentarlos.},
+    author = {Joachim Frans and Laszlo Kosolosky},
+    journal = {Theoria: An International Journal for Theory, History and Foundations of Science},
+    number = {3 (81)},
+    pages = {345--360},
+    publisher = {University of the Basque Country (UPV/EHU)},
+    title = {Mathematical Proofs in Practice: Revisiting the reliability of published mathematical proofs},
+    urldate = {2026-05-15},
+    volume = {29},
+    year = {2014}
+}
+
+@article{andersen_acceptable_2020,
+    title = {Acceptable gaps in mathematical proofs},
+    volume = {197},
+    issn = {1573-0964},
+    url = {https://doi.org/10.1007/s11229-018-1778-8},
+    doi = {10.1007/s11229-018-1778-8},
+    abstract = {Mathematicians often intentionally leave gaps in their proofs. Based on interviews with mathematicians about their refereeing practices, this paper examines the character of intentional gaps in published proofs. We observe that mathematicians’ refereeing practices limit the number of certain intentional gaps in published proofs. The results provide some new perspectives on the traditional philosophical questions of the nature of proof and of what grounds mathematical knowledge.},
+    language = {en},
+    number = {1},
+    urldate = {2026-05-15},
+    journal = {Synthese},
+    author = {Andersen, Line Edslev},
+    month = jan,
+    year = {2020},
+    keywords = {Gaps in proofs, Mathematical practice, Peer review in mathematics, The nature of proofs},
+    pages = {233--247},
+}
+
+@article{hales_formal_2017,
+    title = {A {FORMAL} {PROOF} {OF} {THE} {KEPLER} {CONJECTURE}},
+    volume = {5},
+    doi = {10.1017/fmp.2017.1},
+    journal = {Forum of Mathematics, Pi},
+    author = {HALES, THOMAS and ADAMS, MARK and BAUER, GERTRUD and DANG, TAT DAT and HARRISON, JOHN and HOANG, LE TRUONG and KALISZYK, CEZARY and MAGRON, VICTOR and MCLAUGHLIN, SEAN and NGUYEN, TAT THANG and al, et},
+    year = {2017},
+    pages = {e2},
 }

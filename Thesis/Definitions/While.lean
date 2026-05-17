@@ -24,6 +24,17 @@ inductive Aexp where
   | mul (a₁ a₂ : Aexp)     -- a := a₁ ⋆ a₂
   | sub (a₁ a₂ : Aexp)     -- a := a₁ - a₂
 
+-- === Arithmetic Expression Notation ===
+-- Addition: a₁ ＋ a₂ (fullwidth plus U+FF0B)
+infixl:65 " ＋ " => While.Aexp.add
+
+-- Multiplication: a₁ ⋆ a₂ (star \star)
+infixl:70 " ⋆ " => While.Aexp.mul
+
+-- Subtraction: a₁ − a₂ (minus \minus)
+infixl:65 " − " => While.Aexp.sub
+
+
 inductive Bexp where
   | true                   -- b := true
   | false                  -- b := false
@@ -32,12 +43,43 @@ inductive Bexp where
   | not (b₁ : Bexp)        -- b := ¬b₁
   | and (b₁ b₂ : Bexp)     -- b := b₁ ∧ b₂
 
+-- === Boolean Expression Notation ===
+-- Equality: a₁ ⩵ a₂ (equals with two dots \eqeq)
+notation:50 a₁:51 " ⩵ " a₂:50 => While.Bexp.eq a₁ a₂
+
+-- Less or equal: a₁ ⩽ a₂ (less or slanted equal U+2A7D)
+notation:50 a₁:51 " ⩽ " a₂:50 => While.Bexp.le a₁ a₂
+
+-- Not: ¬ b
+prefix:75 "not " => While.Bexp.not
+
+-- And: b₁ ∧ b₂
+infixr:35 " and " => While.Bexp.and
+
+-- true/false
+notation "true" => While.Bexp.true
+notation "false" => While.Bexp.false
+
+
 inductive Stmt where
   | ass  (x : Var)  (a : Aexp)     -- S = n
   | skip                           -- S = x
   | composition        (S₁ S₂ : Stmt) -- S = S₁; S₂
   | if (b : Bexp) (S₁ S₂ : Stmt) -- S = if b then S₁ else S₂
   | while (b : Bexp) (S₁ : Stmt)    -- S = while b then S₁
+
+-- === Notation for While Syntax ===
+-- Sequence (composition): S₁ ; S₂
+infixl:80 "; " => While.Stmt.composition
+
+-- Assignment: x ≔ a (coloneqq, U+2254)
+infixr:90 " :≡ " => While.Stmt.ass
+
+-- Condition: if b then S₁ else S₂
+notation "if " b:40 " then " S₁:40 " else " S₂:40 => While.Stmt.if b S₁ S₂
+
+-- While loop: while b do S
+notation "while " b:40 " then " S:40 => While.Stmt.while b S
 
 
 /-=============================-/
@@ -49,6 +91,18 @@ def State := Var → ℤ -- Gives notation s x = n, where (s : State) (x : Var) 
 def default_state : State :=
   fun _ => 0
 
+def update (s : State) (x : Var) (v : ℤ) : State :=
+  fun (y: Var) => if y = x then v else s y
+
+notation:max s "[" x "↦" v "]" => update s x v
+
+inductive T where
+  | tt
+  | ff
+  deriving DecidableEq
+
+notation "tt" => T.tt
+notation "ff" => T.ff
 
 /-=============================-/
 -- Semantic Functions         --
@@ -105,29 +159,50 @@ set_option hygiene false in
 notation "𝓐⟦" a "⟧" s:max => Aexp_eval a s
 
 def Aexp_eval : Aexp → (State → ℤ)
-  | Aexp.num n, _ => 𝒩⟦n⟧
-  | Aexp.var x, s => s x
-  | Aexp.add a₁ a₂, s => 𝓐⟦a₁⟧s + 𝓐⟦a₂⟧s
-  | Aexp.mul a₁ a₂, s => 𝓐⟦a₁⟧s * 𝓐⟦a₂⟧s
-  | Aexp.sub a₁ a₂, s => 𝓐⟦a₁⟧s - 𝓐⟦a₂⟧s
+  | .num n, _ => 𝒩⟦n⟧
+  | .var x, s => s x
+  | a₁ + a₂, s => 𝓐⟦a₁⟧s + 𝓐⟦a₂⟧s
+  | a₁ ⋆ a₂, s => 𝓐⟦a₁⟧s * 𝓐⟦a₂⟧s
+  | a₁ − a₂, s => 𝓐⟦a₁⟧s - 𝓐⟦a₂⟧s
 
 
 set_option quotPrecheck false in
 set_option hygiene false in
 notation "𝓑⟦" b "⟧" s:max => Bexp_eval b s
 
-def Bexp_eval : Bexp → (State → Bool)
-  | Bexp.true,      _ => true
-  | Bexp.false,     _ => false
-  | Bexp.eq  a₁ a₂, s =>   𝓐⟦a₁⟧s == 𝓐⟦a₂⟧s
-  | Bexp.le  a₁ a₂, s =>   𝓐⟦a₁⟧s ≤  𝓐⟦a₂⟧s
-  | Bexp.not b₁,    s => ¬ 𝓑⟦b₁⟧s
-  | Bexp.and b₁ b₂, s =>   𝓑⟦b₁⟧s ∧  𝓑⟦b₂⟧s
-
-def assign (s : State) (x : Var) (z : ℤ) : State :=
-  fun (v: Var) => if v = x then z else s v
-
-notation:max s "[" x "↦" z "]" => assign s x z
+def Bexp_eval : Bexp → (State → T)
+  | true, _  => tt
+  | false, _ => ff
+  | a₁ ⩵ a₂,   s  =>
+    if  𝓐⟦a₁⟧s == 𝓐⟦a₂⟧s then tt
+    else ff
+    -- -- if  𝓐⟦a₁⟧s == 𝓐⟦a₂⟧s then true else false
+    -- match decEq (𝓐⟦a₁⟧s) (𝓐⟦a₂⟧s) with
+    --     | Decidable.isTrue  _h_eq  => tt   -- if 𝓐⟦a₁⟧s = 𝓐⟦a₂⟧s
+    --     | Decidable.isFalse _h_neq => ff   -- if 𝓐⟦a₁⟧s ≠ 𝓐⟦a₂⟧s
+  | a₁ ⩽ a₂,   s  =>
+    if  𝓐⟦a₁⟧s ≤  𝓐⟦a₂⟧s then tt
+    else ff
+    -- -- if  𝓐⟦a₁⟧s ≤  𝓐⟦a₂⟧s then true else false
+    -- match (inferInstance : Decidable (𝓐⟦a₁⟧s ≤ 𝓐⟦a₂⟧s)) with
+    --     | Decidable.isTrue  _h_leq => tt   -- if 𝓐⟦a₁⟧s ≤ 𝓐⟦a₂⟧s
+    --     | Decidable.isFalse _h_gt  => ff   -- if 𝓐⟦a₁⟧s > 𝓐⟦a₂⟧s
+  | not b₁,    s =>
+    if  𝓑⟦b₁⟧s = tt then ff
+    else tt
+    -- -- if ¬ 𝓑⟦b₁⟧s then true else false
+    -- match 𝓑⟦b₁⟧s with
+    --   | tt => ff      -- if B[|b|]s = tt
+    --   | ff => tt      -- if B[|b|]s = ff
+  | b₁ and b₂, s =>
+    if  𝓑⟦b₁⟧s = tt ∧ 𝓑⟦b₂⟧s = tt then tt
+    else ff
+    -- -- if   𝓑⟦b₁⟧s ∧  𝓑⟦b₂⟧s then true else false
+    -- match 𝓑⟦b₁⟧s, 𝓑⟦b₂⟧s with
+    --   | tt, tt => tt  -- if B[|b1|]s = tt and B[|b2|]s = tt
+    --   | ff, tt => ff  -- if B[|b1|]s = ff and B[|b2|]s = tt
+    --   | tt, ff => ff  -- if B[|b1|]s = tt and B[|b2|]s = ff
+    --   | ff, ff => ff  -- if B[|b1|]s = ff and B[|b2|]s = ff
 
 
 /-=============================-/
@@ -136,22 +211,22 @@ notation:max s "[" x "↦" z "]" => assign s x z
 
 -- 1. If you update the same variable twice, only the last one matters.
 @[simp]
-theorem assign_shadow (s : State) (x : Var) (z1 z2 : ℤ) :
+theorem update_shadow (s : State) (x : Var) (z1 z2 : ℤ) :
   s[x ↦ z1][x ↦ z2] = s[x ↦ z2] := by
   apply funext
   intro v
-  repeat rw [assign]
+  repeat rw [update]
   split_ifs
   · rfl
   · rfl
 
 -- 2. If you update different variables, you can swap them to group them.
 @[simp]
-theorem assign_comm (s : State) (x y : Var) (z1 z2 : ℤ) (h : x ≠ y) :
+theorem update_comm (s : State) (x y : Var) (z1 z2 : ℤ) (h : x ≠ y) :
   s[x ↦ z1][y ↦ z2] = s[y ↦ z2][x ↦ z1] := by
   apply funext
   intro v
-  repeat rw [assign]
+  repeat rw [update]
   split_ifs with h1 h2
   -- h1 : v = y
   -- h2 : v = x
@@ -165,66 +240,27 @@ theorem assign_comm (s : State) (x y : Var) (z1 z2 : ℤ) (h : x ≠ y) :
   · show s v = s v
     rfl
 
-attribute [simp, reducible] Num_eval Aexp_eval Bexp_eval assign
+attribute [simp, reducible] Num_eval Aexp_eval Bexp_eval update
 
 
 /-=============================-/
--- Notation & Lean 4 Helpers --
+-- Lean 4 Helpers --
 /-=============================-/
-
--- === Notation for While Syntax ===
-
--- Sequence (composition): S₁ ; S₂
-infixl:80 "; " => While.Stmt.composition
-
--- Assignment: x ≔ a (coloneqq, U+2254)
-infixr:90 " :≡ " => While.Stmt.ass
-
--- Condition: if b then S₁ else S₂
-notation "if " b:40 " then " S₁:40 " else " S₂:40 => While.Stmt.if b S₁ S₂
-
--- While loop: while b do S
-notation "while " b:40 " then " S:40 => While.Stmt.while b S
-
--- === Arithmetic Expression Notation ===
-
--- Addition: a₁ ＋ a₂ (fullwidth plus U+FF0B)
-infixl:65 " ＋ " => While.Aexp.add
-
--- Multiplication: a₁ ⋆ a₂ (star \star)
-infixl:70 " ⋆ " => While.Aexp.mul
-
--- Subtraction: a₁ − a₂ (minus \minus)
-infixl:65 " − " => While.Aexp.sub
-
--- === Boolean Expression Notation ===
-
--- Equality: a₁ ⩵ a₂ (equals with two dots \eqeq)
-notation:50 a₁:51 " ⩵ " a₂:50 => While.Bexp.eq a₁ a₂
-
--- Less or equal: a₁ ⩽ a₂ (less or slanted equal U+2A7D)
-notation:50 a₁:51 " ⩽ " a₂:50 => While.Bexp.le a₁ a₂
-
--- Not: ¬ b
-prefix:75 "¬ " => While.Bexp.not
-
--- And: b₁ ∧ b₂
-infixr:35 " ∧ " => While.Bexp.and
-
--- true/false
-notation "𝕋" => While.Bexp.true
-notation "𝔽" => While.Bexp.false
-
--- === End While Notation ===
 
 -- Make variables print as just the string
 -- Unexpander for Var.mk (Antiquotation style)
 section tmp
 open Lean PrettyPrinter
 
-@[app_unexpander assign] def unexpandAssign : Lean.PrettyPrinter.Unexpander
+@[app_unexpander update] def unexpandUpdate : Lean.PrettyPrinter.Unexpander
   | `($_ $s $x $z) => `($s[$x ↦ $z])
   | _ => throw ()
+
+@[app_unexpander T.tt] def unexpandTT : Unexpander
+  | `($_) => `(tt)
+
+@[app_unexpander T.ff] def unexpandFF : Unexpander
+  | `($_) => `(ff)
 
 @[app_unexpander Stmt.ass] def unexpandAss : Unexpander
   | `($_ $x $a) => `($x  :≡  $a)
@@ -266,11 +302,11 @@ open Lean PrettyPrinter
   | _ => throw ()
 
 @[app_unexpander Bexp.true] def unexpandBexpTrue : Unexpander
-  | `(_) => `(𝕋)
+  | `(_) => `(true)
   | _ => throw ()
 
 @[app_unexpander Bexp.false] def unexpandBexpFalse : Unexpander
-  | `(_) => `(𝔽)
+  | `(_) => `(false)
   | _ => throw ()
 
 @[app_unexpander Bexp.eq] def unexpandBexpEq : Unexpander

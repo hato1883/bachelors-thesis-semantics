@@ -600,8 +600,8 @@ When we define \texttt{big\_step} inductively, each constructor represents an
 \textbf{inference rule}. For instance, the rule for statement composition (\texttt{comp}) in Lean is:
 
 \begin{Lean_Code}
-| comp (h_left : @\(\langle\)@S1, s@\(\rangle\)@ @\(\to_{ns}\)@ s') (h_right : @\(\langle\)@S2, s'@\(\rangle\)@ @\(\to_{ns}\)@ s'') :
-    @\(\langle\)@S1; S2, s@\(\rangle\)@ @\(\to_{ns}\)@ s''
+| comp (h_left : §\(\langle\)§S1, s§\(\rangle\)§ §\(\to_{ns}\)§ s') (h_right : §\(\langle\)§S2, s'§\(\rangle\)§ §\(\to_{ns}\)§ s'') :
+    §\(\langle\)§S1; S2, s§\(\rangle\)§ §\(\to_{ns}\)§ s''
 \end{Lean_Code}
 This code defines a rule of inference. To a reader familiar with natural deduction,
 this is a direct mapping of the standard horizontal-bar notation:

@@ -11,7 +11,7 @@ In this thesis we opted to use the Functional approach as Lean is very good at h
 To do this we need to introduce some structure, first of which is the definition of what \emph{State} is.
 
 \begin{Lean_Code}
-def State := Var @\to@ @ \(\mathbb{Z}\)@
+def State := Var §\to§ § \(\mathbb{Z}\)§
 \end{Lean_Code}
 Now that we have the functional definition, it can be helpful to create a "standard implementation", in this case a state which maps all values to \(0\):
 
@@ -24,19 +24,19 @@ By adding a default state that satisfies the total function property we can then
 In this case the assignment was defined as follows:
 
 \begin{Lean_Code}
-def assign (s : State) (x : Var) (z : @\(\mathbb{Z}\)@) : State :=
+def assign (s : State) (x : Var) (z : §\(\mathbb{Z}\)§) : State :=
   fun (v: Var) => if v = x then z else s v
 \end{Lean_Code}
 with the following notation:
 
 \begin{Lean_Code}
-notation:max s "[" x "@\mapsto@" z "]" => assign s x z
+notation:max s "[" x "§\mapsto§" z "]" => assign s x z
 \end{Lean_Code}
 Next we need some scaffolding proofs to be able to reason if 2 states are equivalent or not.
 This is provided by the two theorems:
 \begin{Lean_Code}
-theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
-  s[x @\mapsto@ z1][x @\mapsto@ z2] = s[x @\mapsto@ z2] := by @\dots@
+theorem assign_shadow (s : State) (x : Var) (z1 z2 : §\(\mathbb{Z}\)§) :
+  s[x §\mapsto§ z1][x §\mapsto§ z2] = s[x §\mapsto§ z2] := by §\dots§
   apply funext
   intro v
   repeat rw [assign]
@@ -46,8 +46,8 @@ theorem assign_shadow (s : State) (x : Var) (z1 z2 : @\(\mathbb{Z}\)@) :
 \end{Lean_Code}
 and
 \begin{Lean_Code}
-theorem assign_comm (s : State) (x y : Var) @\leanbreak@ (z1 z2 : @\(\mathbb{Z}\)@) (h : x @\neq@ y) :
-  s[x @\mapsto@ z1][y @\mapsto@ z2] = s[y @\mapsto@ z2][x @\mapsto@ z1] := by @\dots@
+theorem assign_comm (s : State) (x y : Var) §\leanbreak§ (z1 z2 : §\(\mathbb{Z}\)§) (h : x §\neq§ y) :
+  s[x §\mapsto§ z1][y §\mapsto§ z2] = s[y §\mapsto§ z2][x §\mapsto§ z1] := by §\dots§
   apply funext
   intro v
   repeat rw [assign]
@@ -82,73 +82,73 @@ which together allows us to know that the following is true:
 \begin{Lean_Code}
 /-!
 Exercise 2.21 (Essential)
-Prove that if `@\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] s'` then `@\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@`.
-The execution of `S@\(_1\)@` is not influenced by the statement following it.
+Prove that if `§\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{sos}\)§[k] s'` then `§\(\langle\)§S§\(_1\)§; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{sos}\)§[k] §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§`.
+The execution of `S§\(_1\)§` is not influenced by the statement following it.
 -/
-lemma seq_exec_preserve_right {S@\(_1\)@ S@\(_2\)@ : Stmt} {s s' : State} {k : Nat}
-  (h : @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] s') :
-  @\(\langle\)@S@\(_1\)@ ; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@ := by
-  induction k generalizing s S@\(_1\)@ with
+lemma seq_exec_preserve_right {S§\(_1\)§ S§\(_2\)§ : Stmt} {s s' : State} {k : Nat}
+  (h : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{sos}\)§[k] s') :
+  §\(\langle\)§S§\(_1\)§ ; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{sos}\)§[k] §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§ := by
+  induction k generalizing s S§\(_1\)§ with
   | zero =>
-    -- @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@[0] s' is impossible because Step \(\neq\) Final
+    -- §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{sos}\)§[0] s' is impossible because Step \(\neq\) Final
     cases h
   | succ k ih =>
-    -- We have @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\gamma@' @\(\to_{sos}\)@[k] s'
+    -- We have §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{sos}\)§ §\gamma§' §\(\to_{sos}\)§[k] s'
     cases h with
     | step h_step h_rest =>
-      rename_i @\gamma@'
-      -- Now we branch on whether @\gamma@' is a final state or a continuing step
-      cases @\gamma@' with
+      rename_i §\gamma§'
+      -- Now we branch on whether §\gamma§' is a final state or a continuing step
+      cases §\gamma§' with
       | final s_next =>
-        -- Case 1: S@\(_1\)@ finishes in one step (@\gamma@' = s_next)
-        -- This matches the [comp2] rule: @\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\(\langle\)@S@\(_2\)@, s_next@\(\rangle\)@
-        -- Since h_rest is @\(\langle\)@s_next, ...@\(\rangle\)@ @\(\to_{sos}\)@[k] s', and s_next is final,
+        -- Case 1: S§\(_1\)§ finishes in one step (§\gamma§' = s_next)
+        -- This matches the [comp2] rule: §\(\langle\)§S§\(_1\)§; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{sos}\)§ §\(\langle\)§S§\(_2\)§, s_next§\(\rangle\)§
+        -- Since h_rest is §\(\langle\)§s_next, ...§\(\rangle\)§ §\(\to_{sos}\)§[k] s', and s_next is final,
         -- k must be 0 and s_next = s'.
         cases h_rest
         exact small_step_k.step (small_step.comp2 h_step) small_step_k.refl
       | step S_next s_next =>
-        -- Case 2: S@\(_1\)@ takes one step to a new configuration @\(\langle\)@S_next, s_next@\(\rangle\)@
-        -- This matches the [comp1] rule: @\(\langle\)@S@\(_1\)@; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@ @\(\langle\)@S_next; S@\(_2\)@, s_next@\(\rangle\)@
+        -- Case 2: S§\(_1\)§ takes one step to a new configuration §\(\langle\)§S_next, s_next§\(\rangle\)§
+        -- This matches the [comp1] rule: §\(\langle\)§S§\(_1\)§; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{sos}\)§ §\(\langle\)§S_next; S§\(_2\)§, s_next§\(\rangle\)§
         apply small_step_k.step
         · exact small_step.comp1 h_step
-        · -- Now we need: @\(\langle\)@S_next; S@\(_2\)@, s_next@\(\rangle\)@ @\(\to_{sos}\)@[k] @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@
+        · -- Now we need: §\(\langle\)§S_next; S§\(_2\)§, s_next§\(\rangle\)§ §\(\to_{sos}\)§[k] §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§
           -- This is exactly our IH applied to the remaining steps h_rest
           exact ih h_rest
 
 end exercise_2_21
 
-lemma small_step_k_to_star {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ : Config} {k : Nat}
-  (h : small_step_k @\gamma@@\(_1\)@ k @\gamma@@\(_2\)@) : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@ := by
+lemma small_step_k_to_star {§\gamma§§\(_1\)§ §\gamma§§\(_2\)§ : Config} {k : Nat}
+  (h : small_step_k §\gamma§§\(_1\)§ k §\gamma§§\(_2\)§) : small_step_star §\gamma§§\(_1\)§ §\gamma§§\(_2\)§ := by
   induction h with
   | refl => exact small_step_star.refl
   | step s h_rest ih => exact small_step_star.step s ih
 
 
-lemma star_to_small_step_k {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ : Config}
-  (h : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@) : @\exists@ k, small_step_k @\gamma@@\(_1\)@ k @\gamma@@\(_2\)@ := by
+lemma star_to_small_step_k {§\gamma§§\(_1\)§ §\gamma§§\(_2\)§ : Config}
+  (h : small_step_star §\gamma§§\(_1\)§ §\gamma§§\(_2\)§) : §\exists§ k, small_step_k §\gamma§§\(_1\)§ k §\gamma§§\(_2\)§ := by
   induction h with
   | refl =>
     exists 0
     exact small_step_k.refl
   | step s h_rest ih =>
-    let @\(\langle\)@k, hk@\(\rangle\)@ := ih
+    let §\(\langle\)§k, hk§\(\rangle\)§ := ih
     exists k + 1
     exact small_step_k.step s hk
 
-lemma small_step_star_trans {@\gamma@@\(_1\)@ @\gamma@@\(_2\)@ @\gamma@@\(_3\)@ : Config}
-  (h_left : small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_2\)@) (h_right : small_step_star @\gamma@@\(_2\)@ @\gamma@@\(_3\)@) :
-  small_step_star @\gamma@@\(_1\)@ @\gamma@@\(_3\)@ := by
+lemma small_step_star_trans {§\gamma§§\(_1\)§ §\gamma§§\(_2\)§ §\gamma§§\(_3\)§ : Config}
+  (h_left : small_step_star §\gamma§§\(_1\)§ §\gamma§§\(_2\)§) (h_right : small_step_star §\gamma§§\(_2\)§ §\gamma§§\(_3\)§) :
+  small_step_star §\gamma§§\(_1\)§ §\gamma§§\(_3\)§ := by
   induction h_left with
   | refl => exact h_right
   | step s h_rest ih => exact small_step_star.step s (ih h_right)
 
-lemma exercise_2_21 {S@\(_1\)@ S@\(_2\)@ : Stmt} {s s' : State}
-  (h : @\(\langle\)@S@\(_1\)@, s@\(\rangle\)@ @\(\to_{sos}\)@* s') : @\(\langle\)@S@\(_1\)@ ; S@\(_2\)@, s@\(\rangle\)@ @\(\to_{sos}\)@* @\(\langle\)@S@\(_2\)@, s'@\(\rangle\)@ := by
+lemma exercise_2_21 {S§\(_1\)§ S§\(_2\)§ : Stmt} {s s' : State}
+  (h : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{sos}\)§* s') : §\(\langle\)§S§\(_1\)§ ; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{sos}\)§* §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§ := by
   -- 1. Convert star to k-step
-  let @\(\langle\)@k, hk@\(\rangle\)@ := star_to_small_step_k h
-  -- 2. Explicitly tell Lean to use S@\(_2\)@ from the goal
-  -- We use (S@\(_2\)@ := S@\(_2\)@) to map the lemma's parameter to our local variable
-  let h_k := seq_exec_preserve_right (S@\(_2\)@ := S@\(_2\)@) hk
+  let §\(\langle\)§k, hk§\(\rangle\)§ := star_to_small_step_k h
+  -- 2. Explicitly tell Lean to use S§\(_2\)§ from the goal
+  -- We use (S§\(_2\)§ := S§\(_2\)§) to map the lemma's parameter to our local variable
+  let h_k := seq_exec_preserve_right (S§\(_2\)§ := S§\(_2\)§) hk
   -- 3. Convert back to star
   exact small_step_k_to_star h_k
 \end{Lean_Code}

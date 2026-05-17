@@ -31,7 +31,7 @@
     apply, intro, simp, grind, exact, split_ifs, repeat, rw,  rfl, subst,
     contradiction, where, Prop, constructor, exists, specialize, linarity,
     cases, induction, generalizing, rename_i, linarith, prefix, infix,
-    infixl, infixr, trivial, obtain
+    infixl, infixr, trivial, obtain, using
   },
   % Line breaks
   breaklines=true,                % Enables wrapping
@@ -42,7 +42,7 @@
   morecomment=[l]{--},
   morecomment=[s]{/-}{-/},
   % Symbols and Delimiters
-  escapeinside=@@,
+  escapeinside=§§,
   % Unicode Handling for listings
   % Even with LuaLaTeX, 'literate' ensures symbols look perfect in code
   extendedchars=true,
