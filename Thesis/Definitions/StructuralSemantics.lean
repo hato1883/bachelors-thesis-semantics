@@ -43,7 +43,7 @@ notation:40 "⟨" S "," s "⟩" " →ₛₒₛ* " s':40                => small_
 
 
 /--
-  Structural Operational Semantics (Big-Step)
+  Structural Operational Semantics
   Notation: " ⟨S, s⟩ →ₙₛ s' " and  " ⟨S, s⟩ ⇓ₙₛ s' "
   means executing S in state s results in state s'
 --/
@@ -98,7 +98,7 @@ inductive small_step : Stmt → State → Config → Prop where
 
 
 /-
-  k-step and star-step relations for small-step semantics
+  k-step and star-step relations for NS semantics
   ⟨S, s⟩ →ₛₒₛ[k] γ : exactly k small steps from (S, s) to γ
   ⟨S, s⟩ →ₛₒₛ* γ : any finite number of small steps from (S, s) to γ
 -/

@@ -11,7 +11,7 @@ set_option hygiene false in
 notation:40 "⟨" S "," s "⟩" " →ₙₛ " s' => big_step S s s'
 
 /--
-  Natural Operational Semantics (Big-Step)
+  Natural Operational Semantics
   Notation: " ⟨S, s⟩ →ₙₛ s' " and  " ⟨S, s⟩ ⇓ₙₛ s' "
   means executing S in state s results in state s'
 --/

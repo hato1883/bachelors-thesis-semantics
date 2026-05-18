@@ -317,13 +317,13 @@ state or a subsequent configuration \missingcitation \todo{Reference for transit
 \todo{Show state transition notation and describe it, lean on The Formal Semantics of Programming Languages: An Introduction}
 
 In this work, we examine two primary styles of operational semantics:
-\emph{Natural Semantics} (Big-Step) and
-\emph{Structural Operational Semantics} (Small-Step).
+\emph{Natural Semantics} and
+\emph{Structural Operational Semantics}.
 
-\subsection*{Natural Operational Semantics (Big-Step)}
+\subsection*{Natural Operational Semantics}
 \label{background:os:ns}
-\todo{Breif introduction to NS, reader will have read a course on semantics,
-this section is here as a reminader to the reader.}
+\todo{Brief introduction to NS, reader will have read a course on semantics,
+this section is here as a reminder to the reader.}
 Natural Operational Semantics, often shortened to just Natural Semantics (NS), or even big-step semantics
 is the view that a given Statement \(S\) and a starting state \(s\) can evaluate into a finalized state \(s'\).
 This view is that each operation runs to completion.
@@ -440,7 +440,7 @@ for the final conclusion, meaning that the proof becomes infinitely recursive. T
 %
 %
 %
-\subsection*{Structural Operational Semantics (Small-Step)}
+\subsection*{Structural Operational Semantics}
 \label{background:os:sos}
 \todo{Breif introduction to SOS, reader will have read a course on semantics,
 this section is here as a reminader to the reader.}
@@ -582,17 +582,13 @@ Each constructor (e.g., \texttt{add}) is a function
 that takes existing elements of the set and produces a new one.
 
 \subsection{Defining Semantics: Relations as Propositions}
-A core challenge in this thesis is mapping the "Big-Step" operational semantics
-found in literature to Lean's internal logic. In a traditional math course,
-the evaluation of a statement is written as a relation: $\langle S, s \rangle \to_{ns} s'$. 
-
+The evaluation of a statement is written as a relation: $\langle S, s \rangle \to_{ns} s'$. 
 In Lean, this relation is defined as an \texttt{inductive} type that returns
 a \texttt{Prop} (Proposition).
-This is a crucial distinction:
-\begin{itemize}
-    \item \textbf{Data Types} (like \texttt{Aexp}) are used to build programs.
-    \item \textbf{Propositions} (like \texttt{big\_step}) are used to make claims about those programs.
-\end{itemize}
+This is a crucial distinction: \textbf{Data Types} (like \texttt{Aexp}) are used to build programs.
+Whilst \textbf{Propositions} (like \texttt{big\_step}) are used to make claims about those programs.
+Due to propositions being something  that is either true or false, whilst data types are just syntactic sugar.
+
 \noindent
 When we define \texttt{big\_step} inductively, each constructor represents an
 \textbf{inference rule}. For instance, the rule for statement composition (\texttt{comp}) in Lean is:
@@ -606,18 +602,18 @@ this is a direct mapping of the standard horizontal-bar notation:
 \[
 \frac{\langle S_1, s \rangle \to_{ns} s' \quad \langle S_2, s' \rangle \to_{ns} s''}{\langle S_1; S_2, s \rangle \to_{ns} s''}
 \]
-The names \texttt{h1} and \texttt{h2} represent the \textit{hypotheses} or \textit{premises}
+The names \texttt{h\_left} and \texttt{h\_right} represent the \textit{hypotheses} or \textit{premises}
 required to reach the conclusion below the colon.
 
 \subsection{The Proof State and Tactics}
 Unlike a prose proof, which is a static piece of text,
-a proof in Lean is constructed using \textbf{tactics}.
+a proof in Lean is constructed using \emph{tactics}.
 A tactic is a command that transforms a "goal" (the statement to be proven) into simpler sub-goals.
 
 When reading the proofs in this thesis,
 it is helpful to understand the workflow:
-Lean maintains a \textit{proof state} consisting of the current \textbf{context}
-(known facts and variables) and the \textbf{goal}.
+Lean maintains a \textit{proof state} consisting of the current \emph{context}
+(known facts and variables) and the \emph{goal}.
 A tactic like \texttt{intro} moves an assumption into the context,
 while \texttt{cases} performs a proof by exhaustion,
 forcing Lean to consider every possible way a specific relation could have been formed.
@@ -626,9 +622,9 @@ forcing Lean to consider every possible way a specific relation could have been 
 The following table provides a quick reference for mapping Lean's core keywords
 to their respective functionalities in standard mathematical and logical discourse.
 
-\begin{table}[h]
+\begin{figure}[H]
 \centering
-\begin{tabular}{llp{7cm}}
+\begin{tabularx}{\textwidth}{llX}
 \hline
 \textbf{Lean Keyword} & \textbf{Logical Equivalent} & \textbf{Functionality} \\ \hline
 \texttt{inductive}    & Inductive Definition      & Defines a set or a relation via a list of rules/constructors. \\
@@ -639,9 +635,9 @@ to their respective functionalities in standard mathematical and logical discour
 \texttt{cases}        & Proof by Cases       & Deconstructs an object or relation into its possible forms. \\
 \texttt{apply}        & Modus Ponens              & Uses a known rule or theorem to satisfy the current goal. \\
 \texttt{rfl}          & Reflexivity               & Proves an equality of the form $A = A$ by definition. \\ \hline
-\end{tabular}
+\end{tabularx}
 \caption{Mapping of Lean 4 keywords to mathematical concepts.}
-\end{table}
+\end{figure}
 
 \subsection{Notation Conventions}
 To bridge the gap between code and literature,

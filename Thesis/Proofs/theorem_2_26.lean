@@ -9,10 +9,10 @@ open While
 open NaturalSemantics
 open StructuralSemantics
 /-!
-  Equivalence between NS (big-step) and SOS (small-step) semantics.
+  Equivalence between NS and SOS semantics.
 
   For any statement `S` and states `s`, `s'`, there is a natural semantics
-  derivation `⟨S, s⟩ →ₙₛ s'` iff there is a (multi-step) small-step semantics
+  derivation `⟨S, s⟩ →ₙₛ s'` iff there is a (multi-step) NS semantics
   derivation `⟨S, s⟩ →ₛₒₛ* s'.
 
   Proof strategy:
@@ -138,7 +138,7 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
             cases k₂
             case zero => cases hk2 -- This should reach a contradiction
             case succ => linarith
-            
+
           apply big_step.comp (s' := s_mid)
           case h_left => -- Goal: ⟨S, s⟩ →ₙₛ s_mid
             -- We combine the very first step (h_step_S1) with the rest of S (h_S1'_steps)
