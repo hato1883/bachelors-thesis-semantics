@@ -162,13 +162,13 @@ lemma lemma_2_19_verbatim_strong {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
             -- because it is shorter than the one with which we started.
             have
               h_lt : k₀ < k₀ + 1 :=
-              Nat.lt_succ_self k₀
+                Nat.lt_succ_self k₀
+
             specialize ih k₀
               h_lt h_rest
 
             -- This means that there is a state s₀ and natural numbers k₁ and k₂ such that
             -- ⟨S₁', s'⟩ ⇒ᵏ¹ s₀ and ⟨S₂, s₀⟩ ⇒ᵏ² s'' where k₁ + k₂ = k₀.
-            -- (Unpacking the existential components manually without rcases)
             cases ih with
             | intro s₀ h_exists1 =>
             cases h_exists1 with
@@ -203,15 +203,22 @@ lemma lemma_2_19_verbatim_strong {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
             -- The second possibility is that [comp_sos²] has been used to obtain
             -- the derivation ⟨S₁; S₂, s⟩ ⇒ γ.
             -- Then we have ⟨S₁, s⟩ ⇒ s' and γ is ⟨S₂, s'⟩ so that ⟨S₂, s'⟩ ⇒ᵏ⁰ s''
+            have h_S₁_one_step :
+              ⟨S₁, s⟩ →ₛₒₛ[1] s' :=
+                small_step_k.step
+                terminates
+                small_step_k.refl
 
-            -- The result now follows by choosing k₁ = 1 and k₂ = k₀.
+            have h_arith_simple :
+              k₀ + 1 = 1 + k₀ :=
+                by linarith
+
+            -- We combine the properties into a single bundle:
+            have h_prop :
+              ⟨S₁, s⟩ →ₛₒₛ[1] s' ∧
+              ⟨S₂, s'⟩ →ₛₒₛ[k₀] s'' ∧
+              k₀ + 1 = 1 + k₀ :=
+                ⟨h_S₁_one_step, h_rest, h_arith_simple⟩
+
+            -- "The result now follows by choosing k₁ = 1 and k₂ = k₀."
             exists s', 1, k₀
-            have h_S₁_one_step : ⟨S₁, s⟩ →ₛₒₛ[1] s' :=
-              small_step_k.step terminates small_step_k.refl
-
-            have h_arith_simple : k₀ + 1 = 1 + k₀ := by linarith
-
-            and_intros
-            exact h_S₁_one_step
-            exact h_rest
-            exact h_arith_simple
