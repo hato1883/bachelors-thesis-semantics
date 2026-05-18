@@ -15,10 +15,14 @@ open While
 -/
 set_option quotPrecheck false in
 set_option hygiene false in
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " "⟨" S' "," s':40 "⟩" => small_step S s (Config.step S' s')
+notation:40 "⟨" S "," s "⟩"
+  " →ₛₒₛ " "⟨" S' "," s':40 "⟩" =>
+  small_step S s (Config.step S' s')
 set_option quotPrecheck false in
 set_option hygiene false in
-notation:40 "⟨" S "," s "⟩" " →ₛₒₛ " s':40                => small_step S s (Config.final s')
+notation:40 "⟨" S "," s "⟩"
+  " →ₛₒₛ " s':40 =>
+  small_step S s (Config.final s')
 
 -- k-step
 set_option quotPrecheck false in
@@ -27,6 +31,7 @@ notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " "⟨" S' "," s':40 "⟩"
 set_option quotPrecheck false in
 set_option hygiene false in
 notation:40 "⟨" S "," s "⟩" " →ₛₒₛ[" k "] " s':40                => small_step_k (Config.step S s) k (Config.final s')
+
 
 -- star
 set_option quotPrecheck false in

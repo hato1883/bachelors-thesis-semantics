@@ -9,8 +9,9 @@
 
 This chapter summarizes the results found in the previous chapter and discusses
 them in relation to the research questions. While the previous chapter provided
-a "fully zoomed in" discussion of individual proofs and mechanizations, this
+a "fully zoomed in" discussion of individual proofs and mechanization's, this
 chapter takes a step back to evaluate the collective findings.
+We repeat the research question here:
 
 \begin{itemize}
     \item \textbf{RQ1:} Do the proof techniques presented in the textbook~\citep{nielson_semantics_2007}
@@ -18,7 +19,7 @@ chapter takes a step back to evaluate the collective findings.
     structural reformulation?
 
     \item \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
-    present in the literature must be made explicit to satisfy the Lean kernel?
+    present in the literature must be made explicit to satisfy the Lean proof assistant?
 \end{itemize}
 
 %
@@ -32,12 +33,12 @@ This section primarily addresses RQ2. The key finding is that many apparently
 assumptions that Lean requires us to state and prove.
 
 \subsection*{The Myth of the "Simple String"}
-Textbook presentations treat variables as abstract identifiers and proceed as
+The \emph{Semantics with Applications: An Appetizer} textbook presentations treat variables as abstract identifiers and proceed as
 if equality between names is always available. In Lean, this shortcut becomes
 an explicit requirement: variable types must provide \texttt{DecidableEq} so
 that state updates and conditional checks can compute. This is a direct example
 of RQ2: a pedagogical convenience in prose (``we can always tell whether
-$x = y$") becomes a kernel-level obligation.
+$x = y$") becomes a formalization burden.
 
 \subsection*{Tree-Based Reality: BNF to Inductive Types}
 The move from BNF notation to Lean inductive definitions is mostly faithful in
@@ -56,9 +57,9 @@ presentation is reformulated around tree recursion and constructor cases.
 This section addresses both RQ1 and RQ2 by contrasting how semantic transitions
 map into Lean and the technical hurdles of maintaining readable notation.
 
-\subsection*{Big-Step (Natural) Semantics: High-Fidelity Mapping}
-Big-step rules exhibit the highest mapping density: the derivation tree used in the
-textbook~\citep{nielson_semantics_2007} corresponds closely to Lean constructors for the evaluation relation.
+\subsection*{Natural Semantics: High-Fidelity Mapping}
+Big-step rules exhibit the highest mapping density: the derivation rules used in the
+textbook \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007} corresponds closely to Lean constructors for the evaluation relation.
 In this sense, RQ1 is answered positively at the logical level. However, side
 conditions introduce an explicitness burden (RQ2). Conditions such as
 $\mathcal{B}[\![b]\!] s = \mathbf{tt}$, often treated as marginal annotations
@@ -68,7 +69,7 @@ still appear as formal cases and must be closed by contradiction.
 
 \subsection*{Small-Step (SOS): The Configuration Hurdle}
 Small-step semantics reveal a stronger reformulation burden.
-Textbook notation fluidly shifts between intermediate transitions
+The textbook notation fluidly shifts between intermediate transitions
 ($\langle S, s \rangle \Rightarrow \langle S', s' \rangle$) and terminal states
 ($\langle S, s \rangle \Rightarrow s'$). Lean requires this distinction to be
 explicit via a \texttt{Config} type separating active commands from terminal states. 
@@ -96,7 +97,7 @@ using the underlying relations \texttt{small\_step\_k} or \texttt{small\_step\_s
 and explicit configuration constructors such as \texttt{Config.step (S, s)} or
 \texttt{Config.final s}. This highlights a key RQ2 finding: pedagogical notation
 relies on a ``human type-checker'' that can resolve ambiguity through intuition, a 
-luxury the Lean kernel does not share. By forcing explicit constructor calls in
+luxury that Lean does not share. By forcing explicit constructor calls in
 complex cases, the mechanization ensures that the exact nature of the configuration
 transition is never in doubt.
 
@@ -106,7 +107,8 @@ transition is never in doubt.
 \section{The Equivalence Theorem: Managing Complexity}
 \label{discussion:sec:equivalence_complexity}
 
-The proof of $NS \equiv SOS$ makes the explicitness gap most visible because it
+The proof of equivalence between the Natural Semantics and the Structural Operational Semantics
+makes the explicitness gap most visible because it
 combines inductive structure, transitivity, and arithmetic on derivation length.
 
 \subsection*{From NS to SOS: Transitivity and Intermediate States}
@@ -120,7 +122,7 @@ mechanization removes.
 \subsection*{From SOS to NS: Why Strong Induction Is Necessary}
 In the $SOS \to NS$ direction, induction ``on derivation length'' requires an explicit
 arithmetic scaffold. In Lean this appears as \texttt{Nat.strongRecOn} plus
-arithmetic side goals discharged by tools such as \texttt{linarith}. The conclusion
+arithmetic side goals discharged by tactics such as \texttt{linarith}. The conclusion
 for RQ1 is clear: the proof idea maps, but its execution requires significant
 structural reformulation to account for the "step-counting" that is usually
 hand-waved in class.
@@ -153,12 +155,12 @@ The mechanization reveals four recurring shortcuts:
 \begin{table}[ht]
     \centering
     \small
-    \caption{The Explicitness Gap between Literature and Kernel.}
+    \caption{The Explicitness Gap between Literature and Mechanization.}
     \begin{tabular}{p{0.24\textwidth}p{0.33\textwidth}p{0.33\textwidth}}
         \textbf{Feature} & \textbf{Textbook~\citep{nielson_semantics_2007}} & \textbf{Lean 4 (Mechanized)} \\
         \hline
         Variables & Arbitrary strings & Typed identifiers (\texttt{DecidableEq}) \\  \\
-        Ambiguous Notation & Single arrow $\to$ & Chosen subset of transitions  \\  \\
+        Ambiguous Notation & Single arrow $\Rightarrow$ & Chosen subset of transitions  \\  \\
         Impossible cases & Ignored by inspection & Explicitly closed via \texttt{contradiction} \\  \\
         Transitivity & Implied by ``$\dots$'' & Explicit intermediate \texttt{Config} states \\  \\
         Induction style & ``On the structure'' & \texttt{induction} or \texttt{Nat.strongRecOn} \\

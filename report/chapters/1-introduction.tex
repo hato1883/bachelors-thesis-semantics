@@ -57,21 +57,16 @@ The primary objective of this work is to determine the "semantic gap"
 between human-readable proofs and machine-checked logic.
 Specifically, this thesis seeks to answer the following research questions:
 \begin{itemize}
-    \item \textbf{RQ1:} Do the proof techniques presented in the textbook~\citep{nielson_semantics_2007}
+    \item \textbf{RQ1:} Do the proof techniques presented in the \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}
     map directly to Lean's internal mechanisms, or do they require significant
     structural reformulation?
     \item \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
-    present in the literature must be made explicit to satisfy the Lean kernel?
+    present in the literature must be made explicit to satisfy the Lean proof assistant?
 \end{itemize}
 
-%
-%
-%
-\label{intro:motivation}
-\section{Motivation}
-\elias{Remove subsection and combine with 1.0} 
-Informal proofs are designed for human consumption and often prioritize
-intuition over exhaustive detail \hampus{this statement feels weired especially "humna consumption"}.
+\noindent
+Pen-and-paper proofs are designed for a reader and often prioritize
+intuition over exhaustive detail.
 However, these omissions can hide underlying complexities or logical leaps \hampus{no proof of this} \missingcitation \todo{Cite a source discussing 'social processes' in proofs or the 'De Bruijn factor'}.
 By identifying these points of divergence,
 this research provides a roadmap for how educators can
@@ -84,11 +79,11 @@ for formal verification tasks.
 \section{Scope}
 \label{intro:scope}
 This thesis will evaluate proofs from the course "Semantics of Programming Languages
-(1DL311)" which uses the literature "Semantics with Applications: An Appetizer"~\citep{nielson_semantics_2007}.
-will be limited to the evaluation to a few proofs from the chapter
-"1. Introduction" ~\citep[p.~1]{nielson_semantics_2007} and
-"2. Operational Semantics" ~\citep[p.~19]{nielson_semantics_2007}.
-These chapters introduce the toy programming language "While", which will be
+(1DL311)" which uses the textbook \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}.
+Will be limited to the evaluation to a few proofs from the chapter
+"1. Introduction" and
+"2. Operational Semantics".
+These chapters introduce the programming language "\While", which will be
 used in the proofs mechanized into Lean 4.
 
 %
@@ -106,35 +101,31 @@ assistant that otherwise was implicitly defined in the written counterpart.
 %
 \label{intro:roadmap}
 \section{Thesis Structure Roadmap} 
-The journey of this thesis is organized into seven chapters,
-progressing from theoretical foundations to the nuances of machine-checked proofs.
+This thesis is organized into seven chapters,
 Following this introduction, Chapter 2 establishes the necessary background,
-bridging the gap between the formal semantics of programming languages and the
-technical mechanics of the Lean 4 proof assistant.
-This section introduces the While language and explores how mathematical logic is
-mapped onto Lean's inductive types and tactic-based proof state.
-Chapter 3 then details the methodology employed,
+brefiely explaining what programming languages semantics, Operational Semantics and the proof assistant Lean is.
+
+Chapter 3 then details the methodology employed and
 describing the systematic approach used to translate traditional textbook
 definitions into a mechanized framework.
 
 The core technical contribution of this work is contained in Chapter 4,
-which documents the formalization of both Natural Semantics (big-step)
-and Structural Operational Semantics (small-step).
-This chapter moves beyond simple definitions to prove critical properties
-such as determinism and loop unrolling, culminating in a machine-verified
+which documents the formalization of both Natural Semantics
+and Structural Operational Semantics.
+This chapter moves beyond simple definitions to prove properties
+such as determinism and loop unrolling and finishing with a machine-verified
 proof of equivalence between the two semantic styles when
 applied to the \While language.
-Having established this formal framework, Chapter 5 provides a critical
-discussion of the findings.
-It reflects on the "notation gap" between human-readable proofs
-and computer-verified code, specifically addressing how the
-complexity of the equivalence theorem was managed within Lean.
+
+Having established this formal framework, Chapter 5 provides a
+discussion of the collected findings from the case study.
+Reflecting on changes in syntax, implicit knowladge and omited proofs.
 
 The final portion of the thesis situates these results within
 the broader academic context.
-Chapter 6 surveys related work, comparing the abstractions
-used in this project with other modern formalization frameworks
-and discussing the role of automation in engineering "trivial" proofs.
+Chapter 6 surveys related work, comparing the context of this thesis
+with the existing work of formulizating proofs in proof assistants.
+
 Finally, Chapter 7 offers concluding remarks, summarizing the primary
 contributions of the research and identifying future pathways for the
 mechanization of programming language theory.

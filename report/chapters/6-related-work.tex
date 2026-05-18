@@ -9,7 +9,7 @@
 \chapter{Related Work}
 The mechanization of programming language semantics requires navigating a
 trade-off between the high-level intuition of pedagogical materials and the
-low-level rigor of a logical kernel. This research is situated among several
+low-level rigor of a proof assistant. This research is situated among several
 key efforts to bridge this "semantic gap."
 
 %
@@ -17,11 +17,11 @@ key efforts to bridge this "semantic gap."
 %
 \section{Educational Abstractions vs.General Purpose Provers}
 To lower the entry barrier for students, tools like
-SASyLF~\citep{SASyLF} provide a specialized environment where proofs are constructed in a
+SASyLF by~\cite{SASyLF} provide a specialized environment where proofs are constructed in a
 "math-like" syntax. SASyLF~\citep{SASyLF}
 prioritizes the student's mental model by
-abstracting away much of the "syntactic noise" identified in Point 1. In
-contrast, this thesis uses Lean 4, a general-purpose theorem prover.
+abstracting away much of the "syntactic noise" identified in the diffrent proofs.
+In contrast, this thesis uses Lean 4, a general-purpose theorem prover.
 
 By doing so, we evaluate what is lost when these educational abstractions are
 removed, specifically regarding the "pedagogical shortcuts" identified in RQ2.
@@ -31,7 +31,7 @@ removed, specifically regarding the "pedagogical shortcuts" identified in RQ2.
 %
 \section{The Variable Binding Problem and Scoping}
 The difficulty of formalizing
-variable binding—the "infrastructure" of names and scopes—is the central
+variable binding, the "infrastructure" of names and scopes is the central
 theme of the POPLMark Challenge~\citep{aydemir_mechanized_2005}. Traditional solutions often involve complex
 techniques, such as Nominal Techniques in Isabelle/HOL~\citep{urban_nominal_Isabelle_2008}, which automate the
 handling of $\alpha$-equivalence and variable freshness. However, as noted in
@@ -39,29 +39,34 @@ the analysis of the textbook~\citep{nielson_semantics_2007}, the target language
 Scope with no variable shadowing or undefined variables. Consequently, this
 work intentionally bypasses the binding complexities discussed in the POPLMark~\citep{aydemir_mechanized_2005} 
 literature. This allows for a focused evaluation of other "verbatim" translation
-issues, such as:The transition from intuitive side conditions to explicit
-premises (Point 2).
-The requirement for decidable equality on variable strings (Point 3).
+issues, such as:
+The transition from intuitive side conditions to explicit premises.
+The requirement for decidable equality on variable strings amoung others.
 
 %
 %
 %
 \section{Engineering the "Trivial": Scaffolding and Tactics}
-Even in a language with
-simple scope, the engineering effort required to satisfy a kernel remains high.
+Even in a language with simple scope,
+the engineering effort required to satisfy a mechanized
+proof assistant remains high.
 
-\begin{itemize}
-    \item QED at Large~\citep{ringer_qed_2019}: This survey of formally verified software highlights that
-"proof engineering"—the creation of scaffolding lemmas—is often the most
-time-consuming part of formalization. This aligns with my finding in Point 5,
-where textbook logic for state updates ($s[x \to v]$) requires multiple "hidden"
+This challenge is underscored by QED at Large~\citep{ringer_qed_2019},
+a survey of formally verified software which highlights that
+"proof engineering", specifically the creation of scaffolding
+lemmas, is often the most time-consuming part of formalization.
+This insight directly aligns with the finding that textbook logic
+for state updates ($s[x \to v]$) requires multiple "hidden"
 lemmas in Lean to prove identity and extensionality.
 
-    \item The C Standard Formalized in Coq~\citep{mechanizedCSpecification}: On a larger scale, the formalization of the
-C standard (e.g., CH2O~\citep{mechanizedCSpecification}) demonstrates how informal prose must be turned into a
-rigid, constructive logic. This study mirrors that process on a pedagogical
-scale, investigating how "trivial" textbook assumptions must be made explicit.
-\end{itemize}
+On a larger scale, the formalization of the C standard,
+such as the CH2O project~\citep{mechanizedCSpecification},
+further demonstrates how informal prose must be meticulously
+converted into a rigid, constructive logic.
+
+By mirroring this extensive process on a pedagogical scale,
+this thesis investigates how textbook assumptions,
+which are often taken for granted, must be made entirely explicit.
 
 %
 %
@@ -70,8 +75,8 @@ scale, investigating how "trivial" textbook assumptions must be made explicit.
 The recent Modular Lean 4 Framework for Lambda
 Calculi~\citep{ramos2025modularLean4framework} provides a look at how Lean 4 can be used to build highly structured,
 re-usable metatheory. While that framework focuses on the complexity of products,
-sums, and normalization, my work focuses on fidelity to the curriculum. While a
-modular framework re-engineers the logic for efficiency in the prover, my "verbatim"
+sums, and normalization, this work focuses on fidelity to the curriculum. While a
+modular framework re-engineers the logic for efficiency in the prover, this "verbatim"
 approach tests whether Lean can be used as a direct mirror for existing educational
 literature.
 
@@ -80,7 +85,7 @@ literature.
 %
 \section{Automation and the Poincaré Principle}
 Finally, the gap in reasoning
-about numbers (Point 4) is bridged in this work using Lean's \texttt{linarith} tactic.
+about numbers is bridged in this work using Lean's \texttt{linarith} tactic.
 This follows the "Poincaré Principle"~\citep{barendregt_autarkic_2002}, the idea that trivial computational steps
 should be handled by the machine rather than the user. By utilizing \texttt{linarith},
 we ensure that the focus of the formalization remains on the semantics of the

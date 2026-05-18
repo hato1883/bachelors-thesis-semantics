@@ -9,7 +9,7 @@
 \chapter{Method}
 
 This chapter outlines the methodology used to mechanize the semantic proofs
-from the textbook~\citep{nielson_semantics_2007}, ensuring a systematic and traceable translation from
+from the textbook \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}, ensuring a systematic and traceable translation from
 pen-and-paper arguments to formal verification in Lean 4~\citep{theorem_proving_2026}.
 The core of this
 thesis lies in not just proving the theorems, but in analyzing the transformation
@@ -22,7 +22,7 @@ The methodology can be broken down into four main stages:
     \item \textbf{Mechanization of Proofs:} The first step involves translating the proofs
     from the literature into Lean 4. A key principle here is to mirror the original proof
     strategy as closely as possible\missingcitation\todo{Optional: Mention if this "alignment" approach follows a specific formalization philosophy, like De Bruijn’s or similar comparative studies.}.
-    When the textbook specifies "induction on the shape
+    When the textbook \emph{Semantics with Applications: An Appetizer} specifies "induction on the shape
     of the derivation tree," the \texttt{induction} tactic is used. Similarly, when a proof
     proceeds by "case analysis," the \texttt{cases} tactic is employed. This ensures that
     the resulting formal proof maintains a clear correspondence with the original argument.
@@ -38,14 +38,12 @@ The methodology can be broken down into four main stages:
     formal proof work. This involves pinpointing where the mechanization required additional
     steps, such as:
     \begin{itemize}
-        \item Explicitly handling cases that lead to contradictions.
-        
-        \item Introducing necessary assumptions or auxiliary lemmas that were implicit in
+        \item Introducing necessary assumptions or auxiliary lemmas that are implicit in
         the original text.
         
         \item Generalizing proof statements to facilitate induction.
         
-        \item Formalizing concepts that the literature took for granted
+        \item Formalizing concepts that the literature takes for granted
         (e.g., multi-step relations).
     \end{itemize}
 
@@ -56,9 +54,9 @@ The methodology can be broken down into four main stages:
     that emerge from the case studies.
 \end{enumerate}
 
-This structured approach ensures that the thesis provides not only a set of verified
-theorems but also a reflective analysis of what it means to translate informal mathematical
-reasoning into a fully formal, machine-checked system\missingcitation\todo{Cite a source that discusses the general challenge of 'The Formalization Gap' or 'Informal vs Formal proofs' to justify why this reflection is valuable.}.
+This structured approach ensures that the thesis provides a reflective analysis
+of what it means to translate informal mathematical
+reasoning into a fully formal, machine-checked system.
 The next chapter will present the
 results of this methodology, beginning with the side-by-side comparison of the
 pen-and-paper and mechanized proofs for the inductive types.

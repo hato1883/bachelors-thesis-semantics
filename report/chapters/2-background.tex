@@ -8,11 +8,11 @@
 \label{cha:background}
 \noindent
 This chapter establishes the theoretical foundation necessary for the thesis.
-We begin by specifying the \While language, which serves as the primary object
-of study throughout this work. This provides the concrete syntax required to
+We begin by specifying the \While language, from \emph{Semantics with Applications: An Appetizer}
+which is our primary study which throughout this work. This provides the concrete syntax required to
 explore the formal semantics of programming languages—the mathematical bridge
 between a program's notation and its behavior. We then delve into Operational
-Semantics, detailing both the Natural (big-step)~\citep[p.~20]{nielson_semantics_2007} and Structural (small-step)~\citep[p.~33]{nielson_semantics_2007}
+Semantics, detailing both the Natural and Structural
 approaches, followed by the primary proof techniques used in their analysis.
 Finally, we introduce the Lean 4 proof assistant, detailing the mechanisms used
 to translate these textbook definitions into machine-checked proofs~\citep{theorem_proving_2026}.
@@ -329,9 +329,8 @@ is the view that a given Statement \(S\) and a starting state \(s\) can evaluate
 This view is that each operation runs to completion.
 
 As with most semantics we define deduction rules to formulate how the statements are evaluated.
-In the textbook we are given the following table of rules
+In the textbook \emph{Semantics with Applications: An Appetizer} we are given the following table of rules
 
-\hampus{Show Comp NS rules for \While describing them}
 \begin{table}[ht]
     \[
     \begin{array}{ll}
@@ -561,12 +560,11 @@ and one that is "diverging" (infinite transitions possible).
 \hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
 Lean 4 is a functional programming language and an interactive theorem prover
 based on \textit{Dependent Type Theory} \citep{theorem_proving_2026}.
-For the readers familiar with first- and second-order logic,
 Lean can be viewed as a rigorous environment for defining mathematical objects
-and constructing formal proofs that are mechanically verified by a small logical kernel.
+and constructing formal proofs that are mechanically verified by a small logical so-called kernel.
 
 \subsection{Defining Syntax: Inductive Types}
-In the textbook by \cite{nielson_semantics_2007},
+In the textbook \emph{Semantics with Applications: An Appetizer} by \cite{nielson_semantics_2007},
 the syntax of a programming language is often defined using Backus-Naur Form (BNF).
 In Lean, we represent these syntactic categories using \texttt{inductive} types.
 An inductive type defines a set by listing its constructors.
@@ -638,7 +636,7 @@ to their respective functionalities in standard mathematical and logical discour
 \texttt{theorem}      & Theorem / Lemma           & A claim that requires a formal proof term. \\
 \texttt{intro}        & Implication Introduction  & "Assume $P$ is true" or "Let $x$ be an arbitrary element." \\
 \texttt{exact}        & Q.E.D.                    & Completes a goal by providing the required evidence directly. \\
-\texttt{cases}        & Proof by Exhaustion       & Deconstructs an object or relation into its possible forms. \\
+\texttt{cases}        & Proof by Cases       & Deconstructs an object or relation into its possible forms. \\
 \texttt{apply}        & Modus Ponens              & Uses a known rule or theorem to satisfy the current goal. \\
 \texttt{rfl}          & Reflexivity               & Proves an equality of the form $A = A$ by definition. \\ \hline
 \end{tabular}
@@ -646,10 +644,12 @@ to their respective functionalities in standard mathematical and logical discour
 \end{table}
 
 \subsection{Notation Conventions}
-To bridge the gap between code and literature, this thesis employs custom notation.
-We use semantic brackets $\mathcal{A}[\![ a ]\!] s$ to denote the evaluation of
-an expression $a$ in state $s$, and the notation $s[x \mapsto z]$ to denote a
-state update where variable $x$ is assigned value $z$. These notations are not
-merely for display; they are mapped directly to Lean functions through the
-\texttt{notation} and \texttt{unexpander} mechanisms, ensuring that the mechanized
-proof code remains readable to a human audience.
+To bridge the gap between code and literature,
+it is possible to define custom notation and operations,
+which can mimic that of pen-and-paper proofs.
+This can allow for a custom Number type to use the addition sign "+"
+to mark a addition of two numbers, instead of using the full inductive name such-as 
+"\texttt{Number.Add N1 N2}", and instead do "\texttt{N1 + N2}".
+Notations can be defined by using the keyword "\texttt{notation}",
+and operations can be defined using "\texttt{infixl}" and "\texttt{infixr}"
+

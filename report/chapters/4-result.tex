@@ -19,7 +19,7 @@ how an individual proof from the textbook compares with the corresponding Lean f
 %
 \section{Formalizing \While}
 \label{formal_ns_sos_equiv:sec:while:formalization}
-As mentioned we will start with formulating our toy language \While as defined in the textbook~\citep{nielson_semantics_2007}.
+As mentioned we will start with formulating our toy language \While as defined in \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}.
 We will proceed in the same order as outlined by the book, starting with the syntactic categories,
 before moving onwards to the semantic functions.
 
@@ -28,7 +28,7 @@ before moving onwards to the semantic functions.
 We begin by mechanizing the syntactic categories defined in chapter 1.2 of the textbook~\citep[p.~7]{nielson_semantics_2007}. 
 The categories for \While are defined using BNF notation, mapping numerals, variables, and expressions to inductive sets.
 Bellow a side by side view is presented where the left side (Mechanized (Lean 4)) is formalizations of the text on the right
-(Pen-and-Paper) which is directly quoted from the textbook by~\cite{nielson_semantics_2007}
+(Pen-and-Paper) which is directly quoted from the textbook.
 Using Lean 4's syntax, we translate each BNF rule directly into a constructor:
 \begin{paracol}{2}
     \begin{leftcolumn}
@@ -318,6 +318,7 @@ notation
     \)
 \end{rightcolumn}
 
+\newpage
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
@@ -435,6 +436,7 @@ def Aexp_eval : Aexp §\(\to\)§
 \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
+\newpage
 
 \begin{paracol}{2}
 \begin{leftcolumn}
@@ -718,7 +720,6 @@ resulting state will be \(s'\).
     \)
 \end{rightcolumn}
 \end{paracol}
-\newpage
 
 \begin{paracol}{2}
 \begin{leftcolumn}
@@ -745,6 +746,8 @@ resulting state will be \(s'\).
     \)
 \end{rightcolumn}
 \vspace{3em}
+
+
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
@@ -773,7 +776,8 @@ resulting state will be \(s'\).
 \end{prooftree}
     \)
 \end{rightcolumn}
-\vspace{3em}
+\newpage
+
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
@@ -785,7 +789,7 @@ resulting state will be \(s'\).
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
-\vspace{2.5em}
+\vspace{3.5em}
     \(
 \begin{prooftree}
   \hypo{\langle S_1, s \rangle \to s'}
@@ -1799,30 +1803,30 @@ outcomes:
 \vspace{2em}
 
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
 inductive small_step :
   Stmt §\(\to\)§ State §\(\to\)§
   Config §\(\to\)§ Prop where
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-    \end{rightcolumn}
-    \vspace{2em}
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\end{rightcolumn}
+\vspace{2em}
 
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
   | ass {s x a} :
     §\(\langle\)§x §\(: \equiv\)§ a, s§\(\rangle\)§ §\(\to_{sos}\)§
       (s[x §\mapsto§ §\(\mathcal{A}[\![a]\!]\)§ s])
-\end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \vspace{1.1em}
-            \(
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\vspace{1.1em}
+    \(
 \begin{prooftree}
   \hypo{} % Empty hypothesis for an axiom
   \infer[
@@ -1834,21 +1838,21 @@ inductive small_step :
         $}
     }
 \end{prooftree}
-            \)
-    \end{rightcolumn}
-    \vspace{1em}
+    \)
+\end{rightcolumn}
+\vspace{1em}
 
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
   | skip {s} :
     §\(\langle\)§Stmt.skip, s§\(\rangle\)§ §\(\to_{sos}\)§ s
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \vspace{1.1em}
-            \(
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\vspace{1.1em}
+    \(
 \begin{prooftree}
   \hypo{} % Empty hypothesis for an axiom
   \infer[left label=[skip$_{\text{sos}}$]]1{ \langle \mathtt{skip}, s \rangle \Rightarrow s}
@@ -1864,11 +1868,11 @@ inductive small_step :
     §\(\langle\)§S§$_{1}$§, s§\(\rangle\)§ §\(\to_{sos}\)§ §\(\langle\)§S§$_{1}$§', s'§\(\rangle\)§) :
     §\(\langle\)§S§$_{1}$§; S§$_{2}$§, s§\(\rangle\)§ §\(\to_{sos}\)§
       §\(\langle\)§S§$_{1}$§'; S§$_{2}$§, s'§\(\rangle\)§
-        \end{Lean_Code}
-    \end{leftcolumn}
-    \begin{rightcolumn}
-        \vspace{2.5em}
-            \(
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
+\vspace{2.5em}
+    \(
 \begin{prooftree}
   \hypo{\langle S_1, s \rangle \Rightarrow \langle S_1', s' \rangle}
   \infer[
@@ -1880,13 +1884,14 @@ inductive small_step :
         $}
     }
 \end{prooftree}
-            \)
-    \end{rightcolumn}
-    % \vspace{3em}
+    \)
+\end{rightcolumn}
+% \vspace{3em}
+\newpage
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
   | comp2 {S§$_{1}$§ S§$_{2}$§ s s'}
     (h_left :
       §\(\langle\)§S§$_{1}$§, s§\(\rangle\)§ §\(\to_{sos}\)§ s') :
@@ -1903,13 +1908,13 @@ inductive small_step :
   ]1{
     \langle S_1;\ S_2, s \rangle \Rightarrow \langle S_2, s'\rangle}
 \end{prooftree}
-            \)
-    \end{rightcolumn}
-    % \vspace{3em}
+    \)
+\end{rightcolumn}
+% \vspace{3em}
 
-    \switchcolumn[1]*[]
-    \begin{leftcolumn}
-        \begin{Lean_Code}
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
   | if_true {b S§$_{1}$§ S§$_{2}$§ s s'}
     (h_cond_true :
       §\(\mathcal{B}[\![b]\!]\)§ s = true) : 
@@ -2033,10 +2038,14 @@ inductive small_step_k : Config §\(\to\)§ Nat §\(\to\)§ Config §\(\to\)§ P
 
 -- Define the standard Nielson & Nielson notation
 -- Non terminal configuration
-notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§" §\leanbreak§ "§\ \color{purple}\to$_{sos}[$\ §" k "§\ \color{purple}$]$\ §" "§\color{purple}$\langle$§" S' "," s':40 "§\color{purple}$\rangle$§" => §\leanbreak§ small_step_k (Config.step S s) k (Config.step S' s')
+notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§"
+  "§\ \color{purple}\to$_{sos}[$\ §" k "§\ \color{purple}$]$\ §" "§\color{purple}$\langle$§" S' "," s':40 "§\color{purple}$\rangle$§" =>
+  small_step_k (Config.step S s) k (Config.step S' s')
 
 -- Terminal configuration
-notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§" §\leanbreak§ "§\ \color{purple}\to$_{sos}[$\ §" k "§\ \color{purple}$]$\ §" s':40 => §\leanbreak§ small_step_k (Config.step S s) k (Config.final s')
+notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§"
+  "§\ \color{purple}\to$_{sos}[$\ §" k "§\ \color{purple}$]$\ §" s':40 =>
+  small_step_k (Config.step S s) k (Config.final s')
 
 \end{Lean_Code}
 and
@@ -2051,10 +2060,14 @@ inductive small_step_star : Config §\(\to\)§ Nat §\(\to\)§ Config §\(\to\)�
 
 -- Define the standard Nielson & Nielson notation
 -- Non terminal configuration
-notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§" §\leanbreak§ "§\ \color{purple}\to$_{sos}*$\ §" "§\color{purple}$\langle$§" S' "," s':40 "§\color{purple}$\rangle$§" => §\leanbreak§ small_step_star (Config.step S s) (Config.step S' s')
+notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§"
+  "§\ \color{purple}\to$_{sos}*$\ §" "§\color{purple}$\langle$§" S' "," s':40 "§\color{purple}$\rangle$§" =>
+  small_step_star (Config.step S s) (Config.step S' s')
 
 -- Terminal configuration
-notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§" §\leanbreak§ "§\ \color{purple}\to$_{sos}*$\ §" s':40 => §\leanbreak§ small_step_star (Config.step S s) (Config.final s')
+notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§"
+  "§\ \color{purple}\to$_{sos}*$\ §" s':40 =>
+  small_step_star (Config.step S s) (Config.final s')
 
 \end{Lean_Code}
 
@@ -2162,9 +2175,9 @@ If \(k = 0\), then the result holds vacuously
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-  | ind k₀ ih =>
+  | ind k§\(_0\)§ ih =>
     cases h with
-    | @step _ _ _ _ k₀
+    | @step _ _ _ _ k§\(_0\)§
       h_step h_rest =>
     \end{Lean_Code}
 \end{leftcolumn}
@@ -2198,11 +2211,23 @@ which of the two rules [comp\(_{sos}^{1}\)] and [comp\(_{sos}^{2}\)] is used.
 \begin{leftcolumn}
     \begin{Lean_Code}
       | comp1 progress =>
-        have h_lt : k₀ < k₀ + 1 := Nat.lt_succ_self k₀
-        -- `specialize` instantiates the generic `ih` with our specific smaller step count (k₀),
-        -- the strict inequality proof (h_lt), and the remaining derivation (h_rest).
-        specialize ih k₀ h_lt h_rest
-        have ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
+        have h_lt :
+          k§\(_0\)§ < k§\(_0\)§ + 1 :=
+          Nat.lt_succ_self k§\(_0\)§
+        -- `specialize`
+        -- instantiates the
+        -- generic `ih` with
+        -- our specific smaller
+        -- step count (k§\(_0\)§),
+        -- the strict
+        -- inequality proof
+        -- (h_lt), and the
+        -- remaining derivation
+        -- (h_rest).
+        specialize ih k§\(_0\)§
+          h_lt h_rest
+        have ⟨s§\(_0\)§, k§\(_1\)§, k§\(_2\)§,
+          hk§\(_1\)§, hk§\(_2\)§, h_sum⟩ := ih
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2232,20 +2257,18 @@ where \(k_1 + k_2 = k_0\).
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-        -- `exists` instantiates the existential goal (∃ s' k₁ k₂).
-        -- It changes the goal's placeholders to: s₀ (the midpoint from the IH),
-        -- k₁ + 1 (the IH steps plus our first progress step), and k₂ (the remaining IH steps).
-        exists s₀, k₁ + 1, k₂
+        -- `exists`
+        -- instantiates the
+        -- existential goal
+        -- (§\(\exists\)§ s' k§\(_1\)§ k§\(_2\)§).
+        exists s§\(_0\)§, k§\(_1\)§ + 1, k§\(_2\)§
 
-        apply And.intro
-        case left =>
-          apply small_step_k.step
-          case step => exact progress
-          case rest => exact hk₁
-        case right =>
-          apply And.intro
-          case left => exact hk₂
-          case right => linarith [h_sum]
+        and_intros
+        §\(\cdot\)§ exact
+            small_step_k.step
+            progress hk§\(_1\)§
+        §\(\cdot\)§ exact hk§\(_2\)§
+        §\(\cdot\)§ linarith [h_sum]
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2262,32 +2285,16 @@ We have already seen that \(\langle S_2, s_0 \rangle \Rightarrow^{k_2} s''\), an
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-      | comp2 terminates =>
-        -- [comp2]:
-        -- retrive the
-        -- intermidiary state
-        -- s'
-        rename_i s'
+      | @comp2 _ _ _ s'
+        terminates =>
         exists s', 1, k§\(_0\)§
-        apply And.§intro§
-        case left =>
-          apply
+        and_intros
+        §\(\cdot\)§ exact
             small_step_k.step
-          case step =>
-            exact terminates
-          case rest =>
-            apply
-              small_step_k.refl
-
-        case right =>
-          apply And.§intro§
-          case left =>
-            exact h_rest
-          case right =>
-            linarith
-          
-          case right =>
-            linarith
+            terminates
+            small_step_k.refl
+        §\(\cdot\)§ exact h_rest
+        §\(\cdot\)§ linarith
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2316,7 +2323,6 @@ of "pedagogical shortcuts":
 
 \begin{itemize}
     \item \textbf{Variable Generalization}:
-    The \texttt{generalizing} keyword is a crucial pedagogical gap.
     The textbook assumes the property holds for "all derivation sequences of length at most k"
     but in a tactic-based proof, one must explicitly ensure that the induction
     hypothesis is not bound to the specific initial state \(s\), or the proof
@@ -2324,9 +2330,9 @@ of "pedagogical shortcuts":
 
     \item \textbf{Explicit Case Exhaustion}:
     The textbook notes the \(k=0\) case is
-    "vacuous" because the configurations are different. In Lean, this requires the
-    \texttt{cases} tactic to demonstrate that no constructor in the inductive definition
-    of the transition relation can produce a state from a statement in zero steps.
+    "vacuous" because the configurations are different.
+    In Lean, this conclusion is found automatically from the fact that there exist no sych number n,
+    such that n < 0 and therefore we do not need to reason about the base case at all in lean.
 
     \item \textbf{Specialization and Unpacking}:
     The Tactic \texttt{specialize} is used to bridge the gap
@@ -2340,13 +2346,12 @@ of "pedagogical shortcuts":
     to solve the summation of steps (\((k_1 + 1) + k_2 = k_0 + 1\)). In the literature,
     this is dismissed as "the required result," but Lean requires a formal
     proof of equality between natural numbers.
-
-    \item \textbf{Intermediate Configuration Inspection}:
-    Due to our definition of Config type we must uses the \texttt{cases} tactic
-    to build our intermediate \(\gamma = \langle S', s' \rangle\).
-    The textbook performs this move implicitly by
-    immediately discussing [comp\(_{sos}^{1}\)] and [comp\(_{sos}^{2}\)].
 \end{itemize}
+The remaining parts are Lean syntax issues,
+such as prefixing the rule with a at symbol ("@") to allow us
+to name the otherwise anonymous \(k\) symbol, so that we can use it in our proof.
+We also have the usage of \(\land\) which then needs to be introduced in the proof,
+this is done more implicitly by the textbook through the narrative approach.
 
 
 %
@@ -2443,12 +2448,9 @@ Proof: The proof proceeds by induction on the shape of the derivation tree for\\
 \begin{leftcolumn}
     \begin{Lean_Code}
   | ass =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.ass
-    case rest =>
-      apply
-        small_step_star.refl
+    exact small_step_star.step
+      small_step.ass
+      small_step_star.refl
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2468,12 +2470,9 @@ From [ass$_{\text{sos}}$], we get the required
 \begin{leftcolumn}
     \begin{Lean_Code}
   | skip =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.skip
-    case rest =>
-      apply
-        small_step_star.refl
+    exact small_step_star.step
+      small_step.skip
+      small_step_star.refl
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2485,16 +2484,16 @@ From [ass$_{\text{sos}}$], we get the required
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-  | comp ih1 ih2 h1 h2 =>
-    rename_i S§\(_1\)§ S§\(_2\)§ s s' s''
+  | @comp S§\(_1\)§ S§\(_2\)§ s s' s''
+    h§\(_1\)§ h§\(_2\)§ ih§\(_1\)§ ih§\(_2\)§ =>
     -- Exercise 2.21
-    have h_comp_first_part :=
+    have h_comp_stmt :=
       exercise_2_21
-        (S§\(_2\)§ := S§\(_2\)§) h1
+      (S§\(_2\)§ := S§\(_2\)§) ih§\(_1\)§
     -- Transitivity
     exact
       small_step_star_trans
-      h_comp_first_part h2
+      h_comp_stmt ih§\(_2\)§
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2525,14 +2524,11 @@ and thereby \(\langle S_1;\ S_2,\ s \rangle \Rightarrow^{*} s''\).
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-  | if_true h_cond h ih =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.if_true
-      case h_cond_true =>
-        exact hcond
-    case rest =>
-      exact ih
+  | if_true hcond h ih =>
+    exact small_step_star.step
+      (small_step.if_true
+        hcond)
+      ih
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2559,13 +2555,10 @@ from the induction hypothesis applied to the premise\\
 \begin{leftcolumn}
     \begin{Lean_Code}
   | if_false h_cond h ih =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.if_false
-      case h_cond_false =>
-        exact hcond
-    case rest =>
-      exact ih
+    exact small_step_star.step
+      (small_step.if_false
+        hcond)
+      ih
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2577,32 +2570,9 @@ from the induction hypothesis applied to the premise\\
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-  | while_true h_cond h_body
-      h_rest ih_body ih_loop =>
-    rename_i b S s s' s''
-    -- Exercise 2.21
-    have h_after_ex21 :=
-      exercise_2_21
-        (S§\(_2\)§ := Stmt.while b S)
-        ih_body
-    -- while_sos step
-    apply small_step_star.step
-    case step =>
-      exact
-        small_step.while_unroll
-    -- if_sos^tt step
-    case rest =>
-      apply
-        small_step_star.step
-      case step =>
-        exact
-          small_step.if_true
-          h_cond
-      case rest =>
-        -- Transitivity
-        exact
-          small_step_star_trans
-          h_after_ex21 ih_loop
+  | @while_true b S₂ s s' s''
+    hcond h_body h_rest
+    ih_body ih_loop =>
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2620,6 +2590,31 @@ and gives
 \[
 \langle S,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \Rightarrow^{*} s''
 \]
+\end{rightcolumn}
+\vspace{1em}
+
+
+\switchcolumn[1]*[]
+\begin{leftcolumn}
+    \begin{Lean_Code}
+    -- Exercise 2.21
+    have h_after_ex21 :=
+      exercise_2_21
+        (S§\(_2\)§ := Stmt.while b S)
+        ih_body
+    exact small_step_star.step
+      -- while_sos
+      small_step.while_unroll
+      (small_step_star.step
+        -- if_true_sos
+        (small_step.if_true
+          hcond)
+        -- Transitivity
+        (small_step_star_trans
+          h_seq ih_loop))
+    \end{Lean_Code}
+\end{leftcolumn}
+\begin{rightcolumn}
 Using Exercise 2.21, we get
 \[
 \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \Rightarrow^{*} s''
@@ -2643,24 +2638,24 @@ and we have already argued for the last part.
   | while_false h_cond =>
     apply small_step_star.step
     case step =>
+      -- while_sos
       apply
         small_step.while_unroll
     case rest =>
       apply
         small_step_star.step
       case step =>
-        apply
+        -- if_false_sos
+        exact
           small_step.if_false
-        case h_cond_false =>
-          exact h_cond
+          h_cond
       case rest =>
-        apply
+        exact
           small_step_star.step
-        case step =>
-          apply small_step.skip
-        case rest =>
-          apply
-            small_step_star.refl
+          -- skip_sos
+          small_step.skip
+          -- Transitivity
+          small_step_star.refl
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2685,9 +2680,12 @@ of pedagogical shortcuts:
     like "we get the required..."
     
     \item \textbf{Transitivity and Composition}:
-    The textbook's logical chaining (e.g., "we have already argued for the last part")
-    is formalized via \texttt{small\_step\_star\_trans}. This requires the user to provide
-    intermediate states ($s'$) that are often left implicit in written proofs
+    The textbook is proven parts of the step chain and implicitly connect them,
+    whilst Lean must use a auxilurary proof\\
+    \texttt{small\_step\_star\_trans} to prove that if
+    \(\langle S, s \rangle \Rightarrow^* \gamma\) is true and if \(\gamma \Rightarrow^* \langle S', s' \rangle\)
+    is also true, then we can prove that \(\langle S, s \rangle \Rightarrow^* \langle S', s' \rangle\)
+    is also true.
     
     \item \textbf{Formalization of "Analogous" and "Straightforward"}:
     The textbook uses these terms to skip the \texttt{skip}, \texttt{if\_false}, and
@@ -2695,22 +2693,11 @@ of pedagogical shortcuts:
     Even "straightforward" cases like \texttt{while\_false} require a three-step sequence
     (\texttt{while\_unroll} $\to$ \texttt{if\_false} $\to$ \texttt{skip}) that the
     literature treats as a single atomic intuition
-    
-    \item \textbf{Lemma Injection}:
-    The textbook references Exercise 2.21 as a contextual hint.
-    In Lean, this is a structural necessity; the proof cannot progress without an
-    explicit application of \texttt{exercise\_2\_21}, often requiring manual
-    instantiation of variables (e.g., \texttt{S2 := Stmt.loop b S}) to help
-    the unifier
-    
-    \item \textbf{Variable Scoping}:
-    The use of \texttt{rename\_i} highlights a mapping difference: textbooks use
-    global naming conventions for states ($s, s', s''$), whereas Lean generates
-    internal names during induction that must be explicitly mapped to the thesis's
-    notation for readability.
-    This can be done by prepending a '§' character or by using the \texttt{rename\_i} tactic.
 
 \end{itemize}
+In the textbook they describe the process of applying the induction hypothesis to the premises,
+something which lean dose automaticaly for us, allowing us to write shorter proofs, such in the case of
+if true case.
 
 
 \subsubsection*{Lemma 2.28}
@@ -2778,7 +2765,7 @@ is obtained; that is, by inspecting the derivation tree for the first step of co
     \begin{Lean_Code}
         case ass x a =>
           case refl =>
-            apply big_step.ass
+            exact big_step.ass
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2793,7 +2780,7 @@ is obtained; that is, by inspecting the derivation tree for the first step of co
         case skip =>
           cases h_rest
           case refl =>
-            apply big_step.skip
+            exact big_step.skip
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2807,7 +2794,7 @@ is obtained; that is, by inspecting the derivation tree for the first step of co
     \begin{Lean_Code}
         case comp1 S1 S1' S2
           s_next h_step_S1 =>
-          -- Apply Lemma 2.19 to split the sequence
+          -- Apply Lemma 2.19
           have §\(\langle\)§s_mid, k§\(_1\)§, k§\(_2\)§,
             hk1, hk2, h_sum§\(\rangle\)§ :=
             lemma_2_19 h_rest

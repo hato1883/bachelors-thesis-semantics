@@ -35,62 +35,52 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
   -- TODO: implement detailed case proofs here.
   induction h with
   | ass =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.ass
-    case rest =>
-      apply small_step_star.refl
+    exact small_step_star.step
+      small_step.ass
+      small_step_star.refl
 
   | skip =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.skip
-    case rest =>
-      apply small_step_star.refl
+    exact small_step_star.step
+      small_step.skip
+      small_step_star.refl
 
-  | comp ih1 ih2 ih3 ih4 =>
-    rename_i S₁ S₂ s s' s''
+  | @comp S₁ S₂ s s' s''
+    h₁ h₂ ih₁ ih₂ =>
     -- ih1: ⟨S₁, s⟩ →ₛₒₛ* s_mid
     -- ih2: ⟨S₂, s_mid⟩ →ₛₒₛ* s_final
 
     -- 1. Using your k-step derived lemma: ⟨S₁; S₂, s⟩ →ₛₒₛ* ⟨S₂, s_mid⟩
-    let h_first_part := exercise_2_21 (S₂ := S₂) ih3
+    have h_comp_stmt :=
+      exercise_2_21
+      (S₂ := S₂) ih₁
 
     -- 2. Glue the first part to the second part (ih2)
-    exact small_step_star_trans h_first_part ih4
+    exact
+      small_step_star_trans
+      h_comp_stmt ih₂
 
   | if_true hcond h ih =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.if_true
-      case h_cond_true =>
-        exact hcond
-    case rest =>
-      exact ih
+    exact small_step_star.step
+      (small_step.if_true
+        hcond)
+      ih
 
   | if_false hcond h ih =>
-    apply small_step_star.step
-    case step =>
-      apply small_step.if_false
-      case h_cond_false =>
-        exact hcond
-    case rest =>
-      exact ih
+    exact small_step_star.step
+      (small_step.if_false
+        hcond)
+      ih
 
-  | while_true hcond h_body h_rest ih_body ih_loop =>
-    rename_i b S₂ s s' s''
-    -- 1. Unroll: while b do S₂ →ₛₒₛ if b then (S₂; while b do S₂) else skip
-    apply small_step_star.step
-    case step =>
-      exact small_step.while_unroll
-    -- 2. Condition is true: if b then ... →ₛₒₛ ⟨S₂; while b do S₂, s⟩
-    apply small_step_star.step
-    case step =>
-      exact small_step.if_true hcond
-    -- 3. Use the local S₂ for the suffix of the sequence
+  | @while_true b S₂ s s' s''
+    hcond h_body h_rest
+    ih_body ih_loop =>
     have h_seq := exercise_2_21 (S₂ := Stmt.while b S₂) ih_body
-    -- 4. Transitivity: ⟨S₂; while b do S₂, s⟩ →* ⟨while b do S₂, s'⟩ →* s''
-    exact small_step_star_trans h_seq ih_loop
+
+    exact small_step_star.step
+      small_step.while_unroll
+      (small_step_star.step
+        (small_step.if_true hcond)
+        (small_step_star_trans h_seq ih_loop))
 
   | while_false h_cond =>
     apply small_step_star.step
@@ -99,15 +89,12 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     case rest =>
       apply small_step_star.step
       case step =>
-        apply small_step.if_false
-        case h_cond_false =>
-          exact h_cond
+        exact small_step.if_false
+          h_cond
       case rest =>
-        apply small_step_star.step
-        case step =>
-          apply small_step.skip
-        case rest =>
-          apply small_step_star.refl
+        exact small_step_star.step
+          small_step.skip
+          small_step_star.refl
 
 
 lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
@@ -133,29 +120,30 @@ lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :
           -- Text: "The case [ass_sos]: Straightforward (and k0 = 0)"
           cases h_rest -- This must be refl because assignment terminates in 1 step
           case refl =>
-            apply big_step.ass
+            exact big_step.ass
 
         case skip =>
           -- Text: "The case [skip_sos]: Straightforward (and k0 = 0)"
           cases h_rest
           case refl =>
-            apply big_step.skip
+            exact big_step.skip
 
         case comp1 S1 S1' S2 s_next h_step_S1 =>
           -- Text: "The cases [comp1_sos] and [comp2_sos]... apply Lemma 2.19"
           -- We go back to the original h_k_step and apply lemma_2_19
           have ⟨s_mid, k₁, k₂, hk1, hk2, h_sum⟩ := lemma_2_19 h_rest
+
+          have h_k2_pos : k₂ > 0 := by
+            -- Inversion on hk2: a 0-step derivation to a state s' is impossible for a Stmt
+            cases k₂
+            case zero => cases hk2 -- This should reach a contradiction
+            case succ => linarith
+            
           apply big_step.comp (s' := s_mid)
           case h_left => -- Goal: ⟨S, s⟩ →ₙₛ s_mid
             -- We combine the very first step (h_step_S1) with the rest of S (h_S1'_steps)
             have h_S_full : ⟨S1, s⟩ →ₛₒₛ[k₁ + 1] s_mid := by
               apply small_step_k.step h_step_S1 hk1
-
-            have h_k2_pos : k₂ > 0 := by
-              -- Inversion on hk2: a 0-step derivation to a state s' is impossible for a Stmt
-              cases k₂
-              case zero => cases hk2 -- This should reach a contradiction
-              case succ => linarith
 
             -- Apply the Induction Hypothesis (IH)
             apply ih (k₁ + 1) (by linarith) S1 s s_mid h_S_full

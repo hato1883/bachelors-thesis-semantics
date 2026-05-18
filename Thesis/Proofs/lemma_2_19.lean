@@ -39,32 +39,22 @@ lemma lemma_2_19 {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
         have ⟨s₀, k₁, k₂, hk₁, hk₂, h_sum⟩ := ih
 
         -- `exists` instantiates the existential goal (∃ s' k₁ k₂).
-        -- It changes the goal's placeholders to: s₀ (the midpoint from the IH),
-        -- k₁ + 1 (the IH steps plus our first progress step), and k₂ (the remaining IH steps).
         exists s₀, k₁ + 1, k₂
 
-        apply And.intro
-        case left =>
-          apply small_step_k.step
-          case step => exact progress
-          case rest => exact hk₁
-        case right =>
-          apply And.intro
-          case left => exact hk₂
-          case right => linarith [h_sum]
+        and_intros
+        · exact small_step_k.step
+                progress hk₁
+        · exact hk₂
+        · linarith [h_sum]
+
       | @comp2 _ _ _ s' terminates =>
 
         -- `exists` instantiates the existential goal (∃ s' k₁ k₂).
-        -- It changes placeholders to: s' (the state right after S₁ finishes),
-        -- 1 (since S₁ took exactly 1 step to terminate), and k₀ (the remaining steps for S₂).
         exists s', 1, k₀
 
-        apply And.intro
-        case left =>
-          apply small_step_k.step
-          case step => exact terminates
-          case rest => apply small_step_k.refl
-        case right =>
-          apply And.intro
-          case left => exact h_rest
-          case right => linarith
+        and_intros
+        · exact small_step_k.step
+            terminates
+            small_step_k.refl
+        · exact h_rest
+        · linarith
