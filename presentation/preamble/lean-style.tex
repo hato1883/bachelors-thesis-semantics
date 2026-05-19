@@ -1,0 +1,52 @@
+% --- lean-style.tex ---
+
+% Define the lean4 style
+\lstdefinestyle{lean4}{
+  language=bash, % Fallback
+  basicstyle=\normalsize\ttfamily\color{black},
+  keywordstyle=\ttfamily\bfseries\color{blue!70!black},
+  commentstyle=\itshape\color{green!40!black},
+  showstringspaces=false,
+  stringstyle=\color{purple},
+  % Clear all default strings and only allow double quotes
+  morestring=[b]", 
+  % Explicitly tell listings to ignore single quotes as delimiters
+  deletestring=[d]',
+  deletestring=[b]',
+  % Ensure the tick/prime is treated as a normal character
+  alsoletter={'},
+  numberstyle=\footnotesize\sffamily\color{gray},
+  tabsize=2,
+  % xleftmargin=1ex,
+  showstringspaces=false,
+  % Lean 4 Keywords
+  morekeywords={
+    def, theorem, lemma, example, open, import, 
+    variable, variables, instance, class, structure, 
+    inductive, syntax, macro, deriving, if, then, else, 
+    let, have, show, by, match, with, infix, notation, namespace, end,
+    apply, intro, simp, grind, exact, split_ifs, repeat, rw,  rfl, subst,
+    contradiction, where, Prop, constructor, exists, specialize, linarity,
+    cases, induction, generalizing, rename_i, linarith, prefix, infix,
+    infixl, infixr, trivial, obtain, using, and_intros
+  },
+% Comments
+  morecomment=[l]{--},
+  morecomment=[s]{/-}{-/},
+  % Symbols and Delimiters
+  escapeinside=§§,
+  % Unicode Handling for listings
+  % Even with LuaLaTeX, 'literate' ensures symbols look perfect in code
+  extendedchars=true,
+  literate=
+    {→}{{$\ →\ $}}3
+    {↦}{{$\ \mapsto\ $}}3
+    {⇒}{{$⇒\ $}}2
+    {∀}{{$\forall\ $}}2
+    {∃}{{$\exists\ $}}2
+    {λ}{{$\lambda\ $}}2
+    {:=}{{$:=\ $}}2
+    {::=}{{$::=\ $}}3
+    {∘}{{$\circ\ $}}2
+    {|}{{$\mid\ $}}2
+}

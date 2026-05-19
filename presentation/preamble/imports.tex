@@ -1,0 +1,66 @@
+%
+% All Thesis package dependencies
+%
+
+%% --- Core Engine & Language ---
+\usepackage[british]{babel}
+
+% REMOVED: inputenc and fontenc. 
+% fontspec handles encoding natively in LuaLaTeX/XeLaTeX.
+
+% --- Fonts & Unicode Support ---
+\usepackage{fontspec}
+\setmainfont{TeX Gyre Termes}  % Professional Serif (Times-like)
+\setsansfont{TeX Gyre Heros}   % Professional Sans (Helvetica-like)
+
+% --- Typography ---
+\usepackage{microtype}
+% Disable specific microtype features that clash with LuaLaTeX/fontspec
+\microtypesetup{expansion=false, kerning=false}
+
+% --- Coding & Formalism ---
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{pifont}
+% \usepackage{dingbat}
+
+% --- Proof trees ---
+\usepackage{ebproof}
+% Custom style to make the horizontal lines look better
+% \ebproofset{line thickness=0.6pt, separation=0.5em}
+
+% --- Referencing & Utilities ---
+\hypersetup{hidelinks}
+\usepackage[
+    style=authoryear, 
+    backend=biber,    % Recommended backend over bibtex
+    natbib=true,      % Supports \citet and~\citep
+]{biblatex}
+
+% 1. Replace the error-causing line with these:
+\DeclareFieldFormat{citebackslash}{#1}
+\renewcommand{\bibopenparen}{\addthinspace[}
+\renewcommand{\bibcloseparen}{]}
+
+% 2. Ensure the delimiter between name and year is correct:
+\renewcommand*{\nameyeardelim}{\addcomma\space}
+
+\addbibresource{sources.bib}
+
+\usepackage[capitalise]{cleveref}
+\usepackage{xspace}
+\usepackage{todonotes}
+\usepackage{lipsum}
+\usepackage{booktabs}
+
+% --- Margin & Formatting Tools ---
+\usepackage{environ}
+\usepackage{ragged2e}
+\usepackage{changepage}
+
+\usepackage[most]{tcolorbox}
+\usepackage{tabularx}
+\usepackage{tikz}
+% Import positioning and arrows libraries for our custom overlays
+\usetikzlibrary{positioning, arrows.meta, tikzmark}
