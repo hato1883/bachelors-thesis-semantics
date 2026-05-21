@@ -20,16 +20,16 @@ open NaturalSemantics
   - `h_deriv..._alt` : alternative derivation in the direction.
   - `s...`  : states (e.g. `s`, `s'`, `s_mid`).
 -/
-theorem while_expand (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨while b then S, s⟩ →ₙₛ s') →
-  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s') := by
+theorem while_expand (b : Bexp) (S : Stmt) (s s'' : State) :
+  (⟨while b then S, s⟩ →ₙₛ s'') →
+  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s'') := by
   intro h_while
   cases h_while with
 
   | while_true
     h_cond_true h_deriv_seq_left h_while_rest =>
     have h_comp :
-      (⟨S; while b then S, s⟩ →ₙₛ s') :=
+      (⟨S; while b then S, s⟩ →ₙₛ s'') :=
       big_step.comp h_deriv_seq_left h_while_rest
     exact big_step.if_true
       h_cond_true -- Condition
@@ -41,20 +41,20 @@ theorem while_expand (b : Bexp) (S : Stmt) (s s' : State) :
     h_cond_false =>
 
     -- build skip statement
-    have comp_stmt :
+    have skip_stmt :
       (⟨Stmt.skip, s⟩ →ₙₛ s) :=
       -- Use axiom
       big_step.skip
 
     exact big_step.if_false
       h_cond_false -- Condition
-      comp_stmt -- Else case
+      skip_stmt    -- Else case
 
-theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
-  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s') →
-  (⟨while b then S, s⟩ →ₙₛ s') := by
+theorem if_compact (b : Bexp) (S : Stmt) (s s'' : State) :
+  (⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s'') →
+  (⟨while b then S, s⟩ →ₙₛ s'') := by
   intro h_if
-  show ⟨while b then S,s⟩ →ₙₛ s'
+  show ⟨while b then S,s⟩ →ₙₛ s''
 
 
   cases h_if with
@@ -80,18 +80,18 @@ theorem if_compact (b : Bexp) (S : Stmt) (s s' : State) :
     cases h_deriv_skip
     exact big_step.while_false h_cond_false
 
-lemma lemma_2_5 (b : Bexp) (S : Stmt) (s s' : State) :
-(⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s')  ↔
-(⟨while b then S, s⟩ →ₙₛ s') := by
+lemma lemma_2_5 (b : Bexp) (S : Stmt) (s s'' : State) :
+(⟨if b then (S; while b then S) else Stmt.skip, s⟩ →ₙₛ s'')  ↔
+(⟨while b then S, s⟩ →ₙₛ s'') := by
   -- equivalence introduction
   apply Iff.intro
 
   -- Forward direction: if => while
   case mp =>
     -- Reusing our previous proof for if => while
-    exact if_compact b S s s'
+    exact if_compact b S s s''
 
   -- Backward direction: while => if
   case mpr =>
     -- Reusing our previous proof for while => if
-    exact while_expand b S s s'
+    exact while_expand b S s s''
