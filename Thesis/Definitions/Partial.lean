@@ -12,12 +12,17 @@ open While
 open NaturalSemantics
 open StructuralSemantics
 
-
+--            s' if S terminates in natural semantics
+-- 𝓢ₙₛ⟦S⟧ = {
+--            else undefined
 noncomputable
 def S_ns (S : Stmt) (s : State) : Part State :=
-  { Dom := ∃ s', big_step S s s',
+  { Dom := ∃ s', ⟨S, s⟩ →ₙₛ s',
     get := fun h => Classical.choose h }
 
+--            s' if S terminates in structural semantics
+-- 𝓢ₛₒₛ⟦S⟧ = {
+--            else undefined
 noncomputable
 def S_sos (S : Stmt) (s : State) : Part State :=
   { Dom := ∃ s', small_step_star (Config.step S s) (Config.final s'),

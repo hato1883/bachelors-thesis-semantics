@@ -87,14 +87,11 @@ theorem ns_to_sos (S : Stmt) (s s' : State) :
     case step =>
       apply small_step.while_unroll
     case rest =>
-      apply small_step_star.step
-      case step =>
-        exact small_step.if_false
-          h_cond
-      case rest =>
-        exact small_step_star.step
+      exact small_step_star.step
+        (small_step.if_false h_cond)
+        (small_step_star.step
           small_step.skip
-          small_step_star.refl
+          small_step_star.refl)
 
 
 lemma sos_k_to_ns (S : Stmt) (s s' : State) (k : Nat) :

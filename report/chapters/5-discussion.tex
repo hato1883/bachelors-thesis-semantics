@@ -122,10 +122,9 @@ mechanization removes.
 \subsection*{From SOS to NS: Why Strong Induction Is Necessary}
 In the $SOS \to NS$ direction, induction ``on derivation length'' requires an explicit
 arithmetic scaffold. In Lean this appears as \texttt{Nat.strongRecOn} plus
-arithmetic side goals discharged by tactics such as \texttt{linarith}. The conclusion
-for RQ1 is clear: the proof idea maps, but its execution requires significant
-structural reformulation to account for the "step-counting" that is usually
-hand-waved in class.
+arithmetic side goals discharged by tactics such as \texttt{linarith}.
+The textbook can just discharge arithmetic components as trivial, leaning on the assumption
+of that addition is trivial to proof, something we must rely on well constructed tactics to prove.
 
 %
 %

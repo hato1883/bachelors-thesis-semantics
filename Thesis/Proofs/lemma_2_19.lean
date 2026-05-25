@@ -154,10 +154,7 @@ lemma lemma_2_19 {S₁ S₂ : Stmt} {s s'' : State} {k : Nat}
             -- Reconstructing the conjunction bundle manually
             have h_arith : k₀ + 1 = (k₁ + 1) + k₂ := by linarith [h_sum]
 
-            and_intros
-            exact h_S₁_steps
-            exact hk₂
-            exact h_arith
+            exists s₀, k₁ + 1, k₂
 
           | @comp2 _ _ _ s' terminates =>
             -- The second possibility is that [comp_sos²] has been used to obtain
