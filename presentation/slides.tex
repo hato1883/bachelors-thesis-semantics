@@ -14,7 +14,7 @@
 \title{Mechanizing Proofs from a Course on Programming Language Semantics in Lean}
 \subtitle{Bachelors Thesis Presentation}
 \author{Hampus Toft}
-\date{\today}
+\date{26th May 2026}%\today
 
 \begin{document}
 
@@ -23,35 +23,28 @@
   \titlepage
 \end{frame}
 
-% Slide 2: Table of Contents
-\begin{frame}{Agenda}
-  \begin{itemize}
-    \item What is this thesis about?
-    \item How do you even compare Lean and pen-and-paper?
-    \item Examples of the process
-    \item Results of the mechanization process
-    \item Conclusion
-  \end{itemize}
-\end{frame}
-
-% Slide 3: Introduction
+% Slide 2: Introduction
 \begin{frame}
-  \section*{Introduction}
-  What is the meaning of: \\
-  \emph{"Mechanizing Proofs from a Course on Programming Language Semantics in Lean"}
-  
+  \section*{Mechanizing Proofs from a Course on Programming Language Semantics in Lean}  
   \begin{block}<2->{Mechanization}
+    \vspace{1pt}
     Formal proof in a computer proof assistant.
   \end{block}
 
   \begin{block}<3->{Programming Language Semantics}
+    \vspace{1pt}
     The meaning behind the code.
+  \end{block}
+
+  \begin{block}<4->{But why?}
+    \vspace{1pt}
+    To find any similarities between pen-and-paper and mechanized proofs.
   \end{block}
 
 \end{frame}
 
-% Slide 4: Introduction (Nielson)
-\begin{frame}
+% Slide 3: Introduction (Nielson)
+\begin{frame}{Introduction}
   \section*{Nielson \& Nielson's Framework}
   Case study using "\textbf{Semantics with Applications: An Appetizer}". \\
   With the focus on:
@@ -59,25 +52,25 @@
     \item<1-> Chapter 1: The \While language
     \item<2-> Chapter 2: Operational Semantics
       \begin{itemize}
-        \item<3-> Natural Operational Semantics
+        \item<3-> Natural Semantics
         \item<4-> Structural Operational Semantics
       \end{itemize}
   \end{itemize}
 \end{frame}
 
-% Slide 5: Introduction (Lean)
-\begin{frame}
+% Slide 4: Introduction (Lean)
+\begin{frame}{Introduction}
   \section*{The Lean 4 Proof Assistant}
-  Uses "Dependent Type Theory". \\
+  Uses Dependent Type Theory. \\
   With features such as:
   \begin{itemize}
-    \item<1-> Inductive Types
-    \item<2-> Tactics
-    \item<3-> Strict Correctness
+    \item<2-> Inductive Types
+    \item<3-> Tactics
+    \item<4-> Strict Correctness
   \end{itemize}
 \end{frame}
 
-% Slide 6: Research Questions
+% Slide 5: Research Questions
 \begin{frame}
   \section*{Research Questions}
   \begin{itemize}
@@ -90,7 +83,7 @@
   \end{itemize}
 \end{frame}
 
-% Slide 7: Method
+% Slide 6: Method
 \begin{frame}
     \section{Method}
     \begin{enumerate}
@@ -103,8 +96,8 @@
     \end{enumerate}
 \end{frame}
 
-% Slide 8: Mechanization of Aexp
-\begin{frame}[fragile]{The 6-Step Program to Profit}
+% Slide 7: Mechanization of Aexp
+\begin{frame}[fragile]{Evaluation process: \alert{Syntactic Categories}}
     \begin{columns}[T]
         \begin{column}{0.55\textwidth}
             \begin{block}{Method}
@@ -122,7 +115,7 @@
     \item Inductive types \No
     \item Semantic Functions \No
     \item Inference Rules \No
-    \item Proofs and Lemmas \No
+    \item Theorems and Proofs \No
 \end{itemize}
             \end{block}
         \end{column}
@@ -139,8 +132,8 @@
             % Show right column on slide 2 (isolated) and slides 3+ (side-by-side)
             \begin{block}<2->{Lean 4 Formalization}
                 \begin{lstlisting}[style=lean4]
-inductive Aex§\tikzmarknode{ex1_ln1}{p}§ where
-  | num (n : Num) §\tikzmarknode{ex1_ln2}{}§
+inductive Aex§\tikzmarknode{ex7_ln1}{p}§ where
+  | num (n : Num) §\tikzmarknode{ex7_ln2}{}§
   | var (x : Var)
   | add (a1 a2 : Aexp)
   | mul (a1 a2 : Aexp)
@@ -152,12 +145,12 @@ inductive Aex§\tikzmarknode{ex1_ln1}{p}§ where
         % --- RIGHT COLUMN: Original Text Target---
         \begin{column}{0.48\textwidth}
             % Only show left column from slide 1, 3, and 4 (Skip slide 2 to isolate Lean)
-            \only<1,3->{
+            \only<1->{
                 \begin{block}{Original Definition}
 \[
 \begin{array}{lcl}
     \\[0.3em]
-    \tikztarget{ex1_txt1}{a} &::=& \tikztarget{ex1_txt2}{n} \\ 
+    \tikztarget{ex7_txt1}{a} &::=& \tikztarget{ex7_txt2}{n} \\ 
         &\mid& x \\ 
         &\mid& a_1 + a_2 \\ 
         &\mid& a_1 \star a_2 \\ 
@@ -176,52 +169,26 @@ inductive Aex§\tikzmarknode{ex1_ln1}{p}§ where
     \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
         
         % Slide 3: Show the first alignment arrow (Subgroup -> Structure definition)
-        \path<4-> [draw, ->]
-            (ex1_txt1.north)
+        \path<3-> [draw, ->]
+            (ex7_txt1.north)
             [bend right=30] to
             node[below, sloped, text=black, font=\tiny]
                 {Type being defined}
-            (ex1_ln1.north);
+            (ex7_ln1.north);
         
         % Slide 4: Show the second alignment arrow with a descriptive label
-        \path<5-> [draw, ->, draw=red]
-            (ex1_txt2.west)
+        \path<4-> [draw, ->, draw=red]
+            (ex7_txt2.west)
             [bend left=20] to
             node[below, sloped, text=black, font=\tiny]
                 {Inductive Definition}
-            (ex1_ln2.east);
+            (ex7_ln2.east);
         
     \end{tikzpicture}
 \end{frame}
 
-% Slide 9: Mechanization of Stmt
-\begin{frame}[fragile]{The 6-Step Program to Profit}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-            \begin{block}{Method}
-\begin{enumerate}
-    % Step 1: Target (Visible on slide 1, fades slightly or stays on later ones)
-    \item Find something to mechanize
-    % Step 2: Mechanize it (Visible on slide 2+)
-    \item Then mechanize it
-    % Step 3: Side-by-side comparisons (Visible on slide 3+)
-    \item Put them side-by-side
-    \item Repeat Steps 1-3
-\end{enumerate}
-            \end{block}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \only<1-6>{\item Inductive types \No}
-    \only<7>{\item Inductive types \checkmark}
-    \item Semantic Functions \No
-    \item Inference Rules \No
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 8: Mechanization of Var
+\begin{frame}[fragile]{Evaluation process: \alert{Syntactic Categories}}
 
     % \vspace{0.5cm}
     
@@ -231,17 +198,12 @@ inductive Aex§\tikzmarknode{ex1_ln1}{p}§ where
         
         % --- LEFT COLUMN: Lean Code ---
         \begin{column}{0.50\textwidth}
-            \begin{block}{Lean 4 Formalization}
-                \begin{lstlisting}[style=lean4, basicstyle=\footnotesize\ttfamily]
-inductive Stm§\tikzmarknode{ex3_ln1}{t}§ where
-  | ass (x : Var)§\tikzmarknode{ex3_ln2}{}§
-        (a : Aexp)
-  | skip §\tikzmarknode{ex3_ln3}{}§
-  | composition (S§$_{1}$§ : Stmt)§\tikzmarknode{ex3_ln4}{}§
-                (S§$_{2}$§ : Stmt)
-  | §if§ (b : Bexp) §\tikzmarknode{ex3_ln5}{}§
-       (S§$_{1}$§ S§$_{2}$§ : Stmt)
-  | ...
+            % Show right column on slide 2 (isolated) and slides 3+ (side-by-side)
+            \begin{block}<2->{Lean 4 Formalization}
+                \begin{lstlisting}[style=lean4]
+def Var := String
+deriving instance
+  DecidableEq for Var
                 \end{lstlisting}
             \end{block}
         \end{column}
@@ -249,106 +211,21 @@ inductive Stm§\tikzmarknode{ex3_ln1}{t}§ where
         % --- RIGHT COLUMN: Original Text Target---
         \begin{column}{0.48\textwidth}
             % Only show left column from slide 1, 3, and 4 (Skip slide 2 to isolate Lean)
-            \only{
+            \only<1->{
                 \begin{block}{Original Definition}
-\footnotesize
-\[
-\begin{array}{lcl}
-    % \\[0.3em]
-    \tikztarget{ex3_txt1}{S} &::=&\tikztarget{ex3_txt2}{ }x := a \\
-    \\
-    \\
-      &\tikztarget{ex3_txt3}{ }\mid& \mathtt{skip} \\
-      &\tikztarget{ex3_txt4}{ }\mid& S_1; S_2 \\
-      \\
-      &\tikztarget{ex3_txt5}{ }\mid& \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2 \\
-      \\
-      &\mid& \mathtt{while}\ b\ \mathtt{do}\ S
-\end{array}
-\]
+\vspace{1pt}
+We assume that the structure of variables is given elsewhere;
+for example, variables might be strings
+of letters and digits starting with a letter.
                 \end{block}
             }
         \end{column}
         
     \end{columns}
-
-    % --- TIKZ OVERLAY LAYER ---
-    % This executes "on top" of the rendered page. We use slide tracking (<3->) 
-    % to control exactly when individual arrows appear.
-    \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
-        
-        \path<2> [draw, ->]
-            (ex3_txt1.north)
-            [bend right=30] to
-            node[below, sloped, text=black, font=\tiny]
-                {Type being defined}
-            (ex3_ln1.north);
-        
-        \path<3> [draw, ->, draw=red]
-            (ex3_txt2.west)
-            [bend left=20] to
-            node[above, sloped, text=black, font=\tiny]
-                {Inductive Definition}
-            (ex3_ln2.east);
-            
-        \path<4> [draw, ->, draw=red]
-            (ex3_txt3.west)
-            [bend right=5] to
-            (ex3_ln3.east);
-            
-        \path<5> [draw, ->, draw=red]
-            (ex3_txt4.west)
-            [bend right=5] to
-            (ex3_ln4.east);
-            
-        \path<6> [draw, ->, draw=red]
-            (ex3_txt5.west)
-            [bend right=5] to
-            (ex3_ln5.east);
-        
-    \end{tikzpicture}
 \end{frame}
 
-% Slide 10: Transition from Types to Functions
-\begin{frame}{So far so good}
-    Perfect mapping from textbook BNF form \\
-    into Lean 4 inductive typing \\ \vspace{1em}
-    But what about the:
-    \begin{itemize}
-        \item \emph{Semantic Functions}
-        \item \emph{Inference Rules}
-        \item \emph{Proofs}
-    \end{itemize}
-    \vspace{1em}
-    Well ...
-        
-\end{frame}
-
-% Slide 11: Semantic functions Aexp_eval
-\begin{frame}[fragile]{The 6-Step Program: \alert{Semantic Functions}}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-            \begin{block}{Method}
-\begin{enumerate}
-    \item<1-> Find something to mechanize
-    \item<2-> Then mechanize it
-    \item<3-> Put them side-by-side
-    \item<5-> Repeat Steps 1-3
-\end{enumerate}
-            \end{block}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \only<1-4>{\item Semantic Functions \No}
-    \only<5>{\item Semantic Functions \checkmark}
-    \item Inference Rules \No
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 9: Aexp_eval without Notation
+\begin{frame}[fragile]{Evaluation process: \alert{Semantic Functions}}
 
     \begin{columns}[T]
         
@@ -358,24 +235,28 @@ inductive Stm§\tikzmarknode{ex3_ln1}{t}§ where
                 \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
 def Aexp_eval :
   Aexp §\(\to\)§ (State §\(\to\)§ §\(\mathbb{Z}\)§)
-  | .num §\tikzmarknode{ex4_ln1}{n}§, _ => §\(\mathcal{N}[\![\)§n§\(]\!]\)§
+  | .num n, _ => Num_eval n §\tikzmarknode{ex9_ln1}{}§
   | .var x, s => s x
-  | §\(a_1 + a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s + §\(\mathcal{A}[\![a_2]\!]\)§s
-  | §\(a_1 \star a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s * §\(\mathcal{A}[\![a_2]\!]\)§s
-  | §\(a_1 - a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s - §\(\mathcal{A}[\![a_2]\!]\)§s
+  | .add §\(a_1\ a_2\)§, s => Aexp_eval §\(a_1\)§ s
+                   + Aexp_eval §\(a_2\)§ s
+  | .mul §\(a_1\ a_2\)§, s => Aexp_eval §\(a_1\)§ s 
+                   * Aexp_eval §\(a_2\)§ s
+  | .sub §\(a_1\ a_2\)§, s => Aexp_eval §\(a_1\)§ s
+                   - Aexp_eval §\(a_2\)§ s
                 \end{lstlisting}
             \end{block}
         \end{column}
 
         % --- RIGHT COLUMN: Original Text Target---
         \begin{column}{0.48\textwidth}
-            \begin{block}<1,3->{Original Definition}
+            \begin{block}<1->{Original Definition}
 \scriptsize
 \[
+\mathcal{A}: \mathbf{Aexp} \to (\mathbf{State} \to \mathbb{Z})
+\]
+\[
 \begin{array}{lcl}
-        \mathcal{A}: Aexp \to \mathbb{Z}
-        \\[0.8em]
-        \mathcal{A}[\![\tikztarget{ex4_txt1}{n}]\!]s &=& \mathcal{N}[\![n]\!] \\
+        \tikztarget{ex9_txt1}{}\mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\
         \mathcal{A}[\![x]\!]s &=& s \, x \\
         \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s \\
         \mathcal{A}[\![a_1 \star a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s \cdot \mathcal{A}[\![a_2]\!]s \\
@@ -389,118 +270,132 @@ def Aexp_eval :
 
     \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
         
-        \path<4> [draw, ->]
-            (ex4_txt1.north)
-            [bend right=30] to
-            node[below, sloped, text=black, font=\tiny]
-                {Type being defined}
-            (ex4_ln1.north);
+        \path<3> [draw, ->]
+            (ex9_txt1.north)
+            [bend right=5] to
+            (ex9_ln1.north);
         
     \end{tikzpicture}
-
-
-    \begin{block}<3>
-      {What about inference rules?}
-    \end{block}
 \end{frame}
 
-% Slide 12: Inference rules 1/3
-\begin{frame}[fragile]{The 6-Step Program: \alert{Inference Rules} (NS)}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-            \begin{block}{Method}
-\begin{enumerate}
-    \item<1-> Find something to mechanize
-    \item<2-> Then mechanize it
-    \item<3-> Put them side-by-side
-    \item<5-> Repeat Steps 1-3
-\end{enumerate}
-            \end{block}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \only<1-7>{\item Inference Rules \No}
-    \only<8>{\item Inference Rules \checkmark}
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 10: Notation
+\begin{frame}[fragile]{Evaluation process: \alert{Semantic Functions}}
+    If we now add custom notation using
+    \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
+infixl:65 " + " => While.Aexp.add
+infixl:70 " §\color{purple}\(\star\)§ " => While.Aexp.mul
+infixl:65 " - " => While.Aexp.sub
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "§\color{purple}\(\mathcal{N}[\![\)§" n "§\color{purple}\(]\!]\)§" => Num_eval n
+
+set_option quotPrecheck false in
+set_option hygiene false in
+notation "§\color{purple}\(\mathcal{A}[\![\)§" a "§\color{purple}\(]\!]\)§" s:max => Aexp_eval a s
+
+-- + a lot more for everything else that gets defined.
+    \end{lstlisting}
+\end{frame}
+
+% Slide 11: Semantic functions Aexp_eval
+\begin{frame}[fragile]{Evaluation process: \alert{Semantic Functions}}
 
     \begin{columns}[T]
         
         % --- LEFT COLUMN: Lean Code ---
         \begin{column}{0.50\textwidth}
             \begin{block}{Lean 4 Formalization}
-            % \onslide<2->{
+                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
+def Aexp_eval :
+  Aexp §\(\to\)§ (State §\(\to\)§ §\(\mathbb{Z}\)§)
+  | .num n, _ => §\(\mathcal{N}[\![\)§n§\(]\!]\)§
+  | .var x, s => s x
+  | §\(a_1 + a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s + §\(\mathcal{A}[\![a_2]\!]\)§s
+  | §\(a_1 \star a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s * §\(\mathcal{A}[\![a_2]\!]\)§s
+  | §\(a_1 - a_2\)§, s => §\(\mathcal{A}[\![a_1]\!]\)§s - §\(\mathcal{A}[\![a_2]\!]\)§s
+                \end{lstlisting}
+            \end{block}
+        \end{column}
+
+        % --- RIGHT COLUMN: Original Text Target---
+        \begin{column}{0.48\textwidth}
+            \begin{block}{Original Definition}
+\scriptsize
+\[
+\mathcal{A}: \mathbf{Aexp} \to (\mathbf{State} \to \mathbb{Z})
+\]
+\[
+\begin{array}{lcl}
+        \\
+        \mathcal{A}[\![n]\!]s &=& \mathcal{N}[\![n]\!] \\
+        \mathcal{A}[\![x]\!]s &=& s \, x \\
+        \mathcal{A}[\![a_1 + a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s + \mathcal{A}[\![a_2]\!]s \\
+        \mathcal{A}[\![a_1 \star a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s \cdot \mathcal{A}[\![a_2]\!]s \\
+        \mathcal{A}[\![a_1 - a_2]\!]s &=& \mathcal{A}[\![a_1]\!]s - \mathcal{A}[\![a_2]\!]s
+\end{array}
+\]
+            \end{block}
+        \end{column}
+        
+    \end{columns}
+\end{frame}
+
+% Slide 12: Inference rules
+\begin{frame}[fragile]{Evaluation process: \alert{Inference Rules} (NS)}
+
+    \begin{columns}[T]
+        
+        % --- LEFT COLUMN: Lean Code ---
+        \begin{column}{0.50\textwidth}
+            \begin{block}<2->{Lean 4 Formalization}
                 \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
 inductive big_step : Stmt §\(\to\)§
   State §\(\to\)§ State §\(\to\)§ Prop where
-  | ass {s x a} : §\tikzmarknode{ex5_ln1}{}§
-      §\(\langle\)§x §\(: \equiv\)§ a, s§\(\rangle\)§ §\(\to_{ns}\)§ §\tikzmarknode{ex5_ln2}{}§
-      (s[x §\mapsto§ §\(\mathcal{A}[\![a]\!]\)§ s]) §\tikzmarknode{ex5_ln3}{}§
+  | ass {s x a} : §\tikzmarknode{ex12_ln1}{}§
+      §\(\langle\)§x §\(: \equiv\)§ a, s§\(\rangle\)§ §\(\to_{ns}\)§ (s[x §\mapsto§ §\(\mathcal{A}[\![a]\!]\)§ s]) §\tikzmarknode{ex12_ln2}{}§
                 \end{lstlisting}
-            % }
-            % \onslide<5->{
                 \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
   | if_true {b S§$_{1}$§ S§$_{2}$§ s s'}
-    (h_cond : §\(\mathcal{B}[\![b]\!]\)§ s = §\tikzmarknode{ex5_ln5}{tt}§)
-    (h_then : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ §\tikzmarknode{ex5_ln4}{s'}§) :
-    §\(\langle\)§§if§ b §then§ S§$_{1}$§ §else§ S§$_{2}$§, s§\(\rangle\)§ §\(\to_{ns}\)§ s' §\tikzmarknode{ex5_ln6}{}§
+    (h_cond : §\(\mathcal{B}[\![b]\!]\)§ s = §\tikzmarknode{ex12_ln5}{tt}§)
+    (h_then : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ §\tikzmarknode{ex12_ln4}{s'}§) :
+    §\(\langle\)§§if§ b §then§ S§$_{1}$§ §else§ S§$_{2}$§, s§\(\rangle\)§ §\(\to_{ns}\)§ s' §\tikzmarknode{ex12_ln6}{}§
                 \end{lstlisting}
-            % }
             \end{block}
         \end{column}
 
         % --- RIGHT COLUMN: Original Text Target---
         \begin{column}{0.48\textwidth}
             % Only show left column from slide 1, 3, and 4 (Skip slide 2 to isolate Lean)
-            \begin{block}{Original Definition}
-\vspace{2em}
+            \begin{block}<1->{Original Definition}
+\vspace{1em}
 \scriptsize
 \[
   \begin{prooftree}
     \hypo{} % Empty hypothesis for an axiom
     \infer[
-      left label=\tikzmarknode{ex5_txt1}{}[ass$_{\text{ns}}$]
+      left label=\tikzmarknode{ex12_txt1}{}[ass$_{\text{ns}}$]
       ]1{
-          \parbox{2.5cm}{$
-      \tikzmarknode{ex5_txt2}{}\langle x := a, s \rangle \to \\
-      \tikzmarknode{ex5_txt3}{}s[x \mapsto \mathcal{A}[\![a]\!] s]
-          $}
+      \tikzmarknode{ex12_txt2}{}\langle x := a, s \rangle \to s[x \mapsto \mathcal{A}[\![a]\!] s]
       }
   \end{prooftree}
 \]
 \vspace{2em}
 \[
   \begin{prooftree}
-    \hypo{\tikzmarknode{ex5_txt4}{}\langle S_1, s \rangle \to s'}
+    \hypo{\tikzmarknode{ex12_txt4}{}\langle S_1, s \rangle \to s'}
     \infer[
       left label={
         \parbox{0.8cm}{
           [if$_{\text{ns}}^{\text{\ tt}}$]\\
-          \tikzmarknode{ex5_txt5}{}$\mathcal{B}[\![b]\!]s$ \\
+          \tikzmarknode{ex12_txt5}{}$\mathcal{B}[\![b]\!]s$ \\
           $= \mathbf{tt}$}
         }
       ]1{
-        \tikzmarknode{ex5_txt6}{}\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
+        \tikzmarknode{ex12_txt6}{}\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \to s'
       }
   \end{prooftree}
 \]
-% \[
-%   \begin{prooftree}
-%     \hypo{\langle S_1, s \rangle \to s'}
-%     \hypo{\langle S_2, s' \rangle \to s''}
-%     \infer[
-%       left label=[comp$_{\text{ns}}$]
-%       ]2{
-%           \langle S_1;\ S_2, s \rangle \to s''
-%       }
-%   \end{prooftree}
-% \]
             \end{block}
         \end{column}
     \end{columns}
@@ -508,51 +403,74 @@ inductive big_step : Stmt §\(\to\)§
 
     \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
         
-        \path<2-4> [draw, ->]
-            (ex5_txt1.west)
+        \path<2-3> [draw, ->]
+            (ex12_txt1.west)
             to
-            (ex5_ln1.east);
-        \path<3-4> [draw, ->]
-            (ex5_txt2.west)
+            (ex12_ln1.east);
+        \path<3> [draw, ->]
+            (ex12_txt2.west)
             to
-            (ex5_ln2.east);
-        \path<4> [draw, ->]
-            (ex5_txt3.west)
-            to
-            (ex5_ln3.east);
+            (ex12_ln2.east);
 
         \path<5-7> [draw, ->, draw=red]
-            (ex5_txt4.west)
+            (ex12_txt4.west)
             [bend right=45] to
-            (ex5_ln4.east);
+            (ex12_ln4.east);
         \path<6-7> [draw, ->, draw=red]
-            (ex5_txt5.west)
+            (ex12_txt5.west)
             [bend right=15] to
-            (ex5_ln5.east);
-        \path<7-7> [draw, ->, draw=red]
-            (ex5_txt6.west)
+            (ex12_ln5.east);
+        \path<7> [draw, ->, draw=red]
+            (ex12_txt6.west)
             [bend left=20] to
-            (ex5_ln6.east);
+            (ex12_ln6.east);
         
     \end{tikzpicture}
 \end{frame}
 
-% Slide 13: Lemma 2.5 definition
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 1/10}
+% Slide 13: Semantic functions S_ns
+\begin{frame}[fragile]{Evaluation process: \alert{Semantic Functions}}
+
     \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
+        
+        % --- LEFT COLUMN: Lean Code ---
+        \begin{column}{0.50\textwidth}
+            \begin{block}<2->{Lean 4 Formalization}
+                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
+--           s' if S terminates
+-- §\color{green!40!black}\(\mathcal{S}_{ns}[\![\)§S§\color{green!40!black}\(]\!]\)§ = { in natural semantics
+--           else undefined
+noncomputable
+def S_ns (S : Stmt) (s : State) :
+  Part State :=
+  { Dom := §\(\exists\)§ s', §\(\langle\)§S, s§\(\rangle\)§ §\(\to_{ns}\)§ s',
+    get := fun h => Classical.choose h }
+                \end{lstlisting}
             \end{block}
         \end{column}
+
+        % --- RIGHT COLUMN: Original Text Target---
+        \begin{column}{0.48\textwidth}
+            \begin{block}<1->{Original Definition}
+\scriptsize
+\[
+\begin{array}{lcl}
+        \mathcal{S}_{ns}: \mathbf{Stmt} \to (\mathbf{State} \hookrightarrow \mathbf{State})
+        \\[0.8em]
+        \mathcal{S}_{ns}[\![S]\!]s = \begin{cases}
+            s' & if \langle S, s \rangle \to s'\\
+            undef & otherwise
+        \end{cases}
+\end{array}
+\]
+            \end{block}
+        \end{column}
+        
     \end{columns}
+\end{frame}
+
+% Slide 14: Lemma 2.5 definition 1/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 1/6}
 
     \begin{columns}[T]
         
@@ -563,11 +481,11 @@ inductive big_step : Stmt §\(\to\)§
 theorem lemma_2_5
   (b : Bexp) (S : Stmt)
   (s s' : State) :
-  (§\(\langle\)§§while§ b §then§ S, s§\(\rangle\)§ §\(\to_{ns}\)§ s')
-  §\(\leftrightarrow\)§ 
+  (§\(\langle\)§§while§ b §then§ S, s§\(\rangle\)§ §\(\to_{ns}\)§ s') §\tikzmarknode{ex14_ln1}{}§
+  §\(\leftrightarrow\)§ §\tikzmarknode{ex14_ln2}{}§
   (§\(\langle\)§§if§ b
     §then§ (S; §while§ b §then§ S)
-    §else§ Stmt.skip, s§\(\rangle\)§
+    §else§ Stmt.skip, s§\(\rangle\)§ §\tikzmarknode{ex14_ln3}{}§
   §\(\to_{ns}\)§ s') := by
                 \end{lstlisting}
             \end{block}
@@ -584,32 +502,38 @@ theorem lemma_2_5
 \vspace{0.4em}
 \scriptsize
 The statement
-\[\mathtt{while}\ b\ \mathtt{do}\ S\]
-is semantically equivalent to
-\[\mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip}\]
+\[\tikzmarknode{ex14_txt1}{}\mathtt{while}\ b\ \mathtt{do}\ S\]
+is \tikzmarknode{ex14_txt2}{}semantically equivalent to
+\[\tikzmarknode{ex14_txt3}{}\mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip}\]
                 \end{block}
             }
         \end{column}
         
     \end{columns}
+    
+
+    \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
+        
+        \path<2> [draw, ->]
+            (ex14_txt1.west)
+            [bend right=5] to
+            (ex14_ln1.east);
+            
+        \path<3> [draw, ->]
+            (ex14_txt2.west)
+            [bend right=5] to
+            (ex14_ln2.east);
+            
+        \path<4> [draw, ->]
+            (ex14_txt3.west)
+            [bend right=5] to
+            (ex14_ln3.east);
+        
+    \end{tikzpicture}
 \end{frame}
 
-% Slide 14: Lemma 2.5 equiv stmt
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 2/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 15: Lemma 2.5 equiv stmt 2/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 2/6}
 
     \begin{columns}[T]
         
@@ -621,12 +545,12 @@ is semantically equivalent to
 
   -- Forward direction:
   -- if => while
-  case mp =>
+  case mp => §\tikzmarknode{ex15_ln1}{}§
     exact if_compact b S s s'
 
   -- Backward direction:
   -- while => if
-  case mpr =>
+  case mpr => §\tikzmarknode{ex15_ln2}{}§
     exact while_expand b S s s'
                 \end{lstlisting}
             \end{block}
@@ -638,28 +562,30 @@ is semantically equivalent to
             \begin{block}{Original Definition}
 \vspace{0.8em}
 \scriptsize
-The proof is in two parts
+The proof is in \tikzmarknode{ex15_txt1}{}two parts
             \end{block}
         \end{column}
     \end{columns}
+
+
+    \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
+        
+        \path<2> [draw, ->]
+            (ex15_txt1.south)
+            [bend left=10] to
+            (ex15_ln1.east);
+            
+        \path<2> [draw, ->]
+            (ex15_txt1.south)
+            [bend left=30] to
+            (ex15_ln2.east);
+        
+    \end{tikzpicture}
+
 \end{frame}
 
-% Slide 15: Lemma 2.5 while_expand 1/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 3/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 16: Lemma 2.5 while_expand 3/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 3/6}
     
     \begin{columns}[T]
         
@@ -670,14 +596,14 @@ The proof is in two parts
 theorem while_expand
   (b : Bexp) (S : Stmt)
   (s s'' : State) :
-  (§\(\langle\)§§while§ b §then§ S, s§\(\rangle\)§ §\(\to_{ns}\)§ s'') §\tikzmarknode{ex6_ln1}{}§
-  §\(\to\)§ §\tikzmarknode{ex6_ln2}{}§
+  (§\(\langle\)§§while§ b §then§ S, s§\(\rangle\)§ §\(\to_{ns}\)§ s'') §\tikzmarknode{ex16_ln1}{}§
+  §\(\to\)§ §\tikzmarknode{ex16_ln2}{}§
   (§\(\langle\)§§if§ b
-    §then§ (S; §while§ b §then§ S) §\tikzmarknode{ex6_ln3}{}§
+    §then§ (S; §while§ b §then§ S) §\tikzmarknode{ex16_ln3}{}§
     §else§ Stmt.skip, s§\(\rangle\)§
   §\(\to_{ns}\)§ s'') := by
-  intro h_while §\tikzmarknode{ex6_ln4}{}§
-  cases h_while with §\tikzmarknode{ex6_ln5}{}§
+  intro h_while §\tikzmarknode{ex16_ln4}{}§
+  cases h_while with §\tikzmarknode{ex16_ln5}{}§
                 \end{lstlisting}
             \end{block}
         \end{column}
@@ -691,17 +617,17 @@ theorem while_expand
 \scriptsize
 We shall first prove that if
 \[
-\tikzmarknode{ex6_txt1}{} \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \tag{*}
+\tikzmarknode{ex16_txt1}{} \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s'' \tag{*}
 \]
-\tikzmarknode{ex6_txt2}{}then
+\tikzmarknode{ex16_txt2}{}then
 \[
   \parbox{4cm}{
-    \tikzmarknode{ex6_txt3}{} $\langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)$\\
+    \tikzmarknode{ex16_txt3}{} $\langle \mathtt{if}\ b\ \mathtt{then} (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)$\\
     $\mathtt{else}\ \mathtt{skip},\ s\rangle \to s''$
   } \tag{**}
 \]
-\tikzmarknode{ex6_txt4}{} Because (*) holds, we know that we have a derivation tree T for it.\\
-\tikzmarknode{ex6_txt5}{}It can have one of two forms depending on whether it has been constructed using the
+\tikzmarknode{ex16_txt4}{} Because (*) holds, we know that we have a derivation tree T for it.\\
+\tikzmarknode{ex16_txt5}{}It can have one of two forms depending on whether it has been constructed using the
 rule [while$_{\text{ns}}^{\text{\ tt}}$] or the axiom [while$_{\text{ns}}^{\text{\ ff}}$].
                 \end{block}
             }
@@ -713,49 +639,35 @@ rule [while$_{\text{ns}}^{\text{\ tt}}$] or the axiom [while$_{\text{ns}}^{\text
     \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
         
         \path<2> [draw, ->]
-            (ex6_txt1.west)
+            (ex16_txt1.west)
             [bend right=5] to
-            (ex6_ln1.east);
+            (ex16_ln1.east);
 
         \path<3> [draw, ->]
-            (ex6_txt2.west)
+            (ex16_txt2.west)
             [bend right=5] to
-            (ex6_ln2.east);
+            (ex16_ln2.east);
 
         \path<4> [draw, ->]
-            (ex6_txt3.west)
+            (ex16_txt3.west)
             [bend right=5] to
-            (ex6_ln3.east);
+            (ex16_ln3.east);
 
         \path<5> [draw, ->]
-            (ex6_txt4.west)
+            (ex16_txt4.west)
             [bend right=5] to
-            (ex6_ln4.east);
+            (ex16_ln4.east);
 
         \path<6> [draw, ->]
-            (ex6_txt5.west)
+            (ex16_txt5.west)
             [bend left=10] to
-            (ex6_ln5.east);
+            (ex16_ln5.east);
         
     \end{tikzpicture}
 \end{frame}
 
-% Slide 16: Lemma 2.5 while_expand 2/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 4/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 17: Lemma 2.5 while_expand 4/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 4/6}
     
     \begin{columns}[T]
         
@@ -797,22 +709,8 @@ Furthermore, \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\).
     \end{columns}
 \end{frame}
 
-% Slide 17: Lemma 2.5 while_expand 3/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 5/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 18: Lemma 2.5 while_expand 5/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 5/6}
     
     \begin{columns}[T]
         
@@ -823,62 +721,12 @@ Furthermore, \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\).
     have h_comp :
       (§\(\langle\)§S; while b then S, s§\(\rangle\)§
       §\(\to_{ns}\)§ s'') :=
-        big_step.comp T§$_1$§ T§$_2$§
+        big_step.comp T§$_1$§ T§$_2$§ §\tikzmarknode{ex18_ln1}{}§
                 \end{lstlisting}
-            \end{block}
-        \end{column}
 
-        % --- RIGHT COLUMN: Original Text Target---
-        \begin{column}{0.48\textwidth}
-            % Second half of definition
-            \only{
-                \begin{block}{Original Definition}
-\vspace{0.8em}
-\scriptsize
-Using the derivation trees \(T_1\) and \(T_2\) as the premises for the rules [comp$_{\text{ns}}$], we can construct the derivation tree
-\[
-    \begin{prooftree}
-        \hypo{T_1}
-        \hypo{T_2}
-        \infer[
-            % left label=[comp$_{\text{ns}}$]
-            ]2{
-            \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''
-            }
-    \end{prooftree}
-\]
-                \end{block}
-            }
-        \end{column}
-        
-    \end{columns}
-\end{frame}
-
-% Slide 18: Lemma 2.5 while_expand 4/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 6/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-    
-    \begin{columns}[T]
-        
-        % --- LEFT COLUMN: Lean Code ---
-        \begin{column}{0.50\textwidth}
-            \begin{block}{Lean 4 Formalization}
                 \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
-    exact big_step.if_true
-      h_cond_true -- Condition
+    exact big_step.if_true §\tikzmarknode{ex18_ln3}{}§
+      h_cond_true -- Condition §\tikzmarknode{ex18_ln2}{}§
       h_comp      -- Then case
                 \end{lstlisting}
             \end{block}
@@ -891,7 +739,19 @@ Using the derivation trees \(T_1\) and \(T_2\) as the premises for the rules [co
                 \begin{block}{Original Definition}
 \vspace{0.8em}
 \scriptsize
-Using that \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\), we can use the rule [if$_{\text{ns}}^{\ \text{tt}}$]
+Using the derivation trees \(T_1\) and \(T_2\) as the premises for the rules [comp$_{\text{ns}}$], we can construct the derivation tree
+\[\tikzmarknode{ex18_txt1}{}
+    \begin{prooftree}
+        \hypo{T_1}
+        \hypo{T_2}
+        \infer[
+            % left label=[comp$_{\text{ns}}$]
+            ]2{
+            \langle S;\ \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s''
+            }
+    \end{prooftree}
+\]
+Using that \tikzmarknode{ex18_txt2}{} \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\), we can use the rule \tikzmarknode{ex18_txt3}{} [if$_{\text{ns}}^{\ \text{tt}}$]
 to construct the derivation tree
 \[
   \begin{prooftree}
@@ -914,182 +774,29 @@ hereby showing that (**) holds.
         \end{column}
         
     \end{columns}
+
+    \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
+        
+        \path<2> [draw, ->]
+            (ex18_txt1.west)
+            [bend right=5] to
+            (ex18_ln1.east);
+            
+        \path<3> [draw, ->]
+            (ex18_txt2.west)
+            [bend right=5] to
+            (ex18_ln2.east);
+            
+        \path<4> [draw, ->]
+            (ex18_txt3.west)
+            [bend right=5] to
+            (ex18_ln3.east);
+        
+    \end{tikzpicture}
 \end{frame}
 
-% Slide 19: Lemma 2.5 while_expand 5/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 7/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-    
-    \begin{columns}[T]
-        
-        % --- LEFT COLUMN: Lean Code ---
-        \begin{column}{0.50\textwidth}
-            \begin{block}{Lean 4 Formalization}
-                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
-  | while_false h_cond_false =>
-                \end{lstlisting}
-            \end{block}
-        \end{column}
-
-        % --- RIGHT COLUMN: Original Text Target---
-        \begin{column}{0.48\textwidth}
-            % Second half of definition
-            \only{
-                \begin{block}{Original Definition}
-\vspace{0.8em}
-\scriptsize
-Alternatively, the derivation tree T is an instance of [while$_{\text{ns}}^{\ \text{ff}}$].
-Then \(\mathcal{B}[\![b]\!]s = \mathbf{ff}\) and we must have that \(s'' = s\). So T simply is
-\[
-    \begin{prooftree}
-        \hypo{\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s\rangle \to s}
-    \end{prooftree}
-\]
-                \end{block}
-            }
-        \end{column}
-        
-    \end{columns}
-\end{frame}
-
-% Slide 20: Lemma 2.5 while_expand 6/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 8/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-    
-    \begin{columns}[T]
-        
-        % --- LEFT COLUMN: Lean Code ---
-        \begin{column}{0.50\textwidth}
-            \begin{block}{Lean 4 Formalization}
-                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
-    have skip_stmt :
-      (§\(\langle\)§Stmt.skip, s§\(\rangle\)§
-      §\(\to_{ns}\)§ s) :=
-      big_step.skip
-                \end{lstlisting}
-            \end{block}
-        \end{column}
-
-        % --- RIGHT COLUMN: Original Text Target---
-        \begin{column}{0.48\textwidth}
-            % Second half of definition
-            \only{
-                \begin{block}{Original Definition}
-\vspace{0.8em}
-\scriptsize
-Using the axiom [skip$_{\text{ns}}$], we get a derivation tree
-\[
-    \begin{prooftree}
-        \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
-    \end{prooftree}
-\]
-                \end{block}
-            }
-        \end{column}
-        
-    \end{columns}
-\end{frame}
-
-% Slide 21: Lemma 2.5 while_expand 7/7
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 9/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \item Proofs and Lemmas \No
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
-    
-    \begin{columns}[T]
-        
-        % --- LEFT COLUMN: Lean Code ---
-        \begin{column}{0.50\textwidth}
-            \begin{block}{Lean 4 Formalization}
-                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
-    exact big_step.if_false
-      h_cond_false
-      skip_stmt
-                \end{lstlisting}
-            \end{block}
-        \end{column}
-
-        % --- RIGHT COLUMN: Original Text Target---
-        \begin{column}{0.48\textwidth}
-            % Second half of definition
-            \only{
-                \begin{block}{Original Definition}
-\vspace{0.8em}
-\scriptsize
-and we can now apply the rule [if$_{\text{ns}}^{\ \text{ff}}$] to construct a derivation tree for (**):
-\[
-  \begin{prooftree}
-    \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
-    \infer1{
-      \parbox{4cm}{$
-        \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \\
-        \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
-      $}
-    }
-  \end{prooftree}
-\]
-This completes the first part of the proof.
-                \end{block}
-            }
-        \end{column}
-        
-    \end{columns}
-\end{frame}
-
-% Slide 22: Lemma 2.5 final stmt
-\begin{frame}[fragile]{The 6-Step Program: \alert{Proofs} (NS) 10/10}
-    \begin{columns}[T]
-        \begin{column}{0.55\textwidth}
-        \end{column}
-        \begin{column}{0.45\textwidth}
-            \begin{block}{Checklist}
-\begin{itemize}
-    \item Inductive types \checkmark
-    \item Semantic Functions \checkmark
-    \item Inference Rules \checkmark
-    \only<1>{\item Proofs and Lemmas \No}
-    \only<2>{\item Proofs and Lemmas \checkmark}
-\end{itemize}
-            \end{block}
-        \end{column}
-    \end{columns}
+% Slide 19: Lemma 2.5 final stmt 6/6
+\begin{frame}[fragile]{Evaluation process: \alert{Proofs} (NS) 6/6}
 
     (**) to (*) (reverse direction)\\
     Same pattern:
@@ -1100,5 +807,187 @@ This completes the first part of the proof.
     \end{enumerate}
 \end{frame}
 
-% Conclusion time
+% §\tikzmarknode{ex20_ln1}{}§
+% \tikzmarknode{ex20_txt1}{}
+% Slide 20: if false contradiction
+\begin{frame}[fragile]{Can't dismiss all obvious cases}
+\section*{Example from Theorem 2.9}
+    \begin{columns}[T]
+        
+        % --- LEFT COLUMN: Lean Code ---
+        \begin{column}{0.50\textwidth}
+            \begin{block}{Lean 4 Formalization}
+                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
+  | if_true §\tikzmarknode{ex20_ln1}{}§
+      h_cond_true §\tikzmarknode{ex20_ln3}{}§ h_deriv_then §\tikzmarknode{ex20_ln4}{}§
+      ih_then =>
+    intro h_deriv_alt §\tikzmarknode{ex20_ln2}{}§
+    cases h_deriv_alt with
+    | if_true §\tikzmarknode{ex20_ln5}{}§
+        _ h_deriv_then_alt §\tikzmarknode{ex20_ln6}{}§ =>
+      exact §\tikzmarknode{ex20_ln7}{}§ ih_then _
+             h_deriv_then_alt
+
+    | if_false §\tikzmarknode{ex20_ln8}{}§
+        h_cond_false_alt _ =>
+      rw [h_cond_true] at
+          h_cond_false_alt
+      contradiction
+                \end{lstlisting}
+            \end{block}
+        \end{column}
+
+        % --- RIGHT COLUMN: Original Text Target---
+        \begin{column}{0.48\textwidth}
+            % Only show left column from slide 1, 3, and 4 (Skip slide 2 to isolate Lean)
+            \begin{block}<1-9>{Original Definition}
+\vspace{0.2em}
+\scriptsize
+\tikzmarknode{ex20_txt1}{} \textbf{The case} [if$_{\text{ns}}^{\ \text{tt}}$]: \\
+Assume that
+\\\(
+\tikzmarknode{ex20_txt2}{} \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s'
+\)\\
+holds because
+\\\(
+\tikzmarknode{ex20_txt3}{} \mathcal{B}[\![b]\!] = \mathbf{tt}\ \mbox{and}\ \tikzmarknode{ex20_txt4}{} \langle S_1,\ s \rangle \to s'
+\)\\
+\tikzmarknode{ex20_txt5}{} From \(\mathcal{B}[\![b]\!] = \mathbf{tt}\) we get that the only rule that could be applied to give the
+alternative \(\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s''\) is 
+[if$_{\text{ns}}^{\ \text{tt}}$]. So it must be the case that
+\\\(
+\tikzmarknode{ex20_txt6}{}\langle S_1,\ s \rangle \to s''
+\)\\
+\tikzmarknode{ex20_txt7}{} But then the induction hypothesis can be applied to the premise \(\langle S_1,\ s \rangle \to s'\)
+and from \(\langle S_1,\ s \rangle \to s''\) we get \(s' = s''\).
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \begin{tikzpicture}[remember picture, overlay, >=Stealth, thick, cyan]
+        
+        \path<2> [draw, ->]
+            (ex20_txt1.west)
+            [bend right=5] to
+            (ex20_ln1.east);
+            
+        \path<3> [draw, ->]
+            (ex20_txt2.west)
+            [bend right=5] to
+            (ex20_ln2.east);
+            
+        \path<4> [draw, ->]
+            (ex20_txt3.west)
+            [bend right=5] to
+            (ex20_ln3.east);
+            
+        \path<5> [draw, ->]
+            (ex20_txt4.west)
+            [bend right=5] to
+            (ex20_ln4.east);
+            
+        \path<6> [draw, ->]
+            (ex20_txt5.west)
+            [bend right=5] to
+            (ex20_ln5.east);
+            
+        \path<7> [draw, ->]
+            (ex20_txt6.west)
+            [bend right=5] to
+            (ex20_ln6.east);
+            
+        \path<8> [draw, ->]
+            (ex20_txt7.west)
+            [bend right=5] to
+            (ex20_ln7.east);
+            
+        \path<9> [draw, ->, red]
+            (ex20_txt5.west)
+            [bend right=5] to
+            (ex20_ln8.east);
+        
+    \end{tikzpicture}
+\end{frame}
+
+% Slide 21: Theorem 2.26
+\begin{frame}[fragile]{Not all proofs are easy}
+\section*{Example from Theorem 2.26}
+    \begin{columns}[T]
+        
+        % --- LEFT COLUMN: Lean Code ---
+        \begin{column}{0.50\textwidth}
+            \begin{block}{Lean 4 Formalization}
+                \begin{lstlisting}[style=lean4, basicstyle=\scriptsize\ttfamily]
+  | while_false h_cond =>
+    apply small_step_star.step
+    case step =>
+      apply small_step.while_unroll
+    case rest =>
+      exact small_step_star.step
+        (small_step.if_false h_cond)
+        (small_step_star.step
+          small_step.skip
+          small_step_star.refl)
+                \end{lstlisting}
+            \end{block}
+        \end{column}
+
+        % --- RIGHT COLUMN: Original Text Target---
+        \begin{column}{0.48\textwidth}
+            % Only show left column from slide 1, 3, and 4 (Skip slide 2 to isolate Lean)
+            \begin{block}{Original Definition}
+\vspace{1em}
+\scriptsize
+\textbf{The case} [while$_{\text{ns}}^{\ \text{ff}}$]: Straightforward.
+            \end{block}
+        \end{column}
+    \end{columns}
+\end{frame}
+
+% Slide 22: Conclusion time
+\begin{frame}
+    \section*{Conclusion}
+    \begin{itemize}
+        \item<1-> Direct mapping is possible
+        \begin{itemize}
+        \item<2-> BUT\dots using notation increases the similarity
+        \end{itemize}
+        \vspace{1em}
+        \item<3-> Types are generally easy
+        \begin{itemize}
+        \item<4-> BUT\dots some are harder (Var)
+        \end{itemize}
+        \vspace{1em}
+        \item<5-> General proof ideas can be kept
+        \begin{itemize}
+        \item<6-> BUT\dots needs careful evaluation of omitted cases
+        \end{itemize}
+    \end{itemize}
+
+\end{frame}
+
+% Slide 23: Conclusion RQ
+\begin{frame}{Conclusion}
+  \begin{itemize}
+    \item<1-> \textbf{RQ1:} Do the proof techniques presented in "\emph{Semantics with Applications: An Appetizer}"
+    map directly to Lean's internal mechanisms, or do they require significant
+    structural reformulation?
+    \begin{itemize}
+        \item<2-> \textbf{Answer}: They have a direct mapping, but needs notation and careful constructions.
+    \end{itemize}
+    \vspace{1em}
+    \item<3-> \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
+    present in "\emph{Semantics with Applications: An Appetizer}" must be made explicit to satisfy the Lean proof assistant?
+    \begin{itemize}
+        \item<4-> \textbf{Answer}: "Straightforward" might not be as straightforward as you may think.
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+% Slide 24: Thank you
+\begin{frame}
+    \section*{Thank you}
+    \only<2->{Questions?}
+
+\end{frame}
 \end{document}
