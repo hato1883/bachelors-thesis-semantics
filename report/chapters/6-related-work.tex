@@ -15,16 +15,21 @@ key efforts to bridge this "semantic gap."
 %
 %
 %
-\section{Educational Abstractions vs.General Purpose Provers}
+\section{Educational Abstractions vs. General Purpose Provers}
 To lower the entry barrier for students, tools like
 SASyLF by~\cite{SASyLF} provide a specialized environment where proofs are constructed in a
 "math-like" syntax. SASyLF~\citep{SASyLF}
 prioritizes the student's mental model by
-abstracting away much of the "syntactic noise" identified in the diffrent proofs.
+abstracting away much of the "syntactic noise" identified in the different proofs.
 In contrast, this thesis uses Lean 4, a general-purpose theorem prover.
 
-By doing so, we evaluate what is lost when these educational abstractions are
-removed, specifically regarding the "pedagogical shortcuts" identified in RQ2.
+Using Lean 4 lets us make the trade-offs explicit: we lose some of the
+``math-like'' surface syntax and automated scaffolding that educational tools hide,
+but we gain a fully general, reusable proof infrastructure and stronger guarantees
+about what is actually proved. Concretely, we analyze how the ``pedagogical
+shortcuts'' listed in RQ2—implicit side conditions, compressed notation, and
+elided intermediate steps—must be reconstructed or made explicit in a
+general-purpose prover.
 
 %
 %
@@ -41,7 +46,7 @@ work intentionally bypasses the binding complexities discussed in the POPLMark~\
 literature. This allows for a focused evaluation of other "verbatim" translation
 issues, such as:
 The transition from intuitive side conditions to explicit premises.
-The requirement for decidable equality on variable strings amoung others.
+The requirement for decidable equality on variable strings among others.
 
 %
 %
@@ -91,7 +96,3 @@ should be handled by the machine rather than the user. By utilizing \texttt{lina
 we ensure that the focus of the formalization remains on the semantics of the
 language rather than the intricacies of natural number induction, which is not
 the primary focus of the textbook~\citep{nielson_semantics_2007}.
-
-
-
-\todo{Bertot and Castran 2004}

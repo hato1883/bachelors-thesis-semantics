@@ -11,7 +11,7 @@ First steps of this thesis are to compare the \While language definition between
 and what the respective definition would be in Lean 4.
 This will then allow us to formalize both Natural Semantics, and Structural Operational Semantics
 for \While. After introducing the individual semantics rules we can then show
-how an individual proof from the textbook compares with the corresponding Lean formulization.
+how an individual proof from the textbook compares with the corresponding Lean formalization.
 
 
 %
@@ -271,7 +271,9 @@ the textbook continues onwards with the semantic functions.
 
 \subsection*{Semantic Domains and Functions}
 
-With syntax formalized, we now specify the semantic domains and evaluation functions that interpret programs. These include the state representation and the functions that evaluate numerals, arithmetic expressions, and boolean expressions.
+With syntax formalized, we now specify the semantic domains and evaluation functions that interpret programs.
+These include the state representation and the functions that evaluate numerals, arithmetic expressions,
+and boolean expressions.
 
 The \textbf{State} represents memory as a total function from variables to integers~\citep[p.~13]{nielson_semantics_2007}:
 \begin{paracol}{2}
@@ -338,9 +340,12 @@ notation "ff" => T.ff
 \vspace{1em}
 \subsubsection*{Comparison of Semantic Domains}
 The definition of the Semantic Domains, and state function is largely unchanged, the only difference
-being the explicit addition of the \texttt{DecidableEq} property to the Boolean type \textbf{T}.
-As mentioned earlier this allows reasoning whether or not \(\mathtt{tt} == \mathtt{ff}\), as it stands we have not
-defined that \(\mathtt{tt} == \mathtt{true}\) in Lean, something which will affect how we define the upcoming \texttt{Bexp\_eval}.
+being the explicit addition of the \texttt{DecidableEq} property to the Boolean type
+\textbf{T} which is defined to follow the textbook.
+This property is used whenever the need to check equality between two instances is needed.
+As mentioned earlier this allows reasoning whether \(\mathtt{tt} == \mathtt{ff}\), as it stands we have not
+defined that \(\mathtt{tt} == \mathtt{true}\) in Lean, something which will affect
+how we define the upcoming \texttt{Bexp\_eval}.
 
 
 We now define the semantic evaluation functions $\mathcal{N}$, $\mathcal{A}$, and $\mathcal{B}$,
@@ -562,9 +567,9 @@ between mechanized and pen-and-paper approaches:
     While the textbook can directly introduce the notation of semantic brackets
     and reuse them for each semantic function.
     The mechanized version must define this explicitly and on a case by case basis.
-    To use notation within the definition itself (recursive calls),
-    \texttt{quotPrecheck} and \texttt{hygiene}
-    must be disabled to bypass Lean's requirement that identifiers be defined
+    To use notation within the definition itself (recursive calls), thereby calling for a type which is yet to be defined one must disable
+    \texttt{quotPrecheck} and \texttt{hygiene} before defining the notation.
+    This allows us to bypass Lean's requirement that identifiers be defined
     prior to their use in notation.
 
     \item \textbf{Boolean Evaluation}:
@@ -588,45 +593,6 @@ between mechanized and pen-and-paper approaches:
 Beyond these core evaluation functions, mechanized reasoning about
 programs requires formal properties of state manipulation that
 pen-and-paper proofs often treat implicitly.
-
-% \subsection*{Auxiliary Proofs}
-
-% Beyond evaluation functions, state operations require formal verification. In addition to the above definitions, we need proofs to reason about state substitution:
-% First, we prove that repeated assignments to the same variable can be collapsed:
-% \[
-%     s[x \mapsto z_1][x \mapsto z_2] = s[x \mapsto z_2]
-% \]
-% This proof allows us to remove redundant assignments during semantic reasoning \missingcitation \todo{Cite a source for these state transformation lemmas, often found in 'Semantics with Applications'}.
-% The informal proof is straightforward by extensionality: two states are equal if they agree on all variables.
-% By definition of state assignment, both $s[x \mapsto z_1][x \mapsto z_2]$ and $s[x \mapsto z_2]$
-% map $x$ to $z_2$ and any other variable $y \neq x$ to $s(y)$.
-
-% \noindent
-% In Lean, this is formalized as:
-% \begin{Lean_Code}
-% theorem assign_shadow (s : State) (x : Var) (z1 z2 : §\(\mathbb{Z}\)§) :
-%   s[x §\mapsto§ z1][x §\mapsto§ z2] = s[x §\mapsto§ z2] := by §\dots§
-% \end{Lean_Code}
-
-% Second, we prove the commutativity of assignments to distinct variables:
-% \[
-%     s[x \mapsto z_1][y \mapsto z_2] = s[y \mapsto z_2][x \mapsto z_1], \quad \mbox{when } y \neq x
-% \]
-
-% This allows us to reorder assignments to different variables, further simplifying state manipulation proofs.
-% The proof is again by extensionality: when $x \neq y$, both sides assign $z_1$ to $x$, $z_2$ to $y$,
-% and leave all other variables unchanged.
-% \begin{Lean_Code}
-% theorem assign_comm (s : State) (x y : Var) 
-%                        (z1 z2 : §\(\mathbb{Z}\)§) (h : x §\(\neq\)§ y) :
-%   s[x §\mapsto§ z1][y §\mapsto§ z2] = s[y §\mapsto§ z2][x §\mapsto§ z1] := by §\dots§
-% \end{Lean_Code}
-
-% Full proofs for these auxiliary theorems can be found in in the Appendix.
-% With these properties in place, apparently redundant or reordered assignments can be formally simplified, e.g.:
-% \[
-%     s[x \mapsto 3][x \mapsto 2][x \mapsto 1][x \mapsto 0] = s[x \mapsto 0]
-% \]
 
 Having established the syntactic categories, semantic domains, and evaluation functions,
 we now possess the foundation needed to define the transition systems.
@@ -883,7 +849,7 @@ Overall the mapping remains 1-to-1 with some minor syntax differences:
     \item \textbf{Explicit Side Conditions}:
     In pen-and-paper proofs, side conditions (e.g.,
     $if \ \mathcal{B}[\![b]\!]s = \mathbf{tt}$) are often treated as meta-level
-    annotations to justify the choice of a rule. Where the justification can be proven outside of the deduction tree,
+    annotations to justify the choice of a rule. Where the justification can be proven outside the deduction tree,
     whilst in Lean, these become formal premises (\texttt{h\_cond}) which must
     be proven just like the others.
 
@@ -1401,7 +1367,7 @@ To show what actually is happening a table of translation is provided bellow:
         \Gamma \land T1 \land T2 \vdash \mathtt{Prop}
         \)
         we can construct \(\mathtt{Prop}\) using \(T1 \) and \(T2\).
-        such as \lean{big_step.comp T1 T2}
+        Such as \lean{big_step.comp T1 T2}
         &
         We some subtrees in our symbol table such as \(T_1\) and \(T_2\),
         that we now can use in our inference rule [comp\(_{ns}\)] to build our statement.
@@ -1417,7 +1383,8 @@ This divergence may cause confusion for the reader as they no longer maintain th
 %
 \subsection{Determinism (Theorem 2.9)}
 \label{formal_ns_sos_equiv:sec:ns:determinism}
-The next proof made in the textbook~\citep[p.~29]{nielson_semantics_2007} refers to determinism, where the definition of determinism is given
+The next proof made in the textbook~\citep[p.~29]{nielson_semantics_2007} refers to determinism,
+where the definition of determinism is given
 \begin{quotation}
 \dots semantics is called deterministic if for all choices of
 \(S\), \(s\), \(s'\) and \(s''\) we have that
@@ -2020,7 +1987,7 @@ success of the previously mechanized natural semantics.
 
 While the single-step relation \texttt{small\_step} captures individual
 program transitions, practical reasoning about complete program execution
-requires multi-step relations. The textbook introduces convenient shorthand
+requires multistep relations. The textbook introduces convenient shorthand
 notation for these ($\langle S, s\rangle \Rightarrow^{k} s'$ for exactly
 $k$ steps and $\langle S, s\rangle \Rightarrow^{*}$ s' for any finite number
 of steps)~\citep[p.~34, 35]{nielson_semantics_2007}. The mechanized version must explicitly formalize these as inductive
@@ -2037,7 +2004,7 @@ inductive small_step_k : Config §\(\to\)§ Nat §\(\to\)§ Config §\(\to\)§ P
       small_step_k (Config.step S s) (k + 1) §\gamma§''
 
 -- Define the standard Nielson & Nielson notation
--- Non terminal configuration
+-- Non-terminal configuration
 notation:40 "§\color{purple}$\langle$§" S "," s "§\color{purple}$\rangle$§"
   "§\ \color{purple}\to$_{sos}[$\ §" k "§\ \color{purple}$]$\ §" "§\color{purple}$\langle$§" S' "," s':40 "§\color{purple}$\rangle$§" =>
   small_step_k (Config.step S s) k (Config.step S' s')
@@ -2331,15 +2298,15 @@ of "pedagogical shortcuts":
     \item \textbf{Explicit Case Exhaustion}:
     The textbook notes the \(k=0\) case is
     "vacuous" because the configurations are different.
-    In Lean, this conclusion is found automatically from the fact that there exist no sych number n,
-    such that n < 0 and therefore we do not need to reason about the base case at all in lean.
+    In Lean, this conclusion is found automatically from the fact that there exist no such number n,
+    such that \(n < 0\), and therefore we do not need to reason about the base case at all in lean.
 
     \item \textbf{Specialization and Unpacking}:
     The Tactic \texttt{specialize} is used to bridge the gap
     between a general hypothesis and the specific sub-derivation (\texttt{h\_tail})
     generated by the \texttt{step} constructor.
-    Unpacking by using the tactic \texttt{have} unpacks the deafult anonymous named components,
-    allowing thier usage in the proof.
+    Unpacking by using the tactic \texttt{have},
+    allows us to use the anonymously named components in proofs later on.
 
     \item \textbf{Arithmetic Bookkeeping}:
     The mechanized proof relies on \texttt{linarith}
@@ -2379,12 +2346,12 @@ there are no stuck configurations in the structural operational semantics of \Wh
 For the other property, suppose that the execution of \(S\) on state \(s\) loops in one semantics.
 If it terminates in the other semantics, we have a contradiction with the first property
 because both semantics are deterministic (Theorem 2.9 and Exercise 2.22).
-Hence \(S\) will have to loop on state \(s\) also in the other semantics.
+Hence, \(S\) will have to loop on state \(s\) also in the other semantics.
 \end{quotation}
 ~\citep[p.~41 - 42]{nielson_semantics_2007}
 before continuing by proving both Lemma 2.27 and Lemma 2.28.
-To follow the texbook we will make sure to prove them in the same order starting with Lemma 2.27,
-but before we can prove Lemma 2.27 we need to introduce a auxiliary proof.
+To follow the textbook we will make sure to prove them in the same order starting with Lemma 2.27,
+but before we can prove Lemma 2.27 we need to introduce an auxiliary proof.
 \begin{Lean_Code}
 lemma small_step_star_trans {§\(\gamma_1\)§ §\(\gamma_2\)§ §\(\gamma_3\)§ : Config}
   (h_left : small_step_star §\(\gamma_1\)§ §\(\gamma_2\)§)
@@ -2681,7 +2648,7 @@ of pedagogical shortcuts:
     
     \item \textbf{Transitivity and Composition}:
     The textbook is proven parts of the step chain and implicitly connect them,
-    whilst Lean must use a auxilurary proof\\
+    whilst Lean must use an auxiliary proof\\
     \texttt{small\_step\_star\_trans} to prove that if
     \(\langle S, s \rangle \Rightarrow^* \gamma\) is true and if \(\gamma \Rightarrow^* \langle S', s' \rangle\)
     is also true, then we can prove that \(\langle S, s \rangle \Rightarrow^* \langle S', s' \rangle\)
@@ -2696,7 +2663,7 @@ of pedagogical shortcuts:
 
 \end{itemize}
 In the textbook they describe the process of applying the induction hypothesis to the premises,
-something which lean dose automaticaly for us, allowing us to write shorter proofs, such in the case of
+something which lean dose automatically for us, allowing us to write shorter proofs, such in the case of
 if true case.
 
 
@@ -3007,7 +2974,8 @@ by induction on the "length" of a derivation:
 
 \subsubsection*{Completion of the Theorem}
 To complete the theorem we need to introduce a auxilurary proof to prove that
-if \(\langle S, s \rangle \Rightarrow^* s'\) then there must exist some \(k\) such that \(\langle S, s \rangle \Rightarrow^k s'\).
+if \(\langle S, s \rangle \Rightarrow^* s'\) then there must exist some \(k\)
+such that \(\langle S, s \rangle \Rightarrow^k s'\).
 This proof is done by the following:
 \begin{Lean_Code}
 lemma star_to_small_step_k {§\(\gamma_1\)§ §\(\gamma_2\)§ : Config}

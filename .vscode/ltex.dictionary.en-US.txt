@@ -6,3 +6,12 @@ subst
 rfl
 funext
 rw
+prover
+Aexp
+DecidableEq
+Num
+num
+mul
+metavariable
+Bexp
+metatheory

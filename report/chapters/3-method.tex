@@ -21,7 +21,7 @@ The methodology can be broken down into four main stages:
 \begin{enumerate}
     \item \textbf{Mechanization of Proofs:} The first step involves translating the proofs
     from the literature into Lean 4. A key principle here is to mirror the original proof
-    strategy as closely as possible\missingcitation\todo{Optional: Mention if this "alignment" approach follows a specific formalization philosophy, like De Bruijn’s or similar comparative studies.}.
+    strategy as closely as possible.
     When the textbook \emph{Semantics with Applications: An Appetizer} specifies "induction on the shape
     of the derivation tree," the \texttt{induction} tactic is used. Similarly, when a proof
     proceeds by "case analysis," the \texttt{cases} tactic is employed. This ensures that
@@ -37,15 +37,15 @@ The methodology can be broken down into four main stages:
     a detailed evaluation is conducted to identify the specific changes required to make the
     formal proof work. This involves pinpointing where the mechanization required additional
     steps, such as:
-    \begin{itemize}
+    \begin{enumerate}
         \item Introducing necessary assumptions or auxiliary lemmas that are implicit in
         the original text.
         
         \item Generalizing proof statements to facilitate induction.
         
         \item Formalizing concepts that the literature takes for granted
-        (e.g., multi-step relations).
-    \end{itemize}
+        (e.g., multistep relations).
+    \end{enumerate}
 
     \item \textbf{Summarization of Differences:} Finally, the findings from the evaluation
     are synthesized into a comprehensive summary of the differences between informal and

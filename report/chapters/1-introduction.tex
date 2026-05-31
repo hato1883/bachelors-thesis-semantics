@@ -37,7 +37,7 @@ the process of implementing a formal system within a computer program,
 such as a proof assistant, to verify every logical step automatically.
 By mechanizing a proof, we introduce a layer of algorithmic validation
 that ensures logical soundness and eliminates the ambiguity inherent in
-hand-written derivations as was seen during the formalization of the Kepler conjecture~\citep{hales_formal_2017}.
+handwritten derivations as was seen during the formalization of the Kepler conjecture~\citep{hales_formal_2017}.
 
 This thesis investigates the process of translating pen-and-paper
 semantic proofs into mechanized proofs using the
@@ -57,7 +57,7 @@ The primary objective of this work is to determine the "semantic gap"
 between human-readable proofs and machine-checked logic.
 Specifically, this thesis seeks to answer the following research questions:
 \begin{itemize}
-    \item \textbf{RQ1:} Do the proof techniques presented in the \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}
+    \item \textbf{RQ1:} Do the proof techniques presented in the textbook "\emph{Semantics with Applications: An Appetizer}"~\citep{nielson_semantics_2007}
     map directly to Lean's internal mechanisms, or do they require significant
     structural reformulation?
     \item \textbf{RQ2:} What implicit assumptions or "pedagogical shortcuts"
@@ -67,7 +67,7 @@ Specifically, this thesis seeks to answer the following research questions:
 \noindent
 Pen-and-paper proofs are designed for a reader and often prioritize
 intuition over exhaustive detail.
-However, these omissions can hide underlying complexities or logical leaps \hampus{no proof of this} \missingcitation \todo{Cite a source discussing 'social processes' in proofs or the 'De Bruijn factor'}.
+However, these omissions can hide underlying complexities or logical leaps.
 By identifying these points of divergence,
 this research provides a roadmap for how educators can
 structure pen-and-paper proofs to decrease ambiguity and better prepare students
@@ -80,7 +80,7 @@ for formal verification tasks.
 \label{intro:scope}
 This thesis will evaluate proofs from the course "Semantics of Programming Languages
 (1DL311)" which uses the textbook \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}.
-Will be limited to the evaluation to a few proofs from the chapter
+This thesis will be limited to the evaluation to a few proofs from the chapter
 "1. Introduction" and
 "2. Operational Semantics".
 These chapters introduce the programming language "\While", which will be
@@ -103,7 +103,7 @@ assistant that otherwise was implicitly defined in the written counterpart.
 \section{Thesis Structure Roadmap} 
 This thesis is organized into seven chapters,
 Following this introduction, Chapter 2 establishes the necessary background,
-brefiely explaining what programming languages semantics, Operational Semantics and the proof assistant Lean is.
+beefily explaining what programming languages semantics, Operational Semantics and the proof assistant Lean is.
 
 Chapter 3 then details the methodology employed and
 describing the systematic approach used to translate traditional textbook
@@ -119,12 +119,12 @@ applied to the \While language.
 
 Having established this formal framework, Chapter 5 provides a
 discussion of the collected findings from the case study.
-Reflecting on changes in syntax, implicit knowladge and omited proofs.
+Reflecting on changes in syntax, implicit knowledge and omitted proofs.
 
 The final portion of the thesis situates these results within
 the broader academic context.
 Chapter 6 surveys related work, comparing the context of this thesis
-with the existing work of formulizating proofs in proof assistants.
+with the existing work of formulating proofs in proof assistants.
 
 Finally, Chapter 7 offers concluding remarks, summarizing the primary
 contributions of the research and identifying future pathways for the

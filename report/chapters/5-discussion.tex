@@ -41,12 +41,15 @@ of RQ2: a pedagogical convenience in prose (``we can always tell whether
 $x = y$") becomes a formalization burden.
 
 \subsection*{Tree-Based Reality: BNF to Inductive Types}
-The move from BNF notation to Lean inductive definitions is mostly faithful in
-logical content, but not neutral in structure. BNF is read linearly;
-Lean terms are constructor trees. As a consequence, proofs naturally become
-structural: induction follows the datatype shape rather than the order of textbook
-prose. For RQ1, this means the underlying logic maps well, while the procedural
-presentation is reformulated around tree recursion and constructor cases.
+BNF is a textual grammar listing production rules,
+a parse tree (or abstract syntax tree, AST) is the hierarchical
+structure produced by those rules.
+When mechanizing we work with ASTs encoded as Lean inductive types,
+so proofs operate by case analysis and structural induction on constructors.
+This is not a substantive change in logic, BNF generates the same set of trees,
+but it does change proof organization and style.
+The textbook prose often reasons linearly over productions, whereas mechanized proofs
+follow the data type's tree shape.
 
 %
 %
@@ -114,7 +117,7 @@ combines inductive structure, transitivity, and arithmetic on derivation length.
 \subsection*{From NS to SOS: Transitivity and Intermediate States}
 In the $NS \to SOS$ direction, textbook ellipses (``$\dots$") hide intermediate
 configurations. Lean does not permit this compression: every intermediate state
-must be provided and every composition step justified through explicit
+must be provided, and every composition step justified through explicit
 transitivity lemmas (e.g., \texttt{small\_step\_star\_trans}). This is a concrete
 RQ2 result: omitted intermediate states are a pedagogical shortcut that
 mechanization removes.

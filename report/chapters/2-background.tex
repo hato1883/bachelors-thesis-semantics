@@ -24,24 +24,24 @@ to translate these textbook definitions into machine-checked proofs~\citep{theor
 \label{background:sec:formal_semantics_pl}
 \
 The formal semantics of a programming language is a rigorous mathematical
-framework used to describe the behavior of programs \missingcitation \todo{Standard definition of formal semantics}. While a language's syntax
+framework used to describe the behavior of programs. While a language's syntax
 defines the rules for constructing valid programs (the "grammar"), its semantics
 provides the "meaning"—specifying exactly how a computer should execute those
-instructions \missingcitation \todo{Source for the syntax-vs-semantics distinction}.
+instructions.
 
 \
-In many industrial settings, the semantics of a language are described using
-natural language manuals \missingcitation \todo{Provide example or source discussing the use of manuals/standards like C99 or Java Spec}. However, natural language is often prone to ambiguity,
-leading to inconsistent implementations across different compilers or interpreters \missingcitation \todo{Cite a known study or famous example of ambiguity-related bugs (e.g., C undefined behavior)}.
+In many industrial settings, the semantics of a language is described using
+code documentation often written in English. However, natural language such as code documentation can be prone to ambiguity,
+leading to inconsistent implementations across different compilers or interpreters.
 Formal semantics eliminates this ambiguity by using mathematical structures—such
-as sets, functions, and logic to define program execution \missingcitation \todo{Reference for the benefits of formal methods}.
+as sets, functions, and logic to define program execution.
 
 By separating how an instruction is written (the syntax) such as
 \begin{While_Code}
     if (x > 0) then {x = x} else {x = -x}
 \end{While_Code} % \noindent
 from the meaning (the semantics) such as "if x is less than 0 then negate the value, otherwise do nothing" it is possible to
-create a deeper and more detailed understanding \hampus{this statement has no basis} \missingcitation \todo{Source discussing the benefits of abstraction in language design/analysis} of the programming language
+create a deeper and more detailed understanding of the programming language
 and thereby the programs written.
 
 
@@ -49,8 +49,8 @@ and thereby the programs written.
 Formal semantics are typically expressed through three main approaches:
 Denotational (modeling programs as mathematical functions),
 Axiomatic (using logic to define preconditions and postconditions),
-and Operational \missingcitation \todo{Cite the seminal paper or textbook that categorizes these three (e.g., Scott/Strachey, Hoare, and Plotkin)}. This thesis focuses on the Operational approach, which describes
-how a program transition from one state to another during execution \missingcitation \todo{Reference defining Operational Semantics specifically}.
+and Operational. This thesis focuses on the Operational approach, which describes
+how a program transition from one state to another during execution.
 
 In addition to these different semantics a representation of the language in question is needed.
 This representation is built using five different components.
@@ -64,14 +64,14 @@ It is also common to define so called "\emph{meta-variables}" which is used as a
 an example would be \(S\) which could represent a \emph{Statement} in a language, where \(S_1\) is another statement than \(S_2\) or \(S'\).
 
 In addition to defining the categories and \emph{meta-variables}, it is important to define the grammar of the alphabet, effectively creating words out of the alphabet.
-This is commonly done using BNF, short for \emph{Backus-Naur Form} \missingcitation \todo{Original BNF source or standard textbook definition}, an example can be seen in the \autoref{background:sec:while:syntactic}.
+This is commonly done using BNF, short for \emph{Backus-Naur Form}, an example can be seen in the \autoref{background:sec:while:syntactic}.
 By providing the grammar it is possible to start building programs using the earlier defined alphabet, but this is just syntax,
 we have yet to define meaning to our alphabet and words created from it.
 To give the words meaning we use the next two components which is called "\emph{Semantic Domains}" and "\emph{Semantic Functions}"
 
 %
 \subsection*{Semantic Domains}
-This component provides the semantic domains in which we will use to give our programs meaning \missingcitation \todo{Definition of Semantic Domains}.
+This component provides the semantic domains in which we will use to give our programs meaning.
 A domain can be all natural numbers, or true and false, or even a custom domain such as program states or memory locations.
 Next we need to know how the words in our alphabet is translated into our semantic domains, this is done by the "\emph{Semantic Functions}" mentioned earlier.
 
@@ -86,7 +86,7 @@ Whilst this component describes a functional definition, the actual function def
 %
 \subsection*{Semantic Equations}
 This component is responsible for defining on a case by case basis how exactly the semantic function translates the words given by our grammar into our semantic domains.
-Often this is done compositionally \missingcitation \todo{Source for the Principle of Compositionality in semantics}, which means that we might define a multiplication as multiplying the result of two recursive calls on its components.
+Often this is done compositionally, which means that we might define a multiplication as multiplying the result of two recursive calls on its components.
 Lastly we define the last component known as "\emph{Auxiliary Components}".
 
 \subsection*{Auxiliary Components}
@@ -104,10 +104,10 @@ this occurs as a result from picking which approach to use, and what the main fo
 \label{background:sec:while}
 \ Programming language semantics needs a language to study, and commonly used
 programming languages are often a bad fit due to the constant
-evolution of languages, operating systems, and hardware \missingcitation \todo{A source arguing for the use of "toy" languages for formal analysis (e.g., Nielson)}. \
+evolution of languages, operating systems, and hardware. \
 To address this, a common 
 praxis is to invent a "toy" programming language that lacks a physical implementation 
-but possesses rigorous rules \missingcitation \todo{Source on the educational/formal value of toy languages}. In this case, we use \While, a simplified imperative language 
+but possesses rigorous rules. In this case, we use \While, a simplified imperative language 
 defined in the literature of our case study ~\citep[p.~7]{nielson_semantics_2007}.
 
 Like most programming languages, \While is built using statements and expressions. \
@@ -147,12 +147,13 @@ implies a numeral, and $S$ always implies a statement:
     x  & \mbox{ranges over variables, } \Var,\\[0.6em]
     a  & \mbox{ranges over arithmetic expressions, } \Aexp,\\[0.6em]
     b  & \mbox{ranges over boolean expressions, } \Bexp,\\[0.6em]
-    S  & \mbox{ranges over statements, } \Stm.
+    S  & \mbox{ranges over statements, } \Stm. \\[0.6em]
+    s  & \mbox{ranges over states, } \State.
 \end{array}
 \]
 Each variable can be primed or sub-scripted (e.g., \(n', n_0, n_{317}\)) to create 
 distinct instances that still belong to the same set. Using these meta-variables, 
-we define the formation rules using Backus-Naur Form (BNF) notation \missingcitation \todo{Reference for the standard BNF notation used here}:
+we define the formation rules using Backus-Naur Form (BNF) notation:
 \[
 \begin{array}{lcl}
     n &::=& 0 \mid 1 \mid n'0 \mid n'1 \\[0.6em]
@@ -163,7 +164,7 @@ we define the formation rules using Backus-Naur Form (BNF) notation \missingcita
 \end{array}
 \]
 The symbol "\(::=\)" denotes that a category "can be" a specific form, while "\(\mid\)" 
-denotes an alternative. This is an \emph{inductive definition} \missingcitation \todo{Source explaining inductive definitions of syntax}: for example, 
+denotes an alternative. This is an \emph{inductive definition}: for example, 
 an arithmetic expression $a$ can be a simple number $n$, or it can be a 
 compound expression like $a_1 + a_2$, where $a_1$ and $a_2$ are themselves 
 already formed arithmetic expressions.
@@ -175,23 +176,23 @@ symbols into. This is provided by the \emph{Semantic Domains}.
 %
 \subsection*{Semantic Domains}
 While the syntax defines what we can write, the semantic domains define what those 
-writings actually \emph{mean} in terms of mathematical objects \missingcitation \todo{Definition of Semantic Domains in this context}. We map \While 
+writings actually \emph{mean} in terms of mathematical objects. We map \While 
 syntax into the following sets:
 \begin{itemize}
     \item Truth values \(\Truth = \{ \mathbf{tt}, \mathbf{ff} \}\), where \textbf{tt} represents mathematical truth.
     \item Integers \(\mathbb{Z}\), the set $\{ \dots, -1, 0, 1, \dots \}$.
-    \item Program states \State, representing the memory configuration.
+    \item Program states \State, where a state represents all variable-value bindings.
 \end{itemize}
 We use the meta-variable $s$ to range over states. To bridge the gap between 
 the syntax of \Aexp or \Bexp and these mathematical domains, 
-we require \emph{Semantic Functions} \missingcitation \todo{Standard reference for Semantic Functions}.
+we require \emph{Semantic Functions}.
 
 %
 %
 \subsection*{Semantic Functions}
 Semantic functions serve as the "translators" from syntax to semantics. We 
 standardize this translation using 'semantic brackets' \([\![\cdot]\!]\) to 
-enclose the syntax being evaluated \missingcitation \todo{Reference for the Denotational style "Oxford Brackets" notation}. This separates the \While language from 
+enclose the syntax being evaluated. This separates the \While language from 
 the mathematical "meta-language" used to describe it. To distinguish between 
 different types of evaluation, we prefix the brackets with calligraphic letters:
 \[
@@ -211,7 +212,7 @@ evaluated in state $s$."
 \subsection*{Semantic Equations}
 The equations below provide the rules for our semantic functions. These are 
 defined \emph{compositionally}, meaning the value of a complex expression depends 
-solely on the values of its sub-expressions \missingcitation \todo{Formal definition of compositional semantics}. 
+solely on the values of its sub-expressions. 
 
 For numerals, we define the translation of binary-style strings to integers:
 \[
@@ -307,14 +308,12 @@ will take focus on Operational Semantics.
 %
 %
 \section{Operational Semantics}
-\todo{Brief What?} \noindent
 Operational semantics describes the meaning of a program by specifying how it
-executes on an abstract machine \missingcitation \todo{Reference for the abstract machine definition of OS}. Unlike other semantic approaches, it is
+executes on an abstract machine. Unlike other semantic approaches, it is
 "execution-oriented," focusing on the transitions between program states.
 A state transition is typically represented as a relation between a
 configuration—consisting of a statement and the current state—and a resulting
-state or a subsequent configuration \missingcitation \todo{Reference for transition relations/configurations}.
-\todo{Show state transition notation and describe it, lean on The Formal Semantics of Programming Languages: An Introduction}
+state or a subsequent configuration.
 
 In this work, we examine two primary styles of operational semantics:
 \emph{Natural Semantics} and
@@ -322,8 +321,6 @@ In this work, we examine two primary styles of operational semantics:
 
 \subsection*{Natural Operational Semantics}
 \label{background:os:ns}
-\todo{Brief introduction to NS, reader will have read a course on semantics,
-this section is here as a reminder to the reader.}
 Natural Operational Semantics, often shortened to just Natural Semantics (NS), or even big-step semantics
 is the view that a given Statement \(S\) and a starting state \(s\) can evaluate into a finalized state \(s'\).
 This view is that each operation runs to completion.
@@ -442,12 +439,10 @@ for the final conclusion, meaning that the proof becomes infinitely recursive. T
 %
 \subsection*{Structural Operational Semantics}
 \label{background:os:sos}
-\todo{Breif introduction to SOS, reader will have read a course on semantics,
-this section is here as a reminader to the reader.}
 While Natural Semantics describes the overall result of execution, Structural Operational Semantics (SOS), or "Small-Step" semantics,
 describes the individual steps of the computation.
 This approach is particularly useful for reasoning about interleaved execution,
-non-termination, and program intermediate states.In SOS, we distinguish between
+non-termination, and program intermediate states. In SOS, we distinguish between
 two types of configurations:
 \begin{itemize}
     \item Intermediate configurations: $\langle S, s \rangle$,
@@ -463,8 +458,9 @@ or directly to a terminal state, $\langle S, s \rangle \Rightarrow s'$.
 Comparison of Transition Styles
 Unlike Natural Semantics,
 where the derivation tree for a complex statement is constructed all at once,
-an SOS derivation represents a single "pulse" of the abstract machine. This can be shown in the rules
-\begin{table}[ht]
+an SOS derivation represents a single step of the abstract machine, where a step is the minimal amount of work the machine is capable.
+This can be shown in the rules:
+\begin{table}[H]
     \[
     \begin{array}{ll}
         \mbox{[ass}_{sos}\mbox{]} &
@@ -557,7 +553,6 @@ and one that is "diverging" (infinite transitions possible).
 %
 \section{The Lean 4 Proof Assistant}
 \label{background:sec:lean_4}
-\hampus{Show by example, pen-and-paper proof proves evenness by induction, this is done like this in lean \dots}
 Lean 4 is a functional programming language and an interactive theorem prover
 based on \textit{Dependent Type Theory} \citep{theorem_proving_2026}.
 Lean can be viewed as a rigorous environment for defining mathematical objects
@@ -577,6 +572,7 @@ inductive Aexp where
   | add (a1 a2 : Aexp)     -- Addition
 \end{Lean_Code}
 \noindent
+Where the green text starting with \texttt{--} represents a comment.
 This maps directly to the mathematical notion of a set defined by structural induction.
 Each constructor (e.g., \texttt{add}) is a function
 that takes existing elements of the set and produces a new one.
@@ -594,10 +590,10 @@ When we define \texttt{big\_step} inductively, each constructor represents an
 \textbf{inference rule}. For instance, the rule for statement composition (\texttt{comp}) in Lean is:
 
 \begin{Lean_Code}
-| comp (h_left : §\(\langle\)§S1, s§\(\rangle\)§ §\(\to_{ns}\)§ s') (h_right : §\(\langle\)§S2, s'§\(\rangle\)§ §\(\to_{ns}\)§ s'') :
-    §\(\langle\)§S1; S2, s§\(\rangle\)§ §\(\to_{ns}\)§ s''
+| comp (h_left : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ s') (h_right : §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§ §\(\to_{ns}\)§ s'') :
+    §\(\langle\)§S§\(_1\)§; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ s''
 \end{Lean_Code}
-This code defines a rule of inference. To a reader familiar with natural deduction,
+This code defines a rule of inference. To a reader familiar with natural deduction from a course in mathematical logic,
 this is a direct mapping of the standard horizontal-bar notation:
 \[
 \frac{\langle S_1, s \rangle \to_{ns} s' \quad \langle S_2, s' \rangle \to_{ns} s''}{\langle S_1; S_2, s \rangle \to_{ns} s''}
@@ -633,7 +629,7 @@ to their respective functionalities in standard mathematical and logical discour
 \texttt{intro}        & Implication Introduction  & "Assume $P$ is true" or "Let $x$ be an arbitrary element." \\
 \texttt{exact}        & Q.E.D.                    & Completes a goal by providing the required evidence directly. \\
 \texttt{cases}        & Proof by Cases       & Deconstructs an object or relation into its possible forms. \\
-\texttt{apply}        & Modus Ponens              & Uses a known rule or theorem to satisfy the current goal. \\
+\texttt{apply}        & Rule application (implication elimination) & Uses a known rule or theorem to transform or discharge the current goal. \\
 \texttt{rfl}          & Reflexivity               & Proves an equality of the form $A = A$ by definition. \\ \hline
 \end{tabularx}
 \caption{Mapping of Lean 4 keywords to mathematical concepts.}
@@ -644,7 +640,7 @@ To bridge the gap between code and literature,
 it is possible to define custom notation and operations,
 which can mimic that of pen-and-paper proofs.
 This can allow for a custom Number type to use the addition sign "+"
-to mark a addition of two numbers, instead of using the full inductive name such-as 
+to mark an addition of two numbers, instead of using the full inductive name such-as 
 "\texttt{Number.Add N1 N2}", and instead do "\texttt{N1 + N2}".
 Notations can be defined by using the keyword "\texttt{notation}",
 and operations can be defined using "\texttt{infixl}" and "\texttt{infixr}"
