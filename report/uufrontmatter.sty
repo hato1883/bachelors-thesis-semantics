@@ -1,0 +1,154 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{uufrontmatter}[2026/06/03 Uppsala University Front Matter Template]
+
+% Safe package loading (handles duplicates gracefully)
+\RequirePackage{geometry}
+\RequirePackage{svg}
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{tikz}
+\RequirePackage{tikzpagenodes}
+\RequirePackage{etoolbox} % Used for if/then conditional logic
+
+% Exact Page Geometry
+\geometry{
+    a4paper,
+    left=25mm,
+    right=20mm,
+    top=25mm,
+    bottom=25mm
+}
+
+\definecolor{uulightgray}{HTML}{7F7F7F}
+
+% --- Define Variable Storage & Commands ---
+\newcommand{\subtitle}[1]{\def\uu@subtitle{#1}}
+\newcommand{\serialnumber}[1]{\def\uu@serialnumber{#1}}
+\newcommand{\credits}[1]{\def\uu@credits{#1}}
+\newcommand{\datefield}[1]{\def\uu@datefield{#1}}
+\newcommand{\programme}[1]{\def\uu@programme{#1}}
+\newcommand{\abstracttext}[1]{\def\uu@abstracttext{#1}}
+\newcommand{\campus}[1]{\def\uu@campus{#1}}
+\newcommand{\supervisor}[1]{\def\uu@supervisor{#1}}
+\newcommand{\subjectreader}[1]{\def\uu@subjectreader{#1}}
+\newcommand{\examiner}[1]{\def\uu@examiner{#1}}
+
+% Confidentiality toggles
+\newbool{isconfidential}
+\boolfalse{isconfidential}
+\newcommand{\confidentialdate}[1]{\booltrue{isconfidential}\def\uu@confidentialdate{#1}}
+
+% Set sensible defaults so empty fields don't break compilation
+\def\uu@subtitle{}
+\def\uu@datefield{\today}
+
+% --- Macro to Generate the Front Matter ---
+\newcommand{\makeuufrontmatter}{%
+{
+\sffamily
+
+% ==========================================
+% PAGE 1: COVER PAGE
+% ==========================================
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+    
+    % BACKGROUND WATERMARK
+    \node[anchor=center, inner sep=0pt, opacity=0.075] 
+        at ([xshift=9.15cm, yshift=-11.05cm]current page.center) {
+            \includesvg[width=34.5cm]{uppsala-universitet-bw-no-text}
+        };
+    
+    % TOP LEFT: Logo
+    \node[anchor=north west, inner sep=0pt] 
+        (logo) at ([xshift=14.45mm, yshift=-13.70mm]current page.north west) {
+            \includesvg[width=3.215cm]{uppsala-universitet}
+        };
+
+    % TOP RIGHT: Metadata
+    \node[anchor=north east, align=right, inner sep=0pt] 
+        at ([xshift=-19.85mm, yshift=-20.5mm]current page.north east) {
+            {\small\color{uulightgray}\uu@serialnumber} \\[0.25cm]
+            {\large Degree project \uu@credits\ credits} \\[0.3cm]
+            {\large\color{uulightgray}\uu@datefield}
+        };
+
+    % MIDDLE LEFT: Titles
+    \node[anchor=north west, align=left, inner sep=0pt, text width=12cm] 
+        (titles) at ([xshift=50mm, yshift=-60mm]current page.north west) {
+            {\Huge\color{uulightgray}\bfseries \@title} 
+            \ifx\uu@subtitle\empty\else \\[0.35cm] {\Large\color{uulightgray} \uu@subtitle} \fi
+        };
+
+    % FIXED DIVIDER LINE
+    \draw[line width=0.6pt, black] 
+        ([yshift=-0.30cm]titles.south west) -- ([yshift=-0.30cm]titles.south west -| current page text area.east);
+
+    % AUTHOR
+    \node[anchor=north west, align=left, inner sep=0pt]
+        at ([yshift=-0.8cm]titles.south west) {
+            {\Large\textbf{\@author}}
+        };
+
+    % FOOTER
+    \node[anchor=south east, align=right, inner sep=0pt] 
+        at ([xshift=-18.5mm, yshift=16.4mm]current page.south east) {
+            {\Large \uu@programme}
+        };
+\end{tikzpicture}
+\end{titlepage}
+
+\newpage
+
+% ==========================================
+% PAGE 2: ABSTRACT & METADATA PAGE
+% ==========================================
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture, overlay]
+
+    % TOP LEFT: Logotype Image
+    \node[anchor=north west, inner sep=0pt] 
+        (logo) at ([xshift=14.45mm, yshift=-13.70mm]current page.north west) {
+            \includesvg[width=3.215cm]{uppsala-universitet-bw}
+        };
+
+    % TOP RIGHT GROUP: Title, Line, and Author
+    \node[anchor=north west, align=left, inner sep=0pt, text width=12cm] 
+        (titleblock) at ([xshift=70mm, yshift=-26mm]current page.north west) {
+            {\large\bfseries\color{uulightgray} \@title}
+        };
+
+    \draw[line width=0.6pt, black] 
+        ([yshift=-0.25cm]titleblock.south west) -- ([yshift=-0.25cm]titleblock.south west -| current page text area.east);
+
+    \node[anchor=north west, align=left, inner sep=0pt, text width=12cm] 
+        (authorblock) at ([xshift=0mm, yshift=-0.55cm]titleblock.south west) {
+            {\small\textbf{\@author}}
+        };
+        
+    % MIDDLE AREA: Abstract
+    \node[anchor=north west, align=left, inner sep=0pt, text width=14cm] 
+        (abstractblock) at ([xshift=25mm, yshift=-57.7mm]current page.north west) {
+            {\normalsize\textbf{Abstract}} \\[0.275cm]
+            {\normalsize \uu@abstracttext}
+        };
+
+    % BOTTOM AREA: Institutional Footer
+    \node[anchor=south, align=center, inner sep=0pt] 
+        at ([xshift=2.5mm, yshift=4.9mm]current page.south) {
+            {\normalsize\bfseries\color{uulightgray} Faculty of Science and Technology}       \\[2mm]
+            {\normalsize\bfseries\color{uulightgray} Uppsala University, Place of publication: \uu@campus}        \\[0.5cm]
+            
+            {\small\color{uulightgray} Supervisor: \uu@supervisor \quad Subject reader: \uu@subjectreader} \\[0.15cm]
+            {\small\color{uulightgray} Examiner: \uu@examiner} \\[0.3cm]
+            
+            \ifbool{isconfidential}{%
+                {\small\color{uulightgray} This degree project is confidential until \uu@confidentialdate.}
+            }{}
+        };
+\end{tikzpicture}
+\newpage
+\pagenumbering{roman}
+}
+}
