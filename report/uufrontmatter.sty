@@ -1,25 +1,21 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{uufrontmatter}[2026/06/03 Uppsala University Front Matter Template]
 
-% Safe package loading (handles duplicates gracefully)
 \RequirePackage{geometry}
 \RequirePackage{svg}
 \RequirePackage{graphicx}
 \RequirePackage{xcolor}
 \RequirePackage{tikz}
 \RequirePackage{tikzpagenodes}
-\RequirePackage{etoolbox} % Used for if/then conditional logic
+\RequirePackage{etoolbox}
 
-% Exact Page Geometry
-\geometry{
-    a4paper,
-    left=25mm,
-    right=20mm,
-    top=25mm,
-    bottom=25mm
-}
 
 \definecolor{uulightgray}{HTML}{7F7F7F}
+
+% --- Logo Path Configuration Commands ---
+\newcommand{\logobwnotextpath}[1]{\def\uu@logobwnotextpath{#1}}
+\newcommand{\logobwpath}[1]{\def\uu@logobwpath{#1}}
+\newcommand{\logopath}[1]{\def\uu@logopath{#1}}
 
 % --- Define Variable Storage & Commands ---
 \newcommand{\subtitle}[1]{\def\uu@subtitle{#1}}
@@ -38,15 +34,17 @@
 \boolfalse{isconfidential}
 \newcommand{\confidentialdate}[1]{\booltrue{isconfidential}\def\uu@confidentialdate{#1}}
 
-% Set sensible defaults so empty fields don't break compilation
+% Set sensible defaults (fallback to root filenames)
 \def\uu@subtitle{}
 \def\uu@datefield{\today}
+\def\uu@logobwnotextpath{uppsala-universitet-bw-no-text}
+\def\uu@logobwpath{uppsala-universitet-bw}
+\def\uu@logopath{uppsala-universitet}
 
 % --- Macro to Generate the Front Matter ---
 \newcommand{\makeuufrontmatter}{%
 {
 \sffamily
-
 % ==========================================
 % PAGE 1: COVER PAGE
 % ==========================================
@@ -54,16 +52,16 @@
 \thispagestyle{empty}
 \begin{tikzpicture}[remember picture, overlay]
     
-    % BACKGROUND WATERMARK
+    % BACKGROUND WATERMARK: Bottom Right Corner
     \node[anchor=center, inner sep=0pt, opacity=0.075] 
         at ([xshift=9.15cm, yshift=-11.05cm]current page.center) {
-            \includesvg[width=34.5cm]{uppsala-universitet-bw-no-text}
+            \includesvg[width=34.5cm]{\uu@logobwnotextpath}
         };
     
     % TOP LEFT: Logo
     \node[anchor=north west, inner sep=0pt] 
         (logo) at ([xshift=14.45mm, yshift=-13.70mm]current page.north west) {
-            \includesvg[width=3.215cm]{uppsala-universitet}
+            \includesvg[width=3.215cm]{\uu@logopath}
         };
 
     % TOP RIGHT: Metadata
@@ -91,11 +89,12 @@
             {\Large\textbf{\@author}}
         };
 
-    % FOOTER
-    \node[anchor=south east, align=right, inner sep=0pt] 
-        at ([xshift=-18.5mm, yshift=16.4mm]current page.south east) {
-            {\Large \uu@programme}
+    % FOOTER (With fixed right-anchor and leftward text wrapping)
+    \node[anchor=south east, inner sep=0pt] 
+        at ([xshift=-19.85mm, yshift=8.5mm]current page.south east) {
+            \parbox[t]{14.5cm}{\raggedleft\Large\color{uulightgray}\uu@programme}
         };
+
 \end{tikzpicture}
 \end{titlepage}
 
@@ -110,7 +109,7 @@
     % TOP LEFT: Logotype Image
     \node[anchor=north west, inner sep=0pt] 
         (logo) at ([xshift=14.45mm, yshift=-13.70mm]current page.north west) {
-            \includesvg[width=3.215cm]{uppsala-universitet-bw}
+            \includesvg[width=3.215cm]{\uu@logobwpath}
         };
 
     % TOP RIGHT GROUP: Title, Line, and Author

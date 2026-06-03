@@ -4,68 +4,39 @@
 
 %% --- Core Engine & Language ---
 \usepackage[british]{babel}
-
-% REMOVED: inputenc and fontenc. 
-% fontspec handles encoding natively in LuaLaTeX/XeLaTeX.
-
-% --- Fonts & Unicode Support ---
 \usepackage{fontspec}
-\setmainfont{TeX Gyre Termes}  % Professional Serif (Times-like)
-\setsansfont{TeX Gyre Heros}   % Professional Sans (Helvetica-like)
-
-% Set the Serif font (Libertine)
-% \setmainfont{Linux Libertine O}[
-%     Numbers = Lining,
-%     Ligatures = TeX
-% ]
-
-% Set Monospace (Inconsolata or DejaVu Sans Mono for Lean symbols)
-% \setmonofont{inconsolata}[Scale=0.95] 
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
 
 % --- Layout & Typography ---
-\usepackage[paper=a4paper,text={13cm,24cm}]{geometry}
 \usepackage{paracol}
-\setlength{\columnsep}{1em} % Adjust this value as needed
-\columnratio{0.5} % Split page exactly in half
+\setlength{\columnsep}{1em}
+\columnratio{0.5}
 
 \usepackage{microtype}
-% Disable specific microtype features that clash with LuaLaTeX/fontspec
 \microtypesetup{expansion=false, kerning=false}
 
 % --- Graphics & Colors ---
 \usepackage[dvipsnames, table]{xcolor}
-\usepackage{geometry}
-\usepackage{svg}
-\usepackage{graphicx}
 \usepackage{float}
-\usepackage{caption} % Customization below
+\usepackage{caption}
 
 % --- Coding & Formalism ---
 \usepackage{amsmath}
 \usepackage{listings}
 \usepackage{amssymb}
 \usepackage{pifont}
-% \usepackage{dingbat}
 
 % --- Proof trees ---
 \usepackage{ebproof}
-% Custom style to make the horizontal lines look better
-% \ebproofset{line thickness=0.6pt, separation=0.5em}
 
 % --- Referencing & Utilities ---
-\usepackage[hidelinks]{hyperref} % Load before cleveref
-\usepackage[
-    style=authoryear, 
-    backend=biber,    % Recommended backend over bibtex
-    natbib=true,      % Supports \citet and~\citep
-]{biblatex}
+\usepackage[hidelinks]{hyperref}
+\usepackage[style=authoryear, backend=biber, natbib=true]{biblatex}
 
-% 1. Replace the error-causing line with these:
 \DeclareFieldFormat{citebackslash}{#1}
 \renewcommand{\bibopenparen}{\addthinspace[}
 \renewcommand{\bibcloseparen}{]}
-
-% 2. Ensure the delimiter between name and year is correct:
 \renewcommand*{\nameyeardelim}{\addcomma\space}
 
 \addbibresource{sources.bib}
@@ -88,9 +59,10 @@
 \usepackage[most]{tcolorbox}
 \usepackage{tabularx}
 \usepackage{ltablex}
-\usepackage{tikz}
-\usepackage{tikzpagenodes}
-\usetikzlibrary{positioning, arrows.meta} % Allows tabularx to span multiple pages
+\usetikzlibrary{positioning, arrows.meta}
+
+% Load custom front matter macro package cleanly
+\usepackage{uufrontmatter}
 
 % --- Post-Package Setup ---
 \captionsetup{twoside,labelfont=sf}

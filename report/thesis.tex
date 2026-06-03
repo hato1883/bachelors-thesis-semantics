@@ -1,4 +1,4 @@
-\documentclass[11pt,titlepage,oneside]{book}
+\documentclass[11pt,titlepage,oneside,a4paper]{book}
 
 %  Include preamble
 \input{preamble/imports.tex}
@@ -12,16 +12,57 @@
 \synctex=1
 \pagestyle{plain}
 
+% --- Standard LaTeX Fields ---
+\title{Mechanizing Proofs from a
+            Course on Programming Language Semantics in Lean}
+\author{Hampus Tof}
+
+% --- Custom UU Template Fields ---
+\subtitle{} % Optional: Leave empty or comment out if none
+\serialnumber{IT kDV 26 008}
+\credits{15}
+\datefield{June 2026} % Supports standard \today or custom string like {June 2026}
+\programme{Bachelor's Programme in Computer Science}
+\campus{Uppsala} % e.g., Uppsala or Visby
+
+\supervisor{Elias Castegren}
+\subjectreader{Ramanathan Thinniyam Srinivasan}
+\examiner{Johannes Borgström}
+
+\logobwnotextpath{images/uppsala-universitet-bw-no-text.svg}
+\logobwpath{images/uppsala-universitet-bw.svg}
+\logopath{images/uppsala-universitet.svg}
+
+% Confidentiality Setup
+% To activate, uncomment the line below. If left commented, the text automatically hides.
+% \confidentialdate{2028-06-03} 
+
+\abstracttext{%
+As interest in formalized programming language semantics increases,
+proof assistants like Lean offer promising avenues for computer science education.
+While other studies frequently focuses on developing new pedagogical tools,
+this thesis investigates the structural alignment between an established semantics
+textbook and our mechanized translation constructed
+to mimic the text as closely as possible.
+The study evaluates whether traditional pen-and-paper proofs transfer seamlessly
+into Lean or require significant modifications to account for implicit assumptions.
+The results indicate that a large portion of the chapters covered in the textbooks
+material maps directly into Lean.
+However, key deviations emerged due to textbook imprecisions,
+omitted "Straightforward" steps, and Lean's specific constraints regarding partial functions.
+Ultimately, this close structural mapping shows that mechanized translations
+can successfully augment traditional coursework,
+provided students receive adequate guidance to manage the rigorous demands
+of tool-based formalization.
+}
+
 \begin{document}
 
 % Report front stuff
 \frontmatter
 
-% Title page
-\input{chapters/0-title.tex}
+\makeuufrontmatter
 
-% Abstract page
-\input{chapters/0-abstract.tex}
 \input{chapters/0-disclaimer.tex}
 
 % ToC
