@@ -7,8 +7,9 @@
 %
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
-First steps of this thesis are to compare the \While language definition between the textbook~\citep{nielson_semantics_2007}
-and what the respective definition would be in Lean 4.
+In this chapter we present the result of the propoced method showing the mechanized proof in lean on one side next to the original definition given in the book on the other side.
+The full Lean 4 implementation of the formalization and proofs is available in the public github code repository at \href{https://github.com/hato1883/Bachelor-Thesis-Code}{hato1883/Bachelor-Thesis-Code}.
+Now with that said, lets begin by mechanizing the \While language definition into lean.
 This will then allow us to formalize both Natural Semantics, and Structural Operational Semantics
 for \While. After introducing the individual semantics rules we can then show
 how an individual proof from the textbook compares with the corresponding Lean formalization.
@@ -50,7 +51,7 @@ deriving instance
   DecidableEq for Var
         \end{Lean_Code}
     \end{leftcolumn}
-    \begin{rightcolumn}
+    \begin{rightcolumn}\noindent
 We assume that the structure of variables is given elsewhere;
 for example, variables might be strings
 of letters and digits starting with a letter.
