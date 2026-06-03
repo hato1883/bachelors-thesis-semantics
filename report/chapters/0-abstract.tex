@@ -1,5 +1,51 @@
-\section*{Abstract}
 
+% ==========================================
+% PAGE 2: ABSTRACT & METADATA PAGE
+% ==========================================
+\thispagestyle{empty} % Simple clean page number at the bottom center
+
+\begin{tikzpicture}[remember picture, overlay]
+    % Text margin alignments matching the geometry rules from Page 1:
+    % Left text margin = 25mm from page edge
+    % Right text margin = 20mm from page edge (or 210mm - 20mm = 190mm from left edge)
+
+    % ----------------------------------------------------
+    % TOP LEFT: Logotype Image (Kept identical to Cover Page)
+    % ----------------------------------------------------
+    \node[anchor=north west, inner sep=0pt] 
+        (logo) at ([xshift=14.45mm, yshift=-13.70mm]current page.north west) {
+            \includesvg[width=3.215cm]{images/uppsala-universitet-bw}
+        };
+
+    % ----------------------------------------------------
+    % TOP RIGHT GROUP: Title, Line, and Author (Line is In-Between)
+    % ----------------------------------------------------
+    % 1. The Title Node
+    \node[anchor=north west, align=left, inner sep=0pt, text width=10cm] 
+        (titleblock) at ([xshift=70mm, yshift=-26mm]current page.north west) {
+            {\large\bfseries\color{lightgray} Mechanizing Proofs from a
+            Course on Programming Language Semantics in Lean}
+        };
+
+    % 2. FIXED DIVIDER LINE: Drawn exactly under the Title, extending to the right margin
+    \draw[line width=0.6pt, black] 
+        ([yshift=-0.25cm]titleblock.south west) -- ([yshift=-0.25cm]titleblock.south west -| current page text area.east);
+
+    % 3. The Author Node (Placed below the line)
+    \node[anchor=north west, align=left, inner sep=0pt, text width=12cm] 
+        (authorblock) at ([xshift=0mm, yshift=-0.55cm]titleblock.south west) {
+            {\small\textbf{Hampus Toft}}
+        };
+        
+
+    % ----------------------------------------------------
+    % MIDDLE AREA: Abstract Header & Text Block
+    % ----------------------------------------------------
+    % Positioned below the logo, indented to the right (aligns with xshift=50mm)
+    \node[anchor=north west, align=left, inner sep=0pt, text width=14cm] 
+        (abstractblock) at ([xshift=25mm, yshift=-57.7mm]current page.north west) {
+            {\normalsize\textbf{Abstract}} \\[0.275cm]
+            {\normalsize\color{lightgray}
 As interest in formalized programming language semantics increases,
 proof assistants like Lean offer promising avenues for computer science education.
 While other studies frequently focuses on developing new pedagogical tools,
@@ -16,3 +62,45 @@ Ultimately, this close structural mapping shows that mechanized translations
 can successfully augment traditional coursework,
 provided students receive adequate guidance to manage the rigorous demands
 of tool-based formalization.
+            }
+        };
+
+    % ----------------------------------------------------
+    % BOTTOM AREA: Centered Institutional & Confidentiality Footer
+    % ----------------------------------------------------
+    % Fully centered relative to the whole canvas page.center axis
+    \node[anchor=south, align=center, inner sep=0pt] 
+        at ([xshift=2.5mm, yshift=4.9mm]current page.south) {
+            % Lines 1 & 2: Primary Institution Metadata
+            {\normalsize\bfseries\color{lightgray} Faculty of Science and Technology}       \\[2mm]
+            {\normalsize\bfseries\color{lightgray} Uppsala University, Place of publication: Uppsala}        \\[0.5cm]
+            
+            % Lines 3 & 4: Supervisor & Examiner (Smaller Font, Light Grey)
+            {\small\color{lightgray} Supervisor: Elias Castegren \quad Subject reader: Ramanathan Thinniyam Srinivasan} \\[0.15cm]
+            {\small\color{lightgray} Examiner: Johannes Borgström} \\[0.3cm]
+            
+            % Line 5: Confidentiality Warning Field
+            % {\small\color{lightgray} This degree project is confidential until Click and select the date or type in the field. (Remove if not confidential)}
+        };
+
+\end{tikzpicture}
+\newpage
+
+% \section*{Abstract}
+
+% As interest in formalized programming language semantics increases,
+% proof assistants like Lean offer promising avenues for computer science education.
+% While other studies frequently focuses on developing new pedagogical tools,
+% this thesis investigates the structural alignment between an established semantics
+% textbook and our mechanized translation constructed
+% to mimic the text as closely as possible.
+% The study evaluates whether traditional pen-and-paper proofs transfer seamlessly
+% into Lean or require significant modifications to account for implicit assumptions.
+% The results indicate that a large portion of the chapters covered in the textbooks
+% material maps directly into Lean.
+% However, key deviations emerged due to textbook imprecisions,
+% omitted "Straightforward" steps, and Lean's specific constraints regarding partial functions.
+% Ultimately, this close structural mapping shows that mechanized translations
+% can successfully augment traditional coursework,
+% provided students receive adequate guidance to manage the rigorous demands
+% of tool-based formalization.
