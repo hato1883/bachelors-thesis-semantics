@@ -31,6 +31,7 @@ The categories for \While are defined using BNF notation, mapping numerals, vari
 Bellow a side by side view is presented where the left side (Mechanized (Lean 4)) is formalizations of the text on the right
 (Pen-and-Paper) which is directly quoted from the textbook.
 Using Lean 4's syntax, we translate each BNF rule directly into a constructor:
+\newpage
 \begin{paracol}{2}
     \begin{leftcolumn}
         \centering \textbf{Mechanized (Lean 4)}
@@ -58,7 +59,6 @@ of letters and digits starting with a letter.
     \end{rightcolumn}
 \end{paracol}
 
-\newpage
 \begin{paracol}{2}
 \begin{leftcolumn}
     \begin{Lean_Code}
@@ -321,7 +321,6 @@ notation
     \)
 \end{rightcolumn}
 
-\newpage
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
@@ -442,7 +441,6 @@ def Aexp_eval : Aexp §\(\to\)§
 \end{rightcolumn}
 \end{paracol}
 \vspace{1em}
-\newpage
 
 \begin{paracol}{2}
 \begin{leftcolumn}
@@ -506,6 +504,7 @@ def Bexp_eval : Bexp §\(\to\)§
     else ff
     \end{Lean_Code}
 \end{leftcolumn}
+\newpage
 \begin{rightcolumn}
     \[
     \begin{array}{rcl}
@@ -725,6 +724,7 @@ resulting state will be \(s'\).
     §\(\to_{ns}\)§ s'
     \end{Lean_Code}
 \end{leftcolumn}
+
 \begin{rightcolumn}
 \vspace{2.5em}
     \(
@@ -912,6 +912,7 @@ This is the normal way to prove equivalence of two statements.
 
 \subsubsection*{Forward Direction: $(*) \implies (**)$}
 Let us now compare the textbook proof with the mechanized equivalent for the case where we show that (*) holds, implies that (**) holds.
+\newpage
 \begin{paracol}{2}
 \begin{leftcolumn}
     \centering \textbf{Mechanized (Lean 4)}
@@ -1855,7 +1856,6 @@ inductive small_step :
     \)
 \end{rightcolumn}
 % \vspace{3em}
-\newpage
 
 \switchcolumn[1]*[]
 \begin{leftcolumn}
@@ -2347,9 +2347,8 @@ there are no stuck configurations in the structural operational semantics of \Wh
 For the other property, suppose that the execution of \(S\) on state \(s\) loops in one semantics.
 If it terminates in the other semantics, we have a contradiction with the first property
 because both semantics are deterministic (Theorem 2.9 and Exercise 2.22).
-Hence, \(S\) will have to loop on state \(s\) also in the other semantics.
+Hence, \(S\) will have to loop on state \(s\) also in the other semantics~\citep[p.~41 - 42]{nielson_semantics_2007}.
 \end{quotation}
-~\citep[p.~41 - 42]{nielson_semantics_2007}
 before continuing by proving both Lemma 2.27 and Lemma 2.28.
 To follow the textbook we will make sure to prove them in the same order starting with Lemma 2.27,
 but before we can prove Lemma 2.27 we need to introduce an auxiliary proof.
