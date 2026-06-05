@@ -2194,8 +2194,8 @@ which of the two rules [comp\(_{sos}^{1}\)] and [comp\(_{sos}^{2}\)] is used.
         -- (h_rest).
         specialize ih k§\(_0\)§
           h_lt h_rest
-        have ⟨s§\(_0\)§, k§\(_1\)§, k§\(_2\)§,
-          hk§\(_1\)§, hk§\(_2\)§, h_sum⟩ := ih
+        have §\(\langle\)§s§\(_0\)§, k§\(_1\)§, k§\(_2\)§,
+          hk§\(_1\)§, hk§\(_2\)§, h_sum§\(\rangle\)§ := ih
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
@@ -2537,7 +2537,7 @@ from the induction hypothesis applied to the premise\\
 \switchcolumn[1]*[]
 \begin{leftcolumn}
     \begin{Lean_Code}
-  | @while_true b S₂ s s' s''
+  | @while_true b S§\(_2\)§ s s' s''
     hcond h_body h_rest
     ih_body ih_loop =>
     \end{Lean_Code}
@@ -2985,7 +2985,7 @@ lemma star_to_small_step_k {§\(\gamma_1\)§ §\(\gamma_2\)§ : Config}
     exists 0
     exact small_step_k.refl
   | step s h_rest ih =>
-    have ⟨k, hk⟩ := ih
+    have §\(\langle\)§k, hk§\(\rangle\)§ := ih
     exists k + 1
     exact small_step_k.step s hk
 \end{Lean_Code}
