@@ -10,7 +10,7 @@
 This chapter establishes the theoretical foundation necessary for the thesis.
 We begin by specifying the \While language, from \emph{Semantics with Applications: An Appetizer}
 which is our primary study which throughout this work. This provides the concrete syntax required to
-explore the formal semantics of programming languages—the mathematical bridge
+explore the formal semantics of this programming language, giving us the mathematical bridge
 between a program's notation and its behavior. We then delve into Operational
 Semantics, detailing both the Natural and Structural
 approaches, followed by the primary proof techniques used in their analysis.
@@ -22,28 +22,43 @@ to translate these textbook definitions into machine-checked proofs~\citep{theor
 %
 \section{The \While Language Framework}
 \label{background:sec:while}
-The formal language analyzed throughout this work is \While, an imperative, deterministic toy language defined by \citet{nielson_semantics_2007}. To read the formal proofs and translations compared in this thesis, a basic understanding of the language's structural notation is required.
+The formal language analyzed throughout this work is \While, an imperative,
+deterministic toy language defined by \citet{nielson_semantics_2007}.
+In order to read the formal proofs and translations compared in this thesis, a basic understanding of the language's structural notation is required.
 
 \subsection*{Syntactic Structure and BNF Notation}
-The abstract syntax of \While is defined inductively over five core syntactic categories, each associated with a specific meta-variable used in proofs:
+The abstract syntax of \While is defined inductively
+over five core syntactic categories, each associated
+with a specific meta-variable used in proofs:
 \begin{itemize}
-    \item $n \in \Num$ (Numerals / digits)
+    \item $n \in \Num$ (Numerals)
     \item $x \in \Var$ (Variable names)
     \item $a \in \Aexp$ (Arithmetic expressions, e.g., $x + 1$)
     \item $b \in \Bexp$ (Boolean expressions, e.g., $a_1 \leq a_2$)
     \item $S \in \Stm$ (Statements / commands, e.g., loops and assignments)
 \end{itemize}
-The grammar of these categories is specified using Backus-Naur Form (BNF) notation. In this notation, the symbol \mbox{\(::=\)} means \emph{"can be structured as"}, and the vertical bar \mbox{\(\mid\)} denotes an \emph{"alternative choice"}. For example, the statement grammar is written as:
+The grammar of these categories is specified using
+Backus-Naur Form (BNF) notation. In this notation,
+the symbol
+\mbox{\(::=\)} means \emph{"can be structured as"},
+and the vertical bar
+\mbox{\(\mid\)} denotes an \emph{"alternative choice"}.
+For example, the statement grammar is written as:
 \[
 S ::= x := a \mid \mathbf{skip} \mid S_1; S_2 \mid \mathbf{if}\ b\ \mathbf{then}\ S_1\ \mathbf{else}\ S_2 \mid \mathbf{while}\ b\ \mathbf{do}\ S
 \]
-This indicates that a statement $S$ is either an assignment, a no-op (\textbf{skip}), a sequential composition of two statements separated by a semicolon, a conditional branch, or a loop.
+This indicates that a statement $S$ is either
+an assignment consisting of a variable \(x\) and an arithemetic expression \(a\),
+a no-op (\textbf{skip}),
+a sequential composition of two statements separated by a semicolon,
+a conditional branch, consisting of a boolean expression \(b\) and one statement for each of the two cases,
+or a loop consisting of a boolean expression and a statement representing the loop body.
 
 \subsection*{Semantic States and Denotational Notation}
 To give the syntax mathematical meaning, we map expressions to values using explicit environments and evaluation functions:
 \begin{itemize}
     \item \textbf{Program State (\State):} Represented by the meta-variable $s$, a state is a total function mapping variables to integers (\(s : \mathbf{Var} \to \mathbb{Z}\)). The notation \(s \, x\) denotes looking up the integer value of variable $x$ in state $s$.
-    \item \textbf{State Override Notation \(s[x \mapsto v]\):} This represents a lookup function identical to $s$, except that the variable $x$ is explicitly updated to map to the new integer value $v$.
+    \item \textbf{State Override Notation \(s[x \mapsto v]\):} This new construction can also be called a state that is identical to $s$, except that the variable $x$ is explicitly updated to map to the new integer value $v$.
     \item \textbf{Semantic Brackets \([\![\cdot]\!]\):} Double brackets (Oxford brackets) are used to separate the syntax of the programming language from the mathematical meta-language evaluating it. 
 \end{itemize}
 The textbook defines three compositional semantic functions using this bracket notation:
@@ -65,15 +80,13 @@ Operational semantics describes how a program executes by tracking changes to an
 
 This thesis contrasts the translation of two operational paradigms defined by \citet{nielson_semantics_2007}: Natural Semantics and Structural Operational Semantics.
 
-\subsection*{Natural Semantics (Big-Step Notation)}
-Natural Semantics (NS) describes the execution of a statement running completely to its conclusion. The transition relation is denoted by a single arrow (\(\to\)):
+Natural Semantics describes the execution of a statement running completely to its conclusion. The transition relation is denoted by a single arrow (\(\to\)):
 \[
 \langle S, s \rangle \to s'
 \]
 This is read as: \emph{"The execution of statement $S$ starting in state $s$ terminates completely, resulting in the final state $s'$."} Rules in this framework are written as fractions (inference rules), where the statements above the horizontal line are the required premises, and the statement below is the conclusion.
 
-\subsection*{Structural Operational Semantics (Small-Step Notation)}
-Structural Operational Semantics (SOS) models execution at a higher resolution, tracking individual, atomic steps of computation. The transition relation is denoted by a double arrow (\(\Rightarrow\)). SOS distinguishes between two types of targets:
+Structural Operational Semantics models execution at a higher resolution, tracking individual, atomic steps of computation. The transition relation is denoted by a double arrow (\(\Rightarrow\)). SOS distinguishes between two types of targets:
 \begin{itemize}
     \item \textbf{Intermediate Transition:} $\langle S, s \rangle \Rightarrow \langle S', s' \rangle$ \\
     Read as: \emph{"Executing the first step of statement $S$ in state $s$ modifies the state to $s'$, leaving statement $S'$ remaining to be executed."}
@@ -116,39 +129,42 @@ that takes existing elements of the set and produces a new one.
 The evaluation of a statement is written as a relation: $\langle S, s \rangle \to s'$. 
 In Lean, this relation is defined as an \texttt{inductive} type that returns
 a \texttt{Prop} (Proposition).
-This is a crucial distinction: \textbf{Data Types} (like \texttt{Aexp}) are used to build programs.
-Whilst \textbf{Propositions} (like \texttt{big\_step}) are used to make claims about those programs.
+\begin{Lean_Code}
+inductive big_step : Stm §\(\to\)§ State §\(\to\)§ State §\(\to\)§ Prop where
+    | ass {s x a} :
+            big_step (x §\(:\equiv\)§ a) s (s[x §\(\mapsto\)§ §\(\mathcal{A}\)§§\([\![\)§a§\(]\!]\)§s])
+    | comp {S§\(_1\)§ S§\(_2\)§ s s' s''}
+        (h_left  : big_step S§\(_1\)§ s s')
+        (h_right : big_step S§\(_2\)§ s' s'') :
+            big_step (S§\(_1\)§; S§\(_2\)§) s s''
+    | §\dots§
+\end{Lean_Code}
+
+This relation is a \texttt{Prop} because the transition judgment may or may not hold for a given statement and state.
+In other words, the relation is something that is either true or false, which is exactly why \texttt{big\_step} is represented as a proposition rather than as a data type that computes a value by itself.
+
+This is a crucial distinction: \textbf{Data Types} (like \texttt{Aexp}) are used to build programs,
+whilst \textbf{Propositions} (like \texttt{big\_step}) are used to make claims about those programs.
 Due to propositions being something  that is either true or false, whilst data types are just syntactic sugar.
 
-\noindent
 When we define \texttt{big\_step} inductively, each constructor represents an
-\textbf{inference rule}.
-We can then combine this with custom notation so that the original Lean code of:
+\textbf{inference rule}. For example, the constructor for sequential composition says that if
+the first statement steps from $s$ to $s'$ and the second statement steps from $s'$ to $s''$,
+then the combined statement steps from $s$ to $s''$. In Lean, this is written directly as
 
 \begin{Lean_Code}
-    big_step S s s'
+    | comp {S§\(_1\)§ S§\(_2\)§ s s' s''}
+        (h_left  : big_step S§\(_1\)§ s s')
+        (h_right : big_step S§\(_2\)§ s' s'') :
+            big_step (S§\(_1\)§; S§\(_2\)§) s s''
 \end{Lean_Code}
-can be transformed into
-\begin{Lean_Code}
-    §\(\langle\)§S, s§\(\rangle\)§ §\(\to_{ns}\)§ s'
-\end{Lean_Code}
-by using the following
-\begin{Lean_Code}
-notation "§\color{purple}\(\langle\)§" S ", " s "§\color{purple}\(\rangle\)§ §\color{purple}\(\to_{ns}\)§ " s' => big_step S s s'
-\end{Lean_Code}
-For instance, the rule for statement composition (\texttt{comp}) in Lean is:
 
-\begin{Lean_Code}
-| comp (h_left : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ s') (h_right : §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§ §\(\to_{ns}\)§ s'') :
-    §\(\langle\)§S§\(_1\)§; S§\(_2\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ s''
-\end{Lean_Code}
-This code defines a rule of inference. To a reader familiar with natural deduction from a course in mathematical logic,
-this is a direct mapping of the standard horizontal-bar notation:
+To a reader familiar with natrual deduction from a course
+in mathematical logic, this is a direct mapping of the standard horizontal-bar notation:
 \[
-\frac{\langle S_1, s \rangle \to_{ns} s' \quad \langle S_2, s' \rangle \to_{ns} s''}{\langle S_1; S_2, s \rangle \to_{ns} s''}
+\frac{\mathtt{big\_step} \ S_1 \ s \ s' \qquad \mathtt{big\_step} \ S_2 \ s' \ s''}{\mathtt{big\_step} \ (S_1;\ S_2) \ s \ s''}
 \]
-The names \texttt{h\_left} and \texttt{h\_right} represent the \textit{hypotheses} or \textit{premises}
-required to reach the conclusion below the colon.
+Here we simply used the \texttt{h\_left} and \texttt{h\_right} as premises to prove our conclusion.
 
 \subsection{The Proof State and Tactics}
 Unlike a prose proof, which is a static piece of text,
@@ -175,8 +191,8 @@ to their respective functionalities in standard mathematical and logical discour
 \texttt{inductive}    & Inductive Definition      & Defines a set or a relation via a list of rules/constructors. \\ \\
 \texttt{Prop}         & Proposition               & The type of statements that have truth values. \\ \\
 \texttt{theorem}      & Theorem / Lemma           & A claim that requires a formal proof term. \\ \\
-\texttt{intro}        & Implication Introduction  & "Assume $P$ is true" or "Let $x$ be an arbitrary element." \\ \\
-\texttt{exact}        & Q.E.D.                    & Completes a goal by providing the required evidence directly. \\ \\
+\texttt{intro}        & Implication / Variable Introduction  & "Assume $P$ is true" or "Let $x$ be an arbitrary element." \\ \\
+\texttt{exact}        & Direct Proof              & Completes a goal by providing a proof term that matches the goal exactly. \\ \\
 \texttt{cases}        & Proof by Cases       & Deconstructs an object or relation into its possible forms. \\ \\
 \texttt{apply}        & Rule application (implication elimination) & Uses a known rule or theorem to transform or discharge the current goal. \\ \\
 \texttt{rfl}          & Reflexivity               & Proves an equality of the form $A = A$ by definition. \\ \hline
@@ -184,7 +200,7 @@ to their respective functionalities in standard mathematical and logical discour
 \caption{Mapping of Lean 4 keywords to mathematical concepts.}
 \end{figure}
 
-\subsection{Notation Conventions}
+\subsection{Custom Notation}
 To bridge the gap between code and literature,
 it is possible to define custom notation and operations as demonstrated earlier.
 This allows us to mimic notation used by the pen-and-paper proofs.
@@ -194,3 +210,27 @@ to mark an addition of two numbers, instead of using the full inductive name suc
 Notations can be defined by using the keyword "\texttt{notation}",
 and operations can be defined using "\texttt{infixl}" and "\texttt{infixr}"
 
+By introducing the notation
+\begin{Lean_Code}
+notation "§\color{purple}\(\langle\)§" S ", " s "§\color{purple}\(\rangle\)§ §\color{purple}\(\to_{ns}\)§ " s' => big_step S s s'
+\end{Lean_Code}
+we can rewrite the compositional inference rule:
+\begin{Lean_Code}
+    | comp {S§\(_1\)§ S§\(_2\)§ s s' s''}
+        (h_left  : big_step S§\(_1\)§ s s')
+        (h_right : big_step S§\(_2\)§ s' s'') :
+            big_step (S§\(_1\)§; S§\(_2\)§) s s''
+\end{Lean_Code}
+to look like this:
+\begin{Lean_Code}
+    | comp {S§\(_1\)§ S§\(_2\)§ s s' s''}
+        (h_left  : §\(\langle\)§S§\(_1\)§, s§\(\rangle\)§ §\(\to_{ns}\)§ s')
+        (h_right : §\(\langle\)§S§\(_2\)§, s'§\(\rangle\)§ §\(\to_{ns}\)§ s'') :
+            §\(\langle\)§(S§\(_1\)§; S§\(_2\)§), s§\(\rangle\)§ §\(\to_{ns}\)§ s''
+\end{Lean_Code}
+Which, if mapped to the horizontal-bar notation would look like:
+\[
+\frac{\langle S_1,\ s\rangle \to_{ns} s' \qquad \langle S_2,\ s'\rangle \to_{ns} s''}{\langle (S_1;\ S_2),\ s\rangle \to_{ns} s''}
+\]
+which allows for better clarity as well as the use of the same,
+or at least very similar, notation to what is used in the book.
