@@ -7,12 +7,12 @@
 %
 \chapter{Natural Semantics and Structural Operational Semantics: Formalization and Equivalence}
 \label{formal_ns_sos_equiv}
-In this chapter we present the result of the propoced method showing the mechanized proof in lean on one side next to the original definition given in the book on the other side.
-The full Lean 4 implementation of the formalization and proofs is available in the public github code repository at \href{https://github.com/hato1883/Bachelor-Thesis-Code}{hato1883/Bachelor-Thesis-Code}.
-Now with that said, lets begin by mechanizing the \While language definition into lean.
+In this chapter we present the result of the proposed method showing the mechanized proof in Lean next to the original definition given in the book.
+The full Lean 4 implementation of the formalization and proofs is available in the public GitHub code repository \citep{bachelor_thesis_code_repo}.
+We will begin by mechanizing the \While language definition into lean.
 This will then allow us to formalize both Natural Semantics, and Structural Operational Semantics
 for \While. After introducing the individual semantics rules we can then show
-how an individual proof from the textbook compares with the corresponding Lean formalization.
+how the proofs from the textbook compares with the corresponding Lean formalizations.
 
 
 %
@@ -20,15 +20,15 @@ how an individual proof from the textbook compares with the corresponding Lean f
 %
 \section{Formalizing \While}
 \label{formal_ns_sos_equiv:sec:while:formalization}
-As mentioned we will start with formulating our toy language \While as defined in \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}.
+We will start with formulating \While as defined in \emph{Semantics with Applications: An Appetizer}~\citep{nielson_semantics_2007}.
 We will proceed in the same order as outlined by the book, starting with the syntactic categories,
-before moving onwards to the semantic functions.
+before moving on to the semantic functions.
 
 
 \subsection*{Syntactic Categories}
 We begin by mechanizing the syntactic categories defined in chapter 1.2 of the textbook~\citep[p.~7]{nielson_semantics_2007}. 
 The categories for \While are defined using BNF notation, mapping numerals, variables, and expressions to inductive sets.
-Bellow a side by side view is presented where the left side (Mechanized (Lean 4)) is formalizations of the text on the right
+Below a side by side view is presented where the left side (Mechanized (Lean 4)) is formalizations of the text on the right
 (Pen-and-Paper) which is directly quoted from the textbook.
 Using Lean 4's syntax, we translate each BNF rule directly into a constructor:
 \newpage
@@ -237,7 +237,7 @@ The translation of BNF to Lean's inductive types is largely direct, with some mi
     The textbook provides an informal description of variables ($x \in \mathbf{Var}$)
     as strings of letters and digits. In Lean, this must be an explicitly defined,
     in our case the internal String Type.
-    Crucially, to satisfy Lean's need for decidability (e.g., to
+    Crucially, to be able to compare two objects in Lean we need to enable it (e.g., to
     determine if two variables in an assignment are the same such as \(x = y\)), the type must
     explicitly derive \texttt{DecidableEq} property that
     are assumed as "given" in pen-and-paper proofs.
@@ -528,8 +528,8 @@ def Bexp_eval : Bexp §\(\to\)§
     \[
     \begin{array}{rcl}
     \mathcal{B}[\![\neg b]\!]s &=& \begin{cases} 
-        \textbf{tt} & \text{if } \neg \mathcal{B}[\![b]\!]s \\ 
-        \textbf{ff} & \text{if } \mathcal{B}[\![b]\!]s
+        \textbf{tt} & \text{if } \mathcal{B}[\![b]\!]s = \textbf{ff} \\ 
+        \textbf{ff} & \text{if } \mathcal{B}[\![b]\!]s = \textbf{tt}
         \end{cases}
     \end{array}
     \]
@@ -578,8 +578,6 @@ between mechanized and pen-and-paper approaches:
     Using this we can instead compare the evaluation of the \(\mathtt{Bexp}\) to check if it is either
     \(\mathtt{tt}\) or \(\mathtt{ff}\) and then using the built-in \(\mathtt{if-then-else}\),
     we can then map the result back into \(\mathtt{tt}\) and \(\mathtt{ff}\).
-    In comparison, the textbook has mapped \(\mathtt{tt}\) to the \(\mathtt{true}\) value and can therefore
-    use it directly in their \(\mathtt{if-then}\) constructions.
     Another interesting change is that the textbook does not use the \(\mathtt{if-then-else}\) construction,
     but rather two separate \(\mathtt{if-then}\) constructions. This could imply that the law of excluded middle
     does not apply to this construction, but no such mention is made.
@@ -596,8 +594,8 @@ pen-and-paper proofs often treat implicitly.
 
 Having established the syntactic categories, semantic domains, and evaluation functions,
 we now possess the foundation needed to define the transition systems.
-The next section formalizes Natural Semantics for the \While language,
-followed by Structural Operational Semantics, and finally establishes their equivalence.
+The next section compares the formalization of Natural Semantics for the \While language,
+followed by Structural Operational Semantics, and finally compares the equivalence proof.
 
 %
 %
@@ -606,7 +604,7 @@ followed by Structural Operational Semantics, and finally establishes their equi
 \label{formal_ns_sos_equiv:sec:ns:formalization}
 Now that we have a mechanized definition of the \While language we can follow the book by defining the actual semantics of running a \While language program. 
 We will start by defining the natural operational semantics.
-When it comes to operational semantics we use deduction tree syntax to provide inference rules and axioms.
+When it comes to operational semantics we use derivation tree syntax to provide inference rules and axioms.
 
 \begin{paracol}{2}
 \begin{leftcolumn}
@@ -850,7 +848,7 @@ Overall the mapping remains 1-to-1 with some minor syntax differences:
     \item \textbf{Explicit Side Conditions}:
     In pen-and-paper proofs, side conditions (e.g.,
     $if \ \mathcal{B}[\![b]\!]s = \mathbf{tt}$) are often treated as meta-level
-    annotations to justify the choice of a rule. Where the justification can be proven outside the deduction tree,
+    annotations to justify the choice of a rule. Where the justification can be proven outside the derivation tree,
     whilst in Lean, these become formal premises (\texttt{h\_cond}) which must
     be proven just like the others.
 
@@ -1112,8 +1110,8 @@ This completes the first part of the proof.
 \end{paracol}
 \vspace{1em}
 
-As we can see the Lean versions mimics the textbook very closely.
-This proof builds the deduction tree from the top and moving down towards the
+As we can see the Lean version mimics the textbook very closely.
+This proof builds the derivation tree from the top and moving down towards the
 root with our wanted result.
 
 
@@ -1329,7 +1327,7 @@ In this case the mapping seems to not be as straightforward on the surface,
 but this is mostly an illusion due to the narrative approach of walking through each
 step in the proof, compared to Lean's repeated use of inference rule and definitions.
 
-To show what actually is happening a table of translation is provided bellow:
+To show what actually is happening a table of translation is provided below:
 \begin{figure}[H]
     \caption{table of translations for understanding the mapping of Lemma 2.5}
     \centering
@@ -1344,18 +1342,22 @@ To show what actually is happening a table of translation is provided bellow:
         using the tactic
         "\lean{intro h_p}" transforms goal into:
         \(
-        \Gamma \land (\text{h\_p} : \mathtt{Prop}_1) \vdash \mathtt{Prop}_2
+        \Gamma, (\text{h\_p} : \mathtt{Prop}_1) \vdash \mathtt{Prop}_2
         \)
         &
         Given an implication of the form \(\Gamma \vdash \mathtt{Prop}_1 \implies \mathtt{Prop}_2\),
-        it is enough to prove that \(\Gamma' \vdash \mathtt{Prop}_2\) where \(\Gamma' = \Gamma \land \mathtt{Prop}_1\).
+        it is enough to prove that \(\Gamma' \vdash \mathtt{Prop}_2\) where \(\Gamma' = \Gamma, \mathtt{Prop}_1\).
         &
-        Because \(\mathtt{Prop}_1\) holds, we know that we can prove \(\mathtt{Prop}_2\) by \dots \\ \\
+        Assuming \(\mathtt{Prop}_1\) holds, we can then prove that \(\mathtt{Prop}_2\) by \dots \\ \\
 
         Given the goal in lean:
         \(\langle \mathtt{Stmt}, s \rangle\) \(\to_{ns} s''\)
-        we can solve it using:
-        \lean{cases Stmt with}, \lean{| case_1 .. => ...} \lean{| case_2 .. => ...} \lean{| case_? .. => ...}  \lean{| case_k .. => ...}
+        we can solve it using:\\
+        \lean{cases Stmt with}\qquad \quad
+        \lean{| case_1 .. => ...}\qquad
+        \lean{| case_2 .. => ...}\qquad
+        \lean{| case_? .. => ...}\qquad
+        \lean{| case_k .. => ...}
         &
         We have some construction which can only be constructed in \(k\) ways,
         such as the if-then-else statement, which has two rules: [if\(_{ns}^{tt}\)] and [if\(_{ns}^{ff}\)].
@@ -1366,7 +1368,7 @@ To show what actually is happening a table of translation is provided bellow:
 
         Given that we have goal:
         \(
-        \Gamma \land T1 \land T2 \vdash \mathtt{Prop}
+        \Gamma, T1, T2 \vdash \mathtt{Prop}
         \)
         we can construct \(\mathtt{Prop}\) using \(T1 \) and \(T2\).
         Such as \lean{big_step.comp T1 T2}
@@ -1705,6 +1707,7 @@ The formalization of determinism highlights some key differences in how
     This ensures the IH is strong enough to talk about
     \textit{any} potential second derivation, not just one specific fixed $s''$.
 \end{itemize}
+The book contains multiple exercises for Natural Semantics, but these lack an answer key that could be formalized.
 
 
 %
@@ -1712,7 +1715,6 @@ The formalization of determinism highlights some key differences in how
 %
 \section{Formalizing Structural Operational Semantics}
 \label{formal_ns_sos_equiv:sec:sos:formalization}
-The book contains multiple exercises for Natural Semantics, but these lack an answer key that could be formalized.
 Next the book defines Structural Operational Semantics which follows a similar layout to Natural Semantics.
 
 \vspace{1em}
@@ -2050,8 +2052,8 @@ in Lean's parser, causing more diagnostic issues than the shorthand would resolv
 Consequently, we formalize only the most common pedagogical mappings, from a
 statement-state pair ($\langle S, s \rangle$) to either a successor configuration
 or a terminal state, leaving transitions between abstract configurations to be
-handled via manual applications of the underlying small\_step\_k and
-small\_step\_star relations.
+handled via manual applications of the underlying \texttt{small\_step\_k} and
+\texttt{small\_step\_star} relations.
 
 
 %
@@ -2293,8 +2295,8 @@ of "pedagogical shortcuts":
     \item \textbf{Variable Generalization}:
     The textbook assumes the property holds for "all derivation sequences of length at most k"
     but in a tactic-based proof, one must explicitly ensure that the induction
-    hypothesis is not bound to the specific initial state \(s\), or the proof
-    will fail when the state changes during a step.
+    hypothesis is not bound to the specific initial state \(s\) using "\lean{generalizing s}",
+    otherwise the proof will fail when the state changes during a step.
 
     \item \textbf{Explicit Case Exhaustion}:
     The textbook notes the \(k=0\) case is
@@ -2303,7 +2305,7 @@ of "pedagogical shortcuts":
     such that \(n < 0\), and therefore we do not need to reason about the base case at all in lean.
 
     \item \textbf{Specialization and Unpacking}:
-    The Tactic \texttt{specialize} is used to bridge the gap
+    The tactic \texttt{specialize} is used to bridge the gap
     between a general hypothesis and the specific sub-derivation (\texttt{h\_tail})
     generated by the \texttt{step} constructor.
     Unpacking by using the tactic \texttt{have},
@@ -2663,7 +2665,7 @@ of pedagogical shortcuts:
 
 \end{itemize}
 In the textbook they describe the process of applying the induction hypothesis to the premises,
-something which lean dose automatically for us, allowing us to write shorter proofs, such in the case of
+something which Lean does automatically for us, allowing us to write shorter proofs, such in the case of
 if true case.
 
 
@@ -3060,6 +3062,6 @@ mechanized proofs handle logical equivalences:
     Whilst it is possible to define them using Leans special \texttt{Part} construction,
     it is unecesary as proving $\mathcal{S}_{ns}[\![S]\!] = \mathcal{S}_{sos}[\![S]\!]$ requires
     \(\langle S, s \rangle \to s' \Leftrightarrow \langle S, s \rangle \Rightarrow^* s'\).
-    Compared to Pen-and-Paper proofs, lean is very picking in what it can prove on partial functions.
+    Compared to Pen-and-Paper proofs, Lean is very picky in what it can prove about partial functions.
 \end{itemize}
 
