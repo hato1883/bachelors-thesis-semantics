@@ -763,8 +763,8 @@ resulting state will be \(s'\).
     ]1[
     if $\mathcal{B}[\![b]\!]s = \mathbf{ff}$
     ]{
-        \parbox{4cm}{$
-    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2, s \rangle \\
+        \parbox{3cm}{$
+    \langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \\ \mathtt{else}\ S_2, s \rangle
     \to s'
         $}
     }
@@ -791,9 +791,9 @@ resulting state will be \(s'\).
 \begin{prooftree}
   \hypo{\langle S, s \rangle \to s'}
   \hypo{
-        \parbox{3cm}{$
-    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s' \rangle \\
-    \to s''
+        \parbox{1.8cm}{$
+    \langle \mathtt{while}\ b\ \mathtt{do}\ \\
+    S, s' \rangle \to s''
         $}
     }
   \infer[
@@ -801,9 +801,9 @@ resulting state will be \(s'\).
       ]2[
       if $\mathcal{B}[\![b]\!]s = \mathbf{tt}$
       ]{
-        \parbox{5cm}{$
-    \langle \mathtt{while}\ b\ \mathtt{do}\ S, s \rangle \\
-    \to s''
+        \parbox{3cm}{$
+    \langle \mathtt{while}\ b\ \mathtt{do}\ \\
+    S, s \rangle \to s''
         $}
     }
 \end{prooftree}
@@ -979,8 +979,10 @@ In the first case, the derivation tree T has the form
             }
     \end{prooftree}
 \]
-where \(T_1\) is a derivation tree with root \(\langle S,\ s\rangle \to s'\) and \(T_2\) is a derivation tree
-with root \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s'\rangle \to s''\).
+where \(T_1\) is a derivation tree with root \\
+\(\langle S,\ s\rangle \to s'\) and \(T_2\) is a derivation tree
+with root \\
+\(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s'\rangle \to s''\). \\
 Furthermore, \(\mathcal{B}[\![b]\!]s = \mathbf{tt}\).
 \end{rightcolumn}
 \vspace{1.5em}
@@ -1038,7 +1040,9 @@ to construct the derivation tree
         \infer[
             % left label=[if$_{\text{ns}}^{\ \text{tt}}$]
             ]1{
-            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+                \parbox{6cm}{$
+            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S) \\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+                $}
             }
     \end{prooftree}
 \]
@@ -1101,7 +1105,9 @@ and we can now apply the rule [if$_{\text{ns}}^{\ \text{ff}}$] to construct a de
         \hypo{\langle \mathtt{skip},\ s\rangle \to s''}
         \infer[
         ]1{
-            \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S)\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+            \parbox{6cm}{$
+        \langle \mathtt{if}\ b\ \mathtt{then}\ (S;\ \mathtt{while}\ b\ \mathtt{do}\ S) \\ \mathtt{else}\ \mathtt{skip},\ s\rangle \to s''
+            $}
         }
     \end{prooftree}
 \]
@@ -1278,7 +1284,7 @@ This means that we have a derivation tree for
 \]
 and according to axiom [skip$_{\text{ns}}$] it must be the case that \(s = s''\).
 \end{rightcolumn}
-\vspace{1.5em}
+\vspace{3.5em}
 
 \switchcolumn[1]*[]
 \begin{leftcolumn}
@@ -1288,6 +1294,7 @@ and according to axiom [skip$_{\text{ns}}$] it must be the case that \(s = s''\)
       h_cond_false
     \end{Lean_Code}
 \end{leftcolumn}
+
 
 \begin{rightcolumn} \noindent
 But then we can use the axiom [while$_{\text{ns}}^{\text{\ ff}}$] to construct a derivation tree for (*).
@@ -1327,10 +1334,11 @@ In this case the mapping seems to not be as straightforward on the surface,
 but this is mostly an illusion due to the narrative approach of walking through each
 step in the proof, compared to Lean's repeated use of inference rule and definitions.
 
-To show what actually is happening a table of translation is provided below:
+To show what actually is happening a table of translation is provided in the \autoref{table:TLDR} below:
 \begin{figure}[H]
     \caption{table of translations for understanding the mapping of Lemma 2.5}
     \centering
+    \label{table:TLDR}
     \begin{tabularx}{\textwidth}{XXX}
         \textbf{Mechanized} & \textbf{Translation} & \textbf{Pen-and-Paper}\\
         \hline
@@ -1516,14 +1524,16 @@ for some \(s_0\).
     \end{Lean_Code}
 \end{leftcolumn}
 \begin{rightcolumn}
-The only rule that could be applied to give \(\langle S_1;\ S_2,\ s \rangle \to s''\) is
+The only rule that could be applied to give \\
+\(\langle S_1;\ S_2,\ s \rangle \to s''\) is
 [comp$_{\text{ns}}$], so there is a state \(s_1\) such that
 \[
 \langle S_1,\ s \rangle \to s_1\ \mbox{and}\ \langle S_2,\ s_1 \rangle \to s''
 \]
 The induction hypothesis can be applied to the premise \(\langle S_1,\ s \rangle \to s_0\) and from
 \(\langle S_1,\ s \rangle \to s_1\) we get \(s_0 = s_1\). Similarly, the induction hypothesis can be applied
-to the premise \(\langle S_2,\ s_0 \rangle \to s'\) and from \(\langle S_2,\ s \rangle \to s''\) we get \(s' = s''\) as required.
+to the premise \\
+\(\langle S_2,\ s_0 \rangle \to s'\) and from \(\langle S_2,\ s \rangle \to s''\) we get \(s' = s''\) as required.
 \end{rightcolumn}
 \vspace{2em}
 
@@ -1558,7 +1568,8 @@ holds because
 \mathcal{B}[\![b]\!] = \mathbf{tt}\ \mbox{and}\ \langle S_1,\ s \rangle \to s'
 \]
 From \(\mathcal{B}[\![b]\!] = \mathbf{tt}\) we get that the only rule that could be applied to give the
-alternative \(\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s''\) is 
+alternative \\
+\(\langle \mathtt{if}\ b\ \mathtt{then}\ S_1\ \mathtt{else}\ S_2,\ s \rangle \to s''\) is 
 [if$_{\text{ns}}^{\ \text{tt}}$]. So it must be the case that
 \[
 \langle S_1,\ s \rangle \to s'
@@ -1629,9 +1640,10 @@ and from \(\langle S_1,\ s \rangle \to s''\) we get \(s' = s''\).
 \]
 because
 \[
-\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s_0\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s_0, \ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'
 \]
-The only rule that could be applied to give \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''\)
+The only rule that could be applied to give \\
+\(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s \rangle \to s''\)
 is [while$_{\text{ns}}^{\ \text{tt}}$] because \(\mathcal{B}[\![b]\!] = \mathbf{tt}\), and this means that
 \[
 \langle S,\ s \rangle \to s_1\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_1 \rangle \to s''
@@ -1640,7 +1652,7 @@ must hold for some \(s_1\). Again the induction hypothesis can be applied to the
 \(\langle S,\ s \rangle \to s_0\), and from \(\langle S,\ s \rangle \to s_1\) we get \(s_0 = s_1\).
 Thus we have
 \[
-\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s' \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''
+\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s', \ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''
 \]
 Since \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s'\) is a premise of [while$_{\text{ns}}^{\ \text{tt}}$],
 we can apply the induction hypothesis to it. From \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s_0 \rangle \to s''\)
@@ -2366,6 +2378,8 @@ lemma small_step_star_trans {§\(\gamma_1\)§ §\(\gamma_2\)§ §\(\gamma_3\)§ 
 \end{Lean_Code}
 This allows us to reason about the fact that if if \(\langle S, s \rangle \Rightarrow^* \langle S', s' \rangle\)
 and \(\langle S', s' \rangle \Rightarrow^* \langle S'', s'' \rangle\) then the following must also be true \(\langle S, s \rangle \Rightarrow^* \langle S'', s'' \rangle\)
+
+\newpage
 \subsubsection*{Lemma 2.27}
 
 \vspace{1em}
@@ -2394,7 +2408,7 @@ For every statement \(S\) of \While and states \(s\) and \(s'\) we have
 \langle S, s \rangle \to s'\ \mbox{implies}\ \langle S, s \rangle \Rightarrow^{*} s'
 \]
 So if the execution of \(S\) from \(s\) terminates in the natural semantics, then it will terminate
-in the same state in the structural operational semantics.\(\langle S, s \rangle \to s'\).
+in the same state in the structural operational semantics.
 
 \end{rightcolumn}
 \vspace{2em}
@@ -2551,13 +2565,14 @@ from the induction hypothesis applied to the premise\\
 \]
 because
 \[
-\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''
+\mathcal{B}[\![b]\!] = \mathbf{tt}, \ \langle S,\ s \rangle \to s', \ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''
 \]
-The induction hypothesis can be applied to both of the premises \(\langle S,\ s \rangle \to s'\)
+The induction hypothesis can be applied to both of the premises \\
+\(\langle S,\ s \rangle \to s'\)
 and \(\langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \to s''\)
 and gives
 \[
-\langle S,\ s \rangle \Rightarrow^{*} s'\ \mbox{and}\ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \Rightarrow^{*} s''
+\langle S,\ s \rangle \Rightarrow^{*} s'\ \mbox{and} \ \langle \mathtt{while}\ b\ \mathtt{do}\ S,\ s' \rangle \Rightarrow^{*} s''
 \]
 \end{rightcolumn}
 \vspace{1em}
@@ -2849,7 +2864,8 @@ derivation sequences because \(k_1 \leq k_0\) and \(k_2 \leq k_0\). So we get
 \[
 \langle S_1,\ s \rangle \to s'\ \mbox{and}\ \langle S_2,\ s' \rangle \to s''
 \]
-Using [comp$_{\text{ns}}$], we now get required \(\langle S_1;\ S_2,\ s \rangle \to s''\)
+Using [comp$_{\text{ns}}$], we now get required \\
+\(\langle S_1;\ S_2,\ s \rangle \to s''\)
 \end{rightcolumn}
 \vspace{2em}
 
